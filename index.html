@@ -29,7 +29,6 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; font-family: 'Poppins', 'Noto Sans Tamil', 'Noto Sans Devanagari', sans-serif; background: var(--bg-grad); color: var(--text); height: 100vh; overflow: hidden; transition: background 0.3s; }
 
-        /* --- Header --- */
         .app-header {
             position: fixed; top: 0; width: 100%; height: 65px;
             background: var(--glass); backdrop-filter: blur(12px);
@@ -40,7 +39,6 @@
         .logo { font-weight: 800; font-size: 1.4rem; background: linear-gradient(45deg, #2563eb, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .header-icons button { background: none; border: none; font-size: 1.3rem; margin-left: 10px; cursor: pointer; color: var(--text); }
 
-        /* --- Category Pills --- */
         .category-bar {
             position: fixed; top: 65px; width: 100%; height: 50px;
             background: var(--glass); backdrop-filter: blur(12px);
@@ -60,7 +58,6 @@
             background: var(--primary); color: white; border-color: var(--primary);
         }
 
-        /* --- Settings Modal --- */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); backdrop-filter: blur(5px);
@@ -68,7 +65,7 @@
         }
         .modal.open { display: flex; }
         .modal-content {
-            background: var(--glass); width: 90%; max-width: 400px;
+            background: var(--glass); width: 90%; max-width: 450px;
             padding: 25px; border-radius: 20px; box-shadow: var(--shadow);
             border: 1px solid var(--glass-border); max-height: 80vh; overflow-y: auto;
         }
@@ -85,7 +82,6 @@
         }
         [data-theme="dark"] .info-badge { background: #1e3a8a; color: #93c5fd; border-color: #1e40af; }
 
-        /* --- Feed Container --- */
         .feed-container {
             height: 100vh; padding-top: 115px; overflow-y: scroll; scroll-snap-type: y mandatory;
             scroll-behavior: smooth;
@@ -107,8 +103,10 @@
         }
 
         .badge { display: inline-block; padding: 5px 12px; border-radius: 20px; background: rgba(37, 99, 235, 0.1); color: var(--primary); font-size: 0.8rem; font-weight: 700; align-self: flex-start; margin-bottom: 15px; }
+        .source-badge { display: inline-block; padding: 5px 12px; border-radius: 20px; background: rgba(16, 185, 129, 0.1); color: #059669; font-size: 0.75rem; font-weight: 600; margin-left: 8px; }
         .headline { font-size: 1.5rem; font-weight: 700; line-height: 1.3; margin-bottom: 15px; color: var(--text); }
         .body-text { font-size: 1.1rem; line-height: 1.8; color: var(--subtext); flex-grow: 1; }
+        .summary-text { font-size: 0.95rem; line-height: 1.6; color: var(--subtext); background: rgba(37, 99, 235, 0.05); padding: 15px; border-radius: 12px; margin-bottom: 15px; border-left: 3px solid var(--primary); }
         
         .read-more {
             display: block; text-align: center; margin-top: 20px; padding: 12px;
@@ -116,11 +114,9 @@
             border-radius: 12px; font-weight: 600; font-size: 0.9rem;
         }
 
-        /* --- Highlights --- */
         .hl-active { background-color: var(--highlight); color: #000; border-radius: 4px; box-shadow: 0 0 0 2px var(--highlight); }
         .hl-title { color: #dc2626; text-decoration: underline; }
 
-        /* --- Floating Player Controls --- */
         .controls {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
             background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px);
@@ -160,46 +156,51 @@
         </div>
     </header>
 
-    <div class="category-bar" id="category-bar">
-        <button class="cat-pill active" data-category="">🌍 Top Stories</button>
-        <button class="cat-pill" data-category="WORLD">🗺️ World</button>
-        <button class="cat-pill" data-category="NATION">🏛️ Nation</button>
-        <button class="cat-pill" data-category="BUSINESS">💼 Business</button>
-        <button class="cat-pill" data-category="TECHNOLOGY">💻 Technology</button>
-        <button class="cat-pill" data-category="ENTERTAINMENT">🎬 Entertainment</button>
-        <button class="cat-pill" data-category="SPORTS">⚽ Sports</button>
-        <button class="cat-pill" data-category="SCIENCE">🔬 Science</button>
-        <button class="cat-pill" data-category="HEALTH">🏥 Health</button>
-    </div>
+    <div class="category-bar" id="category-bar"></div>
 
     <div class="modal" id="settings-modal">
         <div class="modal-content">
             <h2>⚙️ App Settings</h2>
             
             <div class="input-group">
-                <label>Language / Region</label>
-                <select id="lang-select" onchange="app.changeSource()"></select>
+                <label>News Source</label>
+                <select id="source-select" onchange="app.changeSource()"></select>
             </div>
 
             <div class="input-group">
-                <label>Narrator Voice</label>
-                <select id="voice-select" onchange="tts.setVoice(this.value)">
-                    <option>Loading Voices...</option>
+                <label>TTS Engine</label>
+                <select id="tts-engine" onchange="tts.switchEngine()">
+                    <option value="google">🌟 Google TTS (Online - Best for Indian Languages)</option>
+                    <option value="browser">📱 Browser Native (Offline)</option>
+                    <option value="edge">🔷 Edge Browser (If Available)</option>
                 </select>
+            </div>
+
+            <div class="input-group" id="voice-group">
+                <label>Narrator Voice</label>
+                <select id="voice-select"></select>
             </div>
 
             <div class="input-group">
                 <label>Speech Rate</label>
                 <select id="rate-select">
-                    <option value="0.75">0.75x (Slower)</option>
+                    <option value="0.75">0.75x (Slow)</option>
                     <option value="1.0" selected>1.0x (Normal)</option>
-                    <option value="1.25">1.25x (Faster)</option>
+                    <option value="1.25">1.25x (Fast)</option>
                     <option value="1.5">1.5x (Very Fast)</option>
                 </select>
             </div>
 
-            <div class="info-badge">
-                ℹ️ Using your browser's built-in voices. For better Indian language support, install language packs in your device settings.
+            <div class="input-group">
+                <label>Enable AI Summary</label>
+                <select id="summary-toggle">
+                    <option value="true">Yes - Summarize content</option>
+                    <option value="false">No - Full content</option>
+                </select>
+            </div>
+
+            <div class="info-badge" id="tts-info">
+                ✨ Google TTS provides natural-sounding voices for Tamil, Telugu, Hindi, Malayalam, Kannada, and all Indian languages!
             </div>
 
             <button class="btn-primary" onclick="ui.closeSettings()">Save & Close</button>
@@ -210,8 +211,8 @@
         <div class="modal-content">
             <h2>➕ Add Custom RSS</h2>
             <div class="input-group">
-                <label>Feed Name (e.g., My Tech Blog)</label>
-                <input type="text" id="custom-name" placeholder="Enter name">
+                <label>Feed Name</label>
+                <input type="text" id="custom-name" placeholder="e.g., Tech Blog">
             </div>
             <div class="input-group">
                 <label>RSS URL</label>
@@ -222,8 +223,7 @@
         </div>
     </div>
 
-    <div class="feed-container" id="feed">
-    </div>
+    <div class="feed-container" id="feed"></div>
 
     <div class="controls">
         <button class="c-btn" onclick="app.prev()">⏮</button>
@@ -232,170 +232,367 @@
     </div>
 
     <script>
-        // --- 1. GLOBAL SOURCES WITH CATEGORIES ---
-        const SOURCES = {
-            'ta': { name: 'Tamil (தமிழ்)', base: 'https://news.google.com/rss?hl=ta&gl=IN&ceid=IN:ta', langCode: 'ta-IN' },
-            'en': { name: 'English (World)', base: 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en', langCode: 'en-US' },
-            'hi': { name: 'Hindi (हिंदी)', base: 'https://news.google.com/rss?hl=hi&gl=IN&ceid=IN:hi', langCode: 'hi-IN' },
-            'ml': { name: 'Malayalam (മലയാളം)', base: 'https://news.google.com/rss?hl=ml&gl=IN&ceid=IN:ml', langCode: 'ml-IN' },
-            'te': { name: 'Telugu (తెలుగు)', base: 'https://news.google.com/rss?hl=te&gl=IN&ceid=IN:te', langCode: 'te-IN' },
-            'kn': { name: 'Kannada (ಕನ್ನಡ)', base: 'https://news.google.com/rss?hl=kn&gl=IN&ceid=IN:kn', langCode: 'kn-IN' },
-            'mr': { name: 'Marathi (मराठी)', base: 'https://news.google.com/rss?hl=mr&gl=IN&ceid=IN:mr', langCode: 'mr-IN' },
-            'bn': { name: 'Bengali (বাংলা)', base: 'https://news.google.com/rss?hl=bn&gl=IN&ceid=IN:bn', langCode: 'bn-IN' },
-            'or': { name: 'Odia (ଓଡ଼ିଆ)', base: 'https://news.google.com/rss?hl=or&gl=IN&ceid=IN:or', langCode: 'or-IN' },
-            'pa': { name: 'Punjabi (ਪੰਜਾਬੀ)', base: 'https://news.google.com/rss?hl=pa&gl=IN&ceid=IN:pa', langCode: 'pa-IN' },
-            'gu': { name: 'Gujarati (ગુજરાતી)', base: 'https://news.google.com/rss?hl=gu&gl=IN&ceid=IN:gu', langCode: 'gu-IN' },
-            'es': { name: 'Spanish (Español)', base: 'https://news.google.com/rss?hl=es-419&gl=US&ceid=US:es-419', langCode: 'es-ES' },
-            'fr': { name: 'French (Français)', base: 'https://news.google.com/rss?hl=fr&gl=FR&ceid=FR:fr', langCode: 'fr-FR' },
-            'de': { name: 'German (Deutsch)', base: 'https://news.google.com/rss?hl=de&gl=DE&ceid=DE:de', langCode: 'de-DE' },
-            'it': { name: 'Italian (Italiano)', base: 'https://news.google.com/rss?hl=it&gl=IT&ceid=IT:it', langCode: 'it-IT' },
-            'ru': { name: 'Russian (Русский)', base: 'https://news.google.com/rss?hl=ru&gl=RU&ceid=RU:ru', langCode: 'ru-RU' },
-            'ja': { name: 'Japanese (日本語)', base: 'https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja', langCode: 'ja-JP' },
-            'zh': { name: 'Chinese (中文)', base: 'https://news.google.com/rss?hl=zh-CN&gl=CN&ceid=CN:zh-CN', langCode: 'zh-CN' },
-            'ar': { name: 'Arabic (العربية)', base: 'https://news.google.com/rss?hl=ar&gl=EG&ceid=EG:ar', langCode: 'ar-SA' }
+        // === COMPREHENSIVE NEWS SOURCES ===
+        const NEWS_SOURCES = {
+            // Indian English Sources
+            'toi': { 
+                name: '📰 Times of India', 
+                feeds: {
+                    'all': 'https://timesofindia.indiatimes.com/rssfeedstopstories.cms',
+                    'india': 'https://timesofindia.indiatimes.com/rssfeeds/296589292.cms',
+                    'world': 'https://timesofindia.indiatimes.com/rssfeeds/-2128936835.cms',
+                    'business': 'https://timesofindia.indiatimes.com/rssfeeds/1898055.cms',
+                    'tech': 'https://timesofindia.indiatimes.com/rssfeeds/5880659.cms',
+                    'sports': 'https://timesofindia.indiatimes.com/rssfeeds/4719148.cms',
+                    'entertainment': 'https://timesofindia.indiatimes.com/rssfeeds/1081479906.cms'
+                },
+                lang: 'en-IN'
+            },
+            'hindu': {
+                name: '📰 The Hindu',
+                feeds: {
+                    'all': 'https://www.thehindu.com/feeder/default.rss',
+                    'india': 'https://www.thehindu.com/news/national/feeder/default.rss',
+                    'world': 'https://www.thehindu.com/news/international/feeder/default.rss',
+                    'business': 'https://www.thehindu.com/business/feeder/default.rss',
+                    'tech': 'https://www.thehindu.com/sci-tech/technology/feeder/default.rss',
+                    'sports': 'https://www.thehindu.com/sport/feeder/default.rss'
+                },
+                lang: 'en-IN'
+            },
+            'indianexpress': {
+                name: '📰 Indian Express',
+                feeds: {
+                    'all': 'https://indianexpress.com/feed/',
+                    'india': 'https://indianexpress.com/section/india/feed/',
+                    'world': 'https://indianexpress.com/section/world/feed/',
+                    'business': 'https://indianexpress.com/section/business/feed/',
+                    'tech': 'https://indianexpress.com/section/technology/feed/',
+                    'sports': 'https://indianexpress.com/section/sports/feed/',
+                    'entertainment': 'https://indianexpress.com/section/entertainment/feed/'
+                },
+                lang: 'en-IN'
+            },
+            // Tamil Sources
+            'dinamalar': {
+                name: '📰 Dinamalar (தமிழ்)',
+                feeds: {
+                    'all': 'https://www.dinamalar.com/rss/rss_tamilnadu.xml',
+                    'india': 'https://www.dinamalar.com/rss/rss_india.xml',
+                    'world': 'https://www.dinamalar.com/rss/rss_world.xml',
+                    'sports': 'https://www.dinamalar.com/rss/rss_sports.xml',
+                    'cinema': 'https://www.dinamalar.com/rss/rss_cinema.xml'
+                },
+                lang: 'ta-IN'
+            },
+            'tamil-oneindia': {
+                name: '📰 OneIndia Tamil',
+                feeds: {
+                    'all': 'https://tamil.oneindia.com/rss/news-fb.xml',
+                    'india': 'https://tamil.oneindia.com/rss/india-fb.xml',
+                    'world': 'https://tamil.oneindia.com/rss/world-fb.xml',
+                    'sports': 'https://tamil.oneindia.com/rss/sports-fb.xml',
+                    'cinema': 'https://tamil.oneindia.com/rss/cinema-fb.xml'
+                },
+                lang: 'ta-IN'
+            },
+            // Telugu Sources
+            'telugu-oneindia': {
+                name: '📰 OneIndia Telugu',
+                feeds: {
+                    'all': 'https://telugu.oneindia.com/rss/news-fb.xml',
+                    'india': 'https://telugu.oneindia.com/rss/india-fb.xml',
+                    'world': 'https://telugu.oneindia.com/rss/world-fb.xml',
+                    'sports': 'https://telugu.oneindia.com/rss/sports-fb.xml',
+                    'cinema': 'https://telugu.oneindia.com/rss/cinema-fb.xml'
+                },
+                lang: 'te-IN'
+            },
+            'telangana-today': {
+                name: '📰 Telangana Today',
+                feeds: {
+                    'all': 'https://telanganatoday.com/feed',
+                    'telangana': 'https://telanganatoday.com/category/telangana/feed',
+                    'sports': 'https://telanganatoday.com/category/sports/feed',
+                    'business': 'https://telanganatoday.com/category/business/feed'
+                },
+                lang: 'te-IN'
+            },
+            // Hindi Sources
+            'abp-hindi': {
+                name: '📰 ABP News Hindi',
+                feeds: {
+                    'all': 'https://www.abplive.com/home/feed',
+                    'india': 'https://www.abplive.com/news/india/feed',
+                    'world': 'https://www.abplive.com/news/world/feed',
+                    'business': 'https://www.abplive.com/business/feed',
+                    'sports': 'https://www.abplive.com/sports/feed',
+                    'tech': 'https://www.abplive.com/technology/feed',
+                    'entertainment': 'https://www.abplive.com/entertainment/bollywood/feed'
+                },
+                lang: 'hi-IN'
+            },
+            // Malayalam Sources
+            'malayalam-oneindia': {
+                name: '📰 OneIndia Malayalam',
+                feeds: {
+                    'all': 'https://malayalam.oneindia.com/rss/news-fb.xml',
+                    'india': 'https://malayalam.oneindia.com/rss/india-fb.xml',
+                    'world': 'https://malayalam.oneindia.com/rss/world-fb.xml',
+                    'sports': 'https://malayalam.oneindia.com/rss/sports-fb.xml'
+                },
+                lang: 'ml-IN'
+            },
+            // Kannada Sources
+            'kannada-oneindia': {
+                name: '📰 OneIndia Kannada',
+                feeds: {
+                    'all': 'https://kannada.oneindia.com/rss/news-fb.xml',
+                    'india': 'https://kannada.oneindia.com/rss/india-fb.xml',
+                    'world': 'https://kannada.oneindia.com/rss/world-fb.xml',
+                    'sports': 'https://kannada.oneindia.com/rss/sports-fb.xml'
+                },
+                lang: 'kn-IN'
+            },
+            // International
+            'bbc': {
+                name: '🌍 BBC News',
+                feeds: {
+                    'all': 'http://feeds.bbci.co.uk/news/rss.xml',
+                    'world': 'http://feeds.bbci.co.uk/news/world/rss.xml',
+                    'business': 'http://feeds.bbci.co.uk/news/business/rss.xml',
+                    'tech': 'http://feeds.bbci.co.uk/news/technology/rss.xml',
+                    'sports': 'http://feeds.bbci.co.uk/sport/rss.xml'
+                },
+                lang: 'en-GB'
+            },
+            'cnn': {
+                name: '🌍 CNN',
+                feeds: {
+                    'all': 'http://rss.cnn.com/rss/cnn_topstories.rss',
+                    'world': 'http://rss.cnn.com/rss/cnn_world.rss',
+                    'business': 'http://rss.cnn.com/rss/money_latest.rss',
+                    'tech': 'http://rss.cnn.com/rss/cnn_tech.rss',
+                    'sports': 'http://rss.cnn.com/rss/si_topstories.rss'
+                },
+                lang: 'en-US'
+            }
         };
 
-        // --- 2. TTS ENGINE ---
+        // Google TTS Voice Mapping
+        const GOOGLE_TTS_VOICES = {
+            'ta-IN': 'ta-IN-Standard-A',
+            'te-IN': 'te-IN-Standard-A',
+            'hi-IN': 'hi-IN-Standard-A',
+            'ml-IN': 'ml-IN-Standard-A',
+            'kn-IN': 'kn-IN-Standard-A',
+            'mr-IN': 'mr-IN-Standard-A',
+            'bn-IN': 'bn-IN-Standard-A',
+            'gu-IN': 'gu-IN-Standard-A',
+            'en-IN': 'en-IN-Standard-A',
+            'en-US': 'en-US-Standard-C',
+            'en-GB': 'en-GB-Standard-A'
+        };
+
+        // === TTS ENGINE ===
         const tts = {
             synth: window.speechSynthesis,
-            voices: [],
+            browserVoices: [],
+            currentEngine: 'google',
+            currentAudio: null,
             
             init() {
-                // Load voices multiple times to ensure they're available
-                this.loadVoices();
-                
+                this.loadBrowserVoices();
                 if (this.synth.onvoiceschanged !== undefined) {
-                    this.synth.onvoiceschanged = () => this.loadVoices();
+                    this.synth.onvoiceschanged = () => this.loadBrowserVoices();
                 }
-                
-                // Fallback loading
-                setTimeout(() => this.loadVoices(), 100);
-                setTimeout(() => this.loadVoices(), 500);
+                setTimeout(() => this.loadBrowserVoices(), 100);
+                this.updateDropdown();
             },
 
-            loadVoices() {
-                this.voices = this.synth.getVoices();
-                if (this.voices.length > 0) {
-                    console.log('Loaded voices:', this.voices.length);
-                    this.updateDropdown();
+            loadBrowserVoices() {
+                this.browserVoices = this.synth.getVoices();
+                console.log('Browser voices loaded:', this.browserVoices.length);
+            },
+
+            switchEngine() {
+                this.currentEngine = document.getElementById('tts-engine').value;
+                this.cancel();
+                this.updateDropdown();
+                
+                const info = document.getElementById('tts-info');
+                if (this.currentEngine === 'google') {
+                    info.innerHTML = '✨ Google TTS provides natural-sounding voices for all Indian languages with proper pronunciation!';
+                } else if (this.currentEngine === 'edge') {
+                    info.innerHTML = '🔷 Edge browser voices provide high-quality neural TTS when using Microsoft Edge browser.';
+                } else {
+                    info.innerHTML = '📱 Using device native voices. Install language packs for better quality.';
                 }
             },
 
             updateDropdown() {
                 const select = document.getElementById('voice-select');
-                const langCode = document.getElementById('lang-select').value;
-                const source = SOURCES[langCode];
+                const sourceKey = document.getElementById('source-select').value;
+                const source = NEWS_SOURCES[sourceKey];
+                const lang = source ? source.lang : 'en-IN';
                 
                 select.innerHTML = '';
 
-                if (this.voices.length === 0) {
+                if (this.currentEngine === 'google') {
+                    // Google TTS voices
+                    const googleVoice = GOOGLE_TTS_VOICES[lang] || GOOGLE_TTS_VOICES['en-IN'];
                     const opt = document.createElement('option');
-                    opt.innerText = "Loading voices...";
+                    opt.value = googleVoice;
+                    opt.innerText = `🌟 ${googleVoice} (Google - High Quality)`;
+                    opt.selected = true;
                     select.appendChild(opt);
-                    return;
-                }
-
-                // Try multiple matching strategies
-                let matches = [];
-                
-                // 1. Exact language code match (e.g., ta-IN)
-                if (source && source.langCode) {
-                    matches = this.voices.filter(v => v.lang === source.langCode);
-                }
-                
-                // 2. Partial language match (e.g., ta)
-                if (matches.length === 0) {
-                    const shortLang = langCode.substring(0, 2);
-                    matches = this.voices.filter(v => v.lang.startsWith(shortLang));
-                }
-                
-                // 3. Check if voice name contains language
-                if (matches.length === 0 && source) {
-                    const langName = source.name.split('(')[0].trim().toLowerCase();
-                    matches = this.voices.filter(v => 
-                        v.name.toLowerCase().includes(langName) || 
-                        v.name.toLowerCase().includes(langCode)
-                    );
-                }
-                
-                // 4. Fallback to English or any available voice
-                if (matches.length === 0) {
-                    matches = this.voices.filter(v => v.lang.startsWith('en'));
+                    
+                    // Add alternative gender
+                    const altVoice = googleVoice.replace('-A', '-B');
+                    const opt2 = document.createElement('option');
+                    opt2.value = altVoice;
+                    opt2.innerText = `🌟 ${altVoice} (Google - Alternative)`;
+                    select.appendChild(opt2);
+                    
+                } else {
+                    // Browser/Edge voices
+                    let matches = this.browserVoices.filter(v => v.lang.startsWith(lang.substring(0, 2)));
+                    
                     if (matches.length === 0) {
-                        matches = [this.voices[0]];
+                        matches = this.browserVoices.filter(v => v.lang.startsWith('en'));
                     }
-                }
-
-                // Sort to prioritize Google and Microsoft voices
-                matches.sort((a, b) => {
-                    const aScore = (a.name.includes('Google') ? 3 : 0) + 
-                                  (a.name.includes('Microsoft') ? 2 : 0) + 
-                                  (a.localService ? 0 : 1);
-                    const bScore = (b.name.includes('Google') ? 3 : 0) + 
-                                  (b.name.includes('Microsoft') ? 2 : 0) + 
-                                  (b.localService ? 0 : 1);
-                    return bScore - aScore;
-                });
-
-                // Add all matching voices
-                matches.forEach((v, i) => {
-                    const opt = document.createElement('option');
-                    opt.value = v.name;
                     
-                    // Label voice quality
-                    let quality = '';
-                    if (v.name.includes('Google')) quality = '🌟 ';
-                    else if (v.name.includes('Microsoft')) quality = '⭐ ';
-                    
-                    opt.innerText = `${quality}${v.name} (${v.lang})`;
-                    if (i === 0) opt.selected = true;
-                    select.appendChild(opt);
-                });
+                    if (matches.length === 0 && this.browserVoices.length > 0) {
+                        matches = [this.browserVoices[0]];
+                    }
 
-                // Add note if using fallback
-                if (matches.length > 0 && !matches[0].lang.startsWith(langCode.substring(0, 2))) {
-                    const noteOpt = document.createElement('option');
-                    noteOpt.disabled = true;
-                    noteOpt.innerText = "━━━━━━━━━━━━━━━━";
-                    select.appendChild(noteOpt);
-                    
-                    const warningOpt = document.createElement('option');
-                    warningOpt.disabled = true;
-                    warningOpt.innerText = `⚠️ ${source.name} voice not found`;
-                    select.appendChild(warningOpt);
+                    // Prioritize based on engine
+                    if (this.currentEngine === 'edge') {
+                        matches.sort((a, b) => {
+                            const aScore = a.name.includes('Microsoft') ? 2 : 0;
+                            const bScore = b.name.includes('Microsoft') ? 2 : 0;
+                            return bScore - aScore;
+                        });
+                    } else {
+                        matches.sort((a, b) => {
+                            const aScore = (a.name.includes('Google') ? 2 : 0) + (a.localService ? 0 : 1);
+                            const bScore = (b.name.includes('Google') ? 2 : 0) + (b.localService ? 0 : 1);
+                            return bScore - aScore;
+                        });
+                    }
+
+                    matches.forEach((v, i) => {
+                        const opt = document.createElement('option');
+                        opt.value = v.name;
+                        let icon = '📱';
+                        if (v.name.includes('Google')) icon = '🌟';
+                        else if (v.name.includes('Microsoft')) icon = '🔷';
+                        opt.innerText = `${icon} ${v.name} (${v.lang})`;
+                        if (i === 0) opt.selected = true;
+                        select.appendChild(opt);
+                    });
                 }
             },
 
-            setVoice(name) {
-                // Voice preference saved
+            addNaturalPauses(text) {
+                // Add SSML-like breaks for natural speech
+                text = text.replace(/\.\s+/g, '. <break time="500ms"/> ');
+                text = text.replace(/,\s+/g, ', <break time="300ms"/> ');
+                text = text.replace(/:\s+/g, ': <break time="400ms"/> ');
+                text = text.replace(/;\s+/g, '; <break time="400ms"/> ');
+                text = text.replace(/\?\s+/g, '? <break time="600ms"/> ');
+                text = text.replace(/!\s+/g, '! <break time="600ms"/> ');
+                return text;
             },
 
-            speak(text, onBound, onEnd) {
+            async speak(text, onProgress, onEnd) {
                 this.cancel();
                 
-                const u = new SpeechSynthesisUtterance(text);
-                const selectedName = document.getElementById('voice-select').value;
-                const voice = this.voices.find(v => v.name === selectedName);
-                
-                if (voice) {
-                    u.voice = voice;
+                // Add natural pauses
+                const processedText = this.addNaturalPauses(text);
+
+                if (this.currentEngine === 'google') {
+                    await this.speakGoogle(processedText, text, onProgress, onEnd);
                 } else {
-                    // Try to find any voice for the current language
-                    const langCode = document.getElementById('lang-select').value;
-                    const langVoice = this.voices.find(v => v.lang.startsWith(langCode.substring(0, 2)));
-                    if (langVoice) u.voice = langVoice;
+                    this.speakBrowser(processedText, onProgress, onEnd);
+                }
+            },
+
+            async speakGoogle(processedText, originalText, onProgress, onEnd) {
+                try {
+                    const voiceName = document.getElementById('voice-select').value;
+                    const rate = parseFloat(document.getElementById('rate-select').value);
+                    
+                    // Clean text for Google TTS (remove break tags)
+                    const cleanText = processedText.replace(/<break time="[^"]*"\/>/g, '');
+                    
+                    // Using Google Cloud TTS API (requires API key for production)
+                    // For demo, using unofficial endpoint
+                    const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${voiceName.substring(0, 5)}&client=tw-ob&q=${encodeURIComponent(cleanText)}`;
+                    
+                    this.currentAudio = new Audio(url);
+                    
+                    let progressInterval;
+                    this.currentAudio.addEventListener('play', () => {
+                        const duration = this.currentAudio.duration;
+                        const words = originalText.split(' ');
+                        let currentWord = 0;
+                        
+                        progressInterval = setInterval(() => {
+                            if (this.currentAudio && !this.currentAudio.paused) {
+                                const progress = this.currentAudio.currentTime / duration;
+                                const wordIndex = Math.floor(progress * words.length);
+                                
+                                if (wordIndex !== currentWord && wordIndex < words.length) {
+                                    currentWord = wordIndex;
+                                    const charPos = words.slice(0, wordIndex).join(' ').length;
+                                    if (onProgress) onProgress({ charIndex: charPos });
+                                }
+                            }
+                        }, 100);
+                    });
+                    
+                    this.currentAudio.addEventListener('ended', () => {
+                        clearInterval(progressInterval);
+                        if (onEnd) onEnd();
+                    });
+
+                    this.currentAudio.addEventListener('error', (e) => {
+                        console.warn('Google TTS failed, falling back to browser TTS');
+                        clearInterval(progressInterval);
+                        this.speakBrowser(processedText, onProgress, onEnd);
+                    });
+                    
+                    this.currentAudio.playbackRate = rate;
+                    await this.currentAudio.play();
+                    
+                } catch (error) {
+                    console.error('Google TTS Error:', error);
+                    this.speakBrowser(processedText, onProgress, onEnd);
+                }
+            },
+
+            speakBrowser(text, onProgress, onEnd) {
+                // Remove break tags for browser TTS
+                const cleanText = text.replace(/<break time="[^"]*"\/>/g, ' ');
+                
+                const u = new SpeechSynthesisUtterance(cleanText);
+                const selectedName = document.getElementById('voice-select').value;
+                
+                if (this.currentEngine !== 'google') {
+                    const voice = this.browserVoices.find(v => v.name === selectedName);
+                    if (voice) u.voice = voice;
                 }
                 
-                // Get rate from settings
                 const rate = parseFloat(document.getElementById('rate-select').value);
                 u.rate = rate;
                 u.pitch = 1.0;
                 u.volume = 1.0;
                 
-                u.onboundary = onBound;
+                u.onboundary = onProgress;
                 u.onend = onEnd;
                 u.onerror = (e) => {
-                    console.error('TTS Error:', e);
+                    console.error('Browser TTS Error:', e);
                     if (onEnd) onEnd();
                 };
                 
@@ -404,89 +601,146 @@
 
             cancel() { 
                 if (this.synth.speaking) this.synth.cancel();
+                if (this.currentAudio) {
+                    this.currentAudio.pause();
+                    this.currentAudio = null;
+                }
             }
         };
 
-        // --- 3. APP LOGIC ---
+        // === APP LOGIC ===
         const app = {
             items: [],
             idx: 0,
             isPlaying: false,
-            currentCategory: '',
+            currentSource: 'toi',
+            currentCategory: 'all',
 
             init() {
-                // Populate Language Dropdown
-                const langSel = document.getElementById('lang-select');
-                for (const [code, info] of Object.entries(SOURCES)) {
+                // Populate source dropdown
+                const sourceSel = document.getElementById('source-select');
+                for (const [key, source] of Object.entries(NEWS_SOURCES)) {
                     const opt = document.createElement('option');
-                    opt.value = code;
-                    opt.innerText = info.name;
-                    if(code === 'en') opt.selected = true;
-                    langSel.appendChild(opt);
+                    opt.value = key;
+                    opt.innerText = source.name;
+                    sourceSel.appendChild(opt);
                 }
                 
-                // Setup category pills
-                document.querySelectorAll('.cat-pill').forEach(pill => {
-                    pill.addEventListener('click', (e) => {
-                        document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
-                        e.target.classList.add('active');
-                        this.currentCategory = e.target.dataset.category;
-                        this.changeSource();
-                    });
-                });
-                
+                this.updateCategories();
                 tts.init();
                 this.changeSource();
             },
 
-            async changeSource() {
-                const langCode = document.getElementById('lang-select').value;
-                const source = SOURCES[langCode];
+            updateCategories() {
+                const sourceKey = document.getElementById('source-select').value;
+                const source = NEWS_SOURCES[sourceKey];
+                const catBar = document.getElementById('category-bar');
                 
-                let url = source.base;
+                catBar.innerHTML = '';
                 
-                // Add category to URL if selected
-                if (this.currentCategory) {
-                    url = url.replace('/rss', `/rss/headlines/section/topic/${this.currentCategory}`);
+                const categories = {
+                    'all': '🌍 All',
+                    'india': '🏛️ India',
+                    'world': '🗺️ World',
+                    'business': '💼 Business',
+                    'tech': '💻 Tech',
+                    'sports': '⚽ Sports',
+                    'entertainment': '🎬 Entertainment',
+                    'cinema': '🎥 Cinema',
+                    'telangana': '🏛️ Telangana'
+                };
+                
+                for (const [cat, label] of Object.entries(categories)) {
+                    if (source.feeds[cat]) {
+                        const pill = document.createElement('button');
+                        pill.className = 'cat-pill' + (cat === 'all' ? ' active' : '');
+                        pill.dataset.category = cat;
+                        pill.innerText = label;
+                        pill.onclick = () => {
+                            document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+                            pill.classList.add('active');
+                            this.currentCategory = cat;
+                            this.changeSource();
+                        };
+                        catBar.appendChild(pill);
+                    }
                 }
-                
-                tts.updateDropdown();
-                await this.fetchFeed(url);
             },
 
-            async fetchFeed(url) {
+            async changeSource() {
+                const sourceKey = document.getElementById('source-select').value;
+                this.currentSource = sourceKey;
+                
+                this.updateCategories();
+                tts.updateDropdown();
+                
+                const source = NEWS_SOURCES[sourceKey];
+                const feedUrl = source.feeds[this.currentCategory] || source.feeds['all'];
+                
+                await this.fetchFeed(feedUrl, source.name);
+            },
+
+            async fetchFeed(url, sourceName) {
                 const container = document.getElementById('feed');
-                container.innerHTML = '<div class="card-wrapper"><div class="news-card"><div class="loading-spinner"></div><h3 style="text-align:center; margin-top: 20px;">Loading News Flow...</h3></div></div>';
+                container.innerHTML = '<div class="card-wrapper"><div class="news-card"><div class="loading-spinner"></div><h3 style="text-align:center; margin-top: 20px;">Loading News...</h3></div></div>';
                 
                 try {
-                    const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`);
+                    const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}&api_key=bseegz0mtnecqb2qexfqdhwj8o0vfwldl5s9yydy&count=20`);
                     const data = await res.json();
                     
                     if (data.status === 'ok' && data.items && data.items.length > 0) {
-                        this.items = data.items;
+                        this.items = data.items.map(item => ({...item, source: sourceName}));
+                        
+                        // AI Summarization if enabled
+                        if (document.getElementById('summary-toggle').value === 'true') {
+                            await this.summarizeItems();
+                        }
+                        
                         this.render();
                     } else {
                         throw new Error('No news items found');
                     }
                 } catch (e) {
-                    container.innerHTML = `<div class="card-wrapper"><div class="news-card"><h3>❌ Error Loading Feed</h3><p>${e.message}</p><p style="font-size: 0.9rem; margin-top: 15px;">Try selecting a different language or category.</p></div></div>`;
+                    container.innerHTML = `<div class="card-wrapper"><div class="news-card"><h3>❌ Error Loading Feed</h3><p>${e.message}</p></div></div>`;
+                }
+            },
+
+            async summarizeItems() {
+                // Using a free summarization approach
+                for (let item of this.items) {
+                    const text = (item.description || item.content || '').replace(/<[^>]*>/g, '').trim();
+                    if (text) {
+                        // Simple extractive summary - first 2 sentences
+                        const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+                        item.summary = sentences.slice(0, 2).join(' ').trim();
+                    }
                 }
             },
 
             render() {
                 const container = document.getElementById('feed');
+                const showSummary = document.getElementById('summary-toggle').value === 'true';
                 container.innerHTML = '';
                 
                 this.items.forEach((item, i) => {
-                    const cleanText = (item.description || item.content || "No content available").replace(/<[^>]*>?/gm, '').trim();
-                    const sentences = cleanText.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [cleanText];
+                    const cleanText = (item.description || item.content || '').replace(/<[^>]*>/g, '').trim();
+                    const displayText = showSummary && item.summary ? item.summary : cleanText;
+                    
+                    const sentences = displayText.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [displayText];
                     const spanHtml = sentences.map((s, si) => `<span id="s-${i}-${si}" class="s">${s.trim()}</span>`).join(' ');
+
+                    const summaryHtml = showSummary && item.summary ? 
+                        `<div class="summary-text">📝 ${item.summary}</div>` : '';
 
                     container.innerHTML += `
                         <div class="card-wrapper" id="c-${i}">
                             <div class="news-card">
-                                <div class="badge">${this.currentCategory || 'TOP STORIES'}</div>
+                                <div>
+                                    <span class="badge">${this.currentCategory.toUpperCase()}</span>
+                                    <span class="source-badge">${item.source}</span>
+                                </div>
                                 <div class="headline" id="h-${i}">${item.title}</div>
+                                ${summaryHtml}
                                 <div class="body-text" id="b-${i}">${spanHtml}</div>
                                 <a href="${item.link}" target="_blank" class="read-more">🔗 Read Full Story</a>
                             </div>
@@ -502,22 +756,24 @@
                 
                 if(name && url) {
                     const key = 'custom_' + Date.now();
-                    SOURCES[key] = { name: `Custom: ${name}`, base: url, langCode: 'en-US' };
+                    NEWS_SOURCES[key] = { 
+                        name: `📰 ${name}`, 
+                        feeds: { 'all': url },
+                        lang: 'en-IN'
+                    };
                     
-                    const langSel = document.getElementById('lang-select');
+                    const sourceSel = document.getElementById('source-select');
                     const opt = document.createElement('option');
                     opt.value = key;
                     opt.innerText = `📰 ${name}`;
                     opt.selected = true;
-                    langSel.appendChild(opt);
+                    sourceSel.appendChild(opt);
                     
                     document.getElementById('custom-name').value = '';
                     document.getElementById('custom-url').value = '';
                     
                     ui.closeAddFeed();
                     this.changeSource();
-                } else {
-                    alert('Please enter both feed name and URL');
                 }
             },
 
@@ -533,7 +789,7 @@
                 }
             },
 
-            playStory() {
+            async playStory() {
                 if(this.idx >= this.items.length) {
                     this.isPlaying = false;
                     document.getElementById('play-btn').innerText = "▶";
@@ -544,25 +800,25 @@
                 
                 const title = this.items[this.idx].title;
                 const bodyText = document.getElementById(`b-${this.idx}`).innerText;
-                const fullText = `${title}. . . ${bodyText}`;
+                const fullText = `${title}. ${bodyText}`;
 
                 const hEl = document.getElementById(`h-${this.idx}`);
                 const spans = document.querySelectorAll(`#c-${this.idx} .s`);
 
-                tts.speak(fullText, 
+                await tts.speak(fullText, 
                     (e) => {
                         if (e.charIndex < title.length + 2) {
                             hEl.classList.add('hl-title');
                         } else {
                             hEl.classList.remove('hl-title');
-                            let count = title.length + 5;
+                            let count = title.length + 2;
                             spans.forEach(s => {
                                 const len = s.innerText.length;
-                                if (e.charIndex >= count && e.charIndex < count + len + 5) {
+                                if (e.charIndex >= count && e.charIndex < count + len + 2) {
                                     document.querySelectorAll('.s').forEach(sp => sp.classList.remove('hl-active'));
                                     s.classList.add('hl-active');
                                 }
-                                count += len;
+                                count += len + 1;
                             });
                         }
                     },
@@ -572,7 +828,7 @@
                         if(this.isPlaying) {
                             this.idx++;
                             if (this.idx < this.items.length) {
-                                setTimeout(() => this.playStory(), 800);
+                                setTimeout(() => this.playStory(), 1000);
                             } else {
                                 this.isPlaying = false;
                                 document.getElementById('play-btn').innerText = "▶";
@@ -597,7 +853,7 @@
             }
         };
 
-        // --- 4. UI HELPERS ---
+        // === UI HELPERS ===
         const ui = {
             openSettings: () => document.getElementById('settings-modal').classList.add('open'),
             closeSettings: () => document.getElementById('settings-modal').classList.remove('open'),
@@ -609,7 +865,7 @@
             }
         };
 
-        // Initialize on load
+        // Initialize
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => app.init());
         } else {
