@@ -196,107 +196,98 @@
 
         // --- 2. TTS ENGINE ---
        // --- MASTER PATCH: ROBUST VOICE FETCHING ---
+// --- RAW TTS ENGINE (No Filters, Full Access) ---
 const tts = {
     synth: window.speechSynthesis,
     voices: [],
     
-    // MAPPING: Connects language codes to ALL possible Google server names
-    voiceMap: {
-        'ta': ['ta-in', 'ta_in', 'tamil', 'google tamil'],
-        'ml': ['ml-in', 'ml_in', 'malayalam', 'google malayalam'],
-        'te': ['te-in', 'te_in', 'telugu', 'google telugu'],
-        'kn': ['kn-in', 'kn_in', 'kannada', 'google kannada'],
-        'or': ['or-in', 'or_in', 'odia', 'oriya', 'google odia'],
-        'hi': ['hi-in', 'hi_in', 'hindi', 'google hindi'],
-        'bn': ['bn-in', 'bn_in', 'bengali', 'bangla', 'google bengali'],
-        'mr': ['mr-in', 'mr_in', 'marathi', 'google marathi'],
-        'en': ['en-us', 'en_us', 'en-gb', 'en_gb', 'english']
+    // Strict ISO Codes to match your specific requirements
+    langCodes: {
+        'ta': 'ta', // Matches ta-IN, ta-LK, ta-in-x-tac...
+        'te': 'te',
+        'kn': 'kn',
+        'ml': 'ml',
+        'hi': 'hi',
+        'bn': 'bn',
+        'or': 'or', // Odia often fails on Chrome, works on Edge
+        'mr': 'mr',
+        'en': 'en'
     },
 
     init() {
-        // Android Bug Fix: Voices load asynchronously. We must wait.
+        // Essential for Chrome/Edge on Laptop to load 'Network' voices
         if (this.synth.onvoiceschanged !== undefined) {
             this.synth.onvoiceschanged = () => this.loadVoices();
         }
-        // Force load attempt immediately
         this.loadVoices();
-        
-        // Double check after 500ms (Fix for some Samsung/Redmi phones)
-        setTimeout(() => this.loadVoices(), 500);
     },
 
     loadVoices() {
         this.voices = this.synth.getVoices();
+        // Console log to prove what we found (Check F12 Developer Tools)
+        console.log("All System Voices:", this.voices.map(v => `${v.name} (${v.lang})`));
         this.updateDropdown();
     },
 
     updateDropdown() {
         const select = document.getElementById('voice-select');
-        const langCode = document.getElementById('lang-select').value; 
+        const selectedLang = document.getElementById('lang-select').value; // e.g., 'ta'
+        const targetCode = this.langCodes[selectedLang] || 'en';
+
         select.innerHTML = '';
 
-        // 1. Get exact search terms for this language from our Map
-        const searchTerms = this.voiceMap[langCode] || [langCode];
-
-        // 2. FIND VOICES: Loose matching (Checks both Name and Lang property)
-        const matches = this.voices.filter(v => {
-            const vName = v.name.toLowerCase();
-            const vLang = v.lang.toLowerCase();
-            
-            // Does this voice match ANY of our search terms?
-            return searchTerms.some(term => vName.includes(term) || vLang.includes(term));
-        });
+        // 1. RAW SEARCH: Find ANY voice that contains the language code
+        // This finds 'ta-IN', 'ta-in-x-tac-local', 'Google Tamil', etc.
+        const matches = this.voices.filter(v => 
+            v.lang.toLowerCase().includes(targetCode) || 
+            v.name.toLowerCase().includes(selectedLang) // Fallback for names like "Tamil"
+        );
 
         if (matches.length === 0) {
-            // ERROR HANDLING: If no voice found, show specific error
             const opt = document.createElement('option');
-            opt.innerText = `⚠️ No ${langCode.toUpperCase()} voice installed on Phone`;
-            opt.disabled = true;
-            opt.selected = true;
+            opt.innerText = `❌ No voices found for code '${targetCode}'`;
             select.appendChild(opt);
-        } else {
-            // 3. SORT: Put "Google" or "Network" voices at the top (better quality)
-            matches.sort((a, b) => {
-                if (a.name.includes('Google') || a.name.includes('Network')) return -1;
-                if (b.name.includes('Google') || b.name.includes('Network')) return 1;
-                return 0;
-            });
-
-            matches.forEach(v => {
-                const opt = document.createElement('option');
-                opt.value = v.name;
-                // Make the name readable for the user
-                opt.innerText = v.name.replace('Android', '').replace('English', '').trim();
-                select.appendChild(opt);
-            });
-            // Select the first (best) one automatically
-            select.selectedIndex = 0;
-        }
-        
-        // Add a "Show All" button for debugging
-        const debugOpt = document.createElement('option');
-        debugOpt.innerText = "--- 🛠 Debug: Show All Installed Voices ---";
-        debugOpt.value = "DEBUG";
-        select.appendChild(debugOpt);
-    },
-
-    setVoice(name) {
-        if (name === "DEBUG") {
-            alert(this.voices.map(v => `${v.name} [${v.lang}]`).join('\n'));
             return;
         }
+
+        // 2. PRIORITIZE: Put the "Online/Network" voices first (The ones you want)
+        matches.sort((a, b) => {
+            const nameA = a.name.toLowerCase();
+            const nameB = b.name.toLowerCase();
+            
+            // Priority 1: The specific "x-tac" or "network" voices you mentioned
+            if (nameA.includes('x-tac') || nameA.includes('online')) return -1;
+            if (nameB.includes('x-tac') || nameB.includes('online')) return 1;
+
+            // Priority 2: Google or Microsoft (High Quality)
+            if (nameA.includes('google') || nameA.includes('microsoft')) return -1;
+            if (nameB.includes('google') || nameB.includes('microsoft')) return 1;
+            
+            return 0;
+        });
+
+        // 3. RENDER: Show the exact raw name so you know it's the right one
+        matches.forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v.name;
+            opt.innerText = v.name; // Shows full raw name like "Google Tamil" or "ta-in-x-tac"
+            select.appendChild(opt);
+        });
+        
+        // Auto-select the first (highest priority) voice
+        select.selectedIndex = 0;
     },
 
     speak(text, onBound, onEnd) {
         this.cancel();
         const u = new SpeechSynthesisUtterance(text);
         
-        const selectedName = document.getElementById('voice-select').value;
-        const voice = this.voices.find(v => v.name === selectedName);
-        
-        if (voice) {
-            u.voice = voice;
-            u.lang = voice.lang; // CRITICAL: Force the utterance to match voice language
+        const voiceName = document.getElementById('voice-select').value;
+        const targetVoice = this.voices.find(v => v.name === voiceName);
+
+        if (targetVoice) {
+            u.voice = targetVoice;
+            u.lang = targetVoice.lang; // Important: Force strict language match
         }
 
         u.rate = 1.0;
