@@ -3,144 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>News Reader - No API Dependency</title>
+    <title>Tamil News Reader - Frontend Only</title>
     <style>
-        :root { --bg: #f0f2f5; --text: #1c1e21; --accent: #007bff; --card: #ffffff; }
-        [data-theme="dark"] { --bg: #18191a; --text: #e4e6eb; --accent: #2d88ff; --card: #242526; }
+        :root { --bg: #f0f2f5; --text: #1c1e21; --accent: #d63031; --card: #ffffff; }
+        [data-theme="dark"] { --bg: #18191a; --text: #e4e6eb; --accent: #ff7675; --card: #242526; }
 
         body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
         
-        /* Category Tabs */
+        .header {
+            position: fixed; top: 0; width: 100%; height: 60px;
+            background: var(--card); display: flex; align-items: center; 
+            justify-content: space-between; padding: 0 20px; z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
         .nav-tabs {
             position: fixed; top: 60px; width: 100%; height: 50px;
             background: var(--card); display: flex; overflow-x: auto;
             border-bottom: 1px solid rgba(0,0,0,0.1); z-index: 900;
         }
         .tab { 
-            padding: 10px 20px; white-space: nowrap; cursor: pointer; 
-            border-bottom: 3px solid transparent; opacity: 0.7;
+            padding: 12px 20px; white-space: nowrap; cursor: pointer; 
+            border-bottom: 3px solid transparent; opacity: 0.7; font-weight: bold;
         }
-        .tab.active { border-bottom-color: var(--accent); opacity: 1; font-weight: bold; }
-
-        .header {
-            position: fixed; top: 0; width: 100%; height: 60px;
-            background: var(--card); display: flex; align-items: center; 
-            justify-content: space-between; padding: 0 20px; z-index: 1000;
-        }
+        .tab.active { border-bottom-color: var(--accent); opacity: 1; color: var(--accent); }
 
         .feed { height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; padding-top: 110px; }
-        .news-card { height: calc(100vh - 110px); scroll-snap-align: start; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .box { background: var(--card); padding: 25px; border-radius: 12px; max-width: 500px; width: 100%; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .news-card { height: calc(100vh - 110px); scroll-snap-align: start; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+        .box { background: var(--card); padding: 25px; border-radius: 15px; max-width: 500px; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
-        .active-sentence { background: #ffeb3b; color: #000; border-radius: 4px; padding: 0 4px; }
+        h3 { margin-top: 0; line-height: 1.4; color: var(--accent); }
+        p { line-height: 1.8; font-size: 1.1rem; }
+
+        .active-sentence { background: #fff176; color: #000; border-radius: 4px; padding: 0 2px; }
         
         .controls {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: var(--accent); padding: 10px 20px; border-radius: 30px;
-            display: flex; gap: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 2000;
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: var(--accent); padding: 12px 25px; border-radius: 40px;
+            display: flex; gap: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); z-index: 2000;
         }
-        .controls button { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; }
+        .controls button { background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer; }
     </style>
 </head>
 <body data-theme="light">
 
     <div class="header">
-        <b style="font-size: 1.2rem; color: var(--accent);">NEWS READER</b>
-        <button onclick="document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light')" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">🌓</button>
+        <b style="font-size: 1.3rem;">செய்தி வாசிப்பாளர் (News Reader)</b>
+        <button onclick="toggleTheme()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">🌓</button>
     </div>
 
     <div class="nav-tabs" id="tabs">
-        <div class="tab active" onclick="loadCategory('trending', this)">Trending</div>
-        <div class="tab" onclick="loadCategory('politics', this)">Politics</div>
-        <div class="tab" onclick="loadCategory('sports', this)">Sports</div>
-        <div class="tab" onclick="loadCategory('tech', this)">Technology</div>
+        <div class="tab active" onclick="loadNews('https://www.dailythanthi.com/rss/News/TopNews', this)">Trending</div>
+        <div class="tab" onclick="loadNews('https://www.dailythanthi.com/rss/News/State/TamilNadu', this)">Tamil Nadu</div>
+        <div class="tab" onclick="loadNews('https://www.dailythanthi.com/rss/Sports/Cricket', this)">Sports</div>
+        <div class="tab" onclick="loadNews('http://feeds.bbci.co.uk/news/rss.xml', this)">English (World)</div>
     </div>
 
-    <div class="feed" id="feed"></div>
+    <div class="feed" id="feed">
+        <div class="news-card"><div class="box">செய்திகள் ஏற்றப்படுகின்றன...</div></div>
+    </div>
 
     <div class="controls">
         <button onclick="move(-1)">⏮️</button>
-        <button id="p-btn" onclick="toggleAudio()">▶️ Play</button>
+        <button id="play-btn" onclick="togglePlay()">▶️ Play</button>
         <button onclick="move(1)">⏭️</button>
     </div>
 
     <script>
         const synth = window.speechSynthesis;
         let articles = [];
-        let idx = 0;
+        let currentIdx = 0;
         let isPlaying = false;
 
-        async function loadCategory(cat, el) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            el.classList.add('active');
+        // Using a public RSS to JSON converter to bypass CORS
+        async function loadNews(rssUrl, tabEl) {
+            if(tabEl) {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tabEl.classList.add('active');
+            }
             
-            const res = await fetch(`/api/news?category=${cat}`);
-            articles = await res.json();
-            render();
+            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+            
+            try {
+                const res = await fetch(apiUrl);
+                const data = await res.json();
+                articles = data.items;
+                renderNews();
+            } catch (e) {
+                alert("Error loading news. Please try again later.");
+            }
         }
 
-        function render() {
-            const f = document.getElementById('feed');
-            f.innerHTML = '';
-            articles.forEach((a, i) => {
-                const s = a.summary.split(/(?<=[.!?])\s+/).map((txt, si) => 
-                    `<span class="s" id="s-${i}-${si}">${txt}</span>`).join(' ');
-                f.innerHTML += `<div class="news-card" id="c-${i}"><div class="box"><h3>${a.title}</h3><p>${s}</p></div></div>`;
+        function renderNews() {
+            const feed = document.getElementById('feed');
+            feed.innerHTML = '';
+            
+            articles.forEach((item, i) => {
+                // Split text into sentences for highlighting
+                const text = item.description || item.content || "விவரம் இல்லை.";
+                const cleanText = text.replace(/<[^>]*>?/gm, ''); // Remove HTML tags
+                const sentences = cleanText.split(/(?<=[.!?])\s+/);
+                
+                const wrappedSentences = sentences.map((s, si) => 
+                    `<span class="sentence" id="s-${i}-${si}">${s}</span>`
+                ).join(' ');
+
+                feed.innerHTML += `
+                    <div class="news-card" id="card-${i}">
+                        <div class="box">
+                            <h3>${item.title}</h3>
+                            <p>${wrappedSentences}</p>
+                        </div>
+                    </div>
+                `;
             });
-            idx = 0;
-            f.scrollTo(0,0);
+            currentIdx = 0;
+            feed.scrollTo(0, 0);
         }
 
-        function getVoice() {
-            const vs = synth.getVoices();
-            return vs.find(v => v.name.includes('Valluvar') || v.lang === 'ta-IN') || vs.find(v => v.lang.startsWith('ta'));
+        function getTamilVoice() {
+            const voices = synth.getVoices();
+            return voices.find(v => v.name.includes('Valluvar') || v.lang === 'ta-IN') || 
+                   voices.find(v => v.lang.startsWith('ta'));
         }
 
-        function play() {
-            if (idx >= articles.length) { isPlaying = false; updateBtn(); return; }
+        function speak() {
+            if (currentIdx >= articles.length) { isPlaying = false; updateBtn(); return; }
+
+            // Scroll to the current card
+            document.getElementById(`card-${currentIdx}`).scrollIntoView({ behavior: 'smooth' });
+
+            const textToRead = document.querySelector(`#card-${currentIdx} p`).innerText;
+            const utt = new SpeechSynthesisUtterance(textToRead);
+            const spans = document.querySelectorAll(`#card-${currentIdx} .sentence`);
             
-            document.getElementById(`c-${idx}`).scrollIntoView({ behavior: 'smooth' });
-            const utt = new SpeechSynthesisUtterance(articles[idx].summary);
-            const spans = document.querySelectorAll(`#c-${idx} .s`);
-            
-            utt.voice = getVoice();
+            utt.voice = getTamilVoice();
             utt.lang = 'ta-IN';
             utt.rate = 0.9;
 
-            utt.onboundary = (e) => {
-                let count = 0;
+            utt.onboundary = (event) => {
+                let charCount = 0;
                 spans.forEach(span => {
                     const len = span.innerText.length + 1;
-                    if (e.charIndex >= count && e.charIndex < count + len) {
-                        document.querySelectorAll('.s').forEach(s => s.classList.remove('active-sentence'));
+                    if (event.charIndex >= charCount && event.charIndex < charCount + len) {
+                        document.querySelectorAll('.sentence').forEach(s => s.classList.remove('active-sentence'));
                         span.classList.add('active-sentence');
                     }
-                    count += len;
+                    charCount += len;
                 });
             };
 
-            utt.onend = () => { if (isPlaying) { idx++; setTimeout(play, 800); } };
+            utt.onend = () => {
+                if (isPlaying) {
+                    currentIdx++;
+                    setTimeout(speak, 1000);
+                }
+            };
+
             synth.speak(utt);
         }
 
-        function toggleAudio() {
-            if (isPlaying) { synth.cancel(); isPlaying = false; } 
-            else { isPlaying = true; play(); }
+        function togglePlay() {
+            if (isPlaying) {
+                synth.cancel();
+                isPlaying = false;
+            } else {
+                isPlaying = true;
+                speak();
+            }
             updateBtn();
         }
 
-        function move(d) {
+        function move(dir) {
             synth.cancel();
-            idx = Math.max(0, Math.min(articles.length - 1, idx + d));
-            if (isPlaying) play();
-            else document.getElementById(`c-${idx}`).scrollIntoView({ behavior: 'smooth' });
+            currentIdx = Math.max(0, Math.min(articles.length - 1, currentIdx + dir));
+            if (isPlaying) speak();
+            else document.getElementById(`card-${currentIdx}`).scrollIntoView({ behavior: 'smooth' });
         }
 
-        function updateBtn() { document.getElementById('p-btn').innerText = isPlaying ? "⏸️ Pause" : "▶️ Play"; }
+        function updateBtn() {
+            document.getElementById('play-btn').innerText = isPlaying ? "⏸️ Pause" : "▶️ Play";
+        }
 
-        // Initial Load
-        window.speechSynthesis.onvoiceschanged = () => getVoice();
-        loadCategory('trending', document.querySelector('.tab'));
+        function toggleTheme() {
+            const b = document.body;
+            b.setAttribute('data-theme', b.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+        }
+
+        // Initialize
+        window.speechSynthesis.onvoiceschanged = () => getTamilVoice();
+        loadNews('https://www.dailythanthi.com/rss/News/TopNews');
     </script>
 </body>
 </html>
