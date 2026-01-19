@@ -195,91 +195,113 @@
         };
 
         // --- 2. TTS ENGINE ---
-        // --- PATCHED TTS ENGINE (Better Voice Detection) ---
+       // --- MASTER PATCH: ROBUST VOICE FETCHING ---
 const tts = {
     synth: window.speechSynthesis,
     voices: [],
     
+    // MAPPING: Connects language codes to ALL possible Google server names
+    voiceMap: {
+        'ta': ['ta-in', 'ta_in', 'tamil', 'google tamil'],
+        'ml': ['ml-in', 'ml_in', 'malayalam', 'google malayalam'],
+        'te': ['te-in', 'te_in', 'telugu', 'google telugu'],
+        'kn': ['kn-in', 'kn_in', 'kannada', 'google kannada'],
+        'or': ['or-in', 'or_in', 'odia', 'oriya', 'google odia'],
+        'hi': ['hi-in', 'hi_in', 'hindi', 'google hindi'],
+        'bn': ['bn-in', 'bn_in', 'bengali', 'bangla', 'google bengali'],
+        'mr': ['mr-in', 'mr_in', 'marathi', 'google marathi'],
+        'en': ['en-us', 'en_us', 'en-gb', 'en_gb', 'english']
+    },
+
     init() {
-        // Chrome loads voices asynchronously, so we must wait
+        // Android Bug Fix: Voices load asynchronously. We must wait.
         if (this.synth.onvoiceschanged !== undefined) {
             this.synth.onvoiceschanged = () => this.loadVoices();
         }
+        // Force load attempt immediately
         this.loadVoices();
+        
+        // Double check after 500ms (Fix for some Samsung/Redmi phones)
+        setTimeout(() => this.loadVoices(), 500);
     },
 
     loadVoices() {
         this.voices = this.synth.getVoices();
-        // If voices are empty, try again in 500ms (Common Android bug fix)
-        if (this.voices.length === 0) {
-            setTimeout(() => this.loadVoices(), 500);
-            return;
-        }
         this.updateDropdown();
     },
 
     updateDropdown() {
         const select = document.getElementById('voice-select');
-        const currentLangCode = document.getElementById('lang-select').value; // e.g. 'ta', 'ml', 'or'
-        
+        const langCode = document.getElementById('lang-select').value; 
         select.innerHTML = '';
-        
-        // 1. FILTER: Find ALL voices that match the language code (e.g., 'ta' matches 'ta-IN', 'ta-LK')
-        // We use startsWith to be broader.
-        let availableVoices = this.voices.filter(v => v.lang.startsWith(currentLangCode));
 
-        // 2. FALLBACK: If no voices found for 'or' (Odia) or others, try to find "Google" voices generally
-        // Some systems map languages differently, so we ensure we at least show SOMETHING.
-        if (availableVoices.length === 0) {
+        // 1. Get exact search terms for this language from our Map
+        const searchTerms = this.voiceMap[langCode] || [langCode];
+
+        // 2. FIND VOICES: Loose matching (Checks both Name and Lang property)
+        const matches = this.voices.filter(v => {
+            const vName = v.name.toLowerCase();
+            const vLang = v.lang.toLowerCase();
+            
+            // Does this voice match ANY of our search terms?
+            return searchTerms.some(term => vName.includes(term) || vLang.includes(term));
+        });
+
+        if (matches.length === 0) {
+            // ERROR HANDLING: If no voice found, show specific error
             const opt = document.createElement('option');
-            opt.innerText = `No ${currentLangCode} voice found. Using System Default.`;
-            opt.value = 'default';
+            opt.innerText = `⚠️ No ${langCode.toUpperCase()} voice installed on Phone`;
+            opt.disabled = true;
+            opt.selected = true;
             select.appendChild(opt);
+        } else {
+            // 3. SORT: Put "Google" or "Network" voices at the top (better quality)
+            matches.sort((a, b) => {
+                if (a.name.includes('Google') || a.name.includes('Network')) return -1;
+                if (b.name.includes('Google') || b.name.includes('Network')) return 1;
+                return 0;
+            });
+
+            matches.forEach(v => {
+                const opt = document.createElement('option');
+                opt.value = v.name;
+                // Make the name readable for the user
+                opt.innerText = v.name.replace('Android', '').replace('English', '').trim();
+                select.appendChild(opt);
+            });
+            // Select the first (best) one automatically
+            select.selectedIndex = 0;
+        }
+        
+        // Add a "Show All" button for debugging
+        const debugOpt = document.createElement('option');
+        debugOpt.innerText = "--- 🛠 Debug: Show All Installed Voices ---";
+        debugOpt.value = "DEBUG";
+        select.appendChild(debugOpt);
+    },
+
+    setVoice(name) {
+        if (name === "DEBUG") {
+            alert(this.voices.map(v => `${v.name} [${v.lang}]`).join('\n'));
             return;
         }
-
-        // 3. SORT: Prioritize "Google" and "Microsoft" voices to the top
-        availableVoices.sort((a, b) => {
-            const aName = a.name.toLowerCase();
-            const bName = b.name.toLowerCase();
-            if (aName.includes('google') || aName.includes('microsoft')) return -1;
-            if (bName.includes('google') || bName.includes('microsoft')) return 1;
-            return 0;
-        });
-
-        // 4. POPULATE: Add to dropdown
-        availableVoices.forEach(v => {
-            const opt = document.createElement('option');
-            opt.value = v.name;
-            opt.innerText = `${v.name} (${v.lang})`; // e.g. "Google Tamil (ta-IN)"
-            
-            // Auto-select the best one
-            if (v.name.includes('Google') || v.name.includes('Valluvar')) {
-                opt.selected = true;
-            }
-            select.appendChild(opt);
-        });
     },
 
     speak(text, onBound, onEnd) {
         this.cancel();
         const u = new SpeechSynthesisUtterance(text);
         
-        // Get selected voice from dropdown
         const selectedName = document.getElementById('voice-select').value;
+        const voice = this.voices.find(v => v.name === selectedName);
         
-        // Helper: Map 'or' (Odia) to Hindi voice if Odia is missing (Common fallback strategy)
-        // or just use the selected voice.
-        if (selectedName !== 'default') {
-            const voice = this.voices.find(v => v.name === selectedName);
-            if (voice) u.voice = voice;
+        if (voice) {
+            u.voice = voice;
+            u.lang = voice.lang; // CRITICAL: Force the utterance to match voice language
         }
 
-        u.rate = 1.0; 
-        u.pitch = 1.0; 
+        u.rate = 1.0;
         u.onboundary = onBound;
         u.onend = onEnd;
-        
         this.synth.speak(u);
     },
 
