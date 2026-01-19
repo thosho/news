@@ -182,22 +182,24 @@
             </div>
 
             <div class="input-group">
-                <label>TTS Engine</label>
-                <select id="tts-engine" onchange="tts.switchEngine()">
-                    <option value="edge">Microsoft Edge TTS (Best Quality - Free)</option>
-                    <option value="native">Native Browser TTS</option>
-                </select>
-            </div>
-
-            <div class="input-group">
                 <label>Narrator Voice</label>
                 <select id="voice-select" onchange="tts.setVoice(this.value)">
                     <option>Loading Voices...</option>
                 </select>
             </div>
 
+            <div class="input-group">
+                <label>Speech Rate</label>
+                <select id="rate-select">
+                    <option value="0.75">0.75x (Slower)</option>
+                    <option value="1.0" selected>1.0x (Normal)</option>
+                    <option value="1.25">1.25x (Faster)</option>
+                    <option value="1.5">1.5x (Very Fast)</option>
+                </select>
+            </div>
+
             <div class="info-badge">
-                ✨ Edge TTS provides high-quality voices for all Indian languages including Tamil, Telugu, Hindi, Malayalam, Kannada, and more - completely free!
+                ℹ️ Using your browser's built-in voices. For better Indian language support, install language packs in your device settings.
             </div>
 
             <button class="btn-primary" onclick="ui.closeSettings()">Save & Close</button>
@@ -229,213 +231,171 @@
         <button class="c-btn" onclick="app.next()">⏭</button>
     </div>
 
-    <!-- Edge TTS Library -->
-    <script type="module">
-        import { EdgeTTS } from 'https://cdn.jsdelivr.net/npm/edge-tts-client@1.0.3/+esm';
-        window.EdgeTTSClient = EdgeTTS;
-    </script>
-
-    <script type="module">
+    <script>
         // --- 1. GLOBAL SOURCES WITH CATEGORIES ---
         const SOURCES = {
-            'ta': { name: 'Tamil (தமிழ்)', base: 'https://news.google.com/rss?hl=ta&gl=IN&ceid=IN:ta', langCode: 'ta-IN', edgeVoice: 'ta-IN-PallaviNeural' },
-            'en': { name: 'English (World)', base: 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en', langCode: 'en-US', edgeVoice: 'en-US-JennyNeural' },
-            'hi': { name: 'Hindi (हिंदी)', base: 'https://news.google.com/rss?hl=hi&gl=IN&ceid=IN:hi', langCode: 'hi-IN', edgeVoice: 'hi-IN-SwaraNeural' },
-            'ml': { name: 'Malayalam (മലയാളം)', base: 'https://news.google.com/rss?hl=ml&gl=IN&ceid=IN:ml', langCode: 'ml-IN', edgeVoice: 'ml-IN-SobhanaNeural' },
-            'te': { name: 'Telugu (తెలుగు)', base: 'https://news.google.com/rss?hl=te&gl=IN&ceid=IN:te', langCode: 'te-IN', edgeVoice: 'te-IN-ShrutiNeural' },
-            'kn': { name: 'Kannada (ಕನ್ನಡ)', base: 'https://news.google.com/rss?hl=kn&gl=IN&ceid=IN:kn', langCode: 'kn-IN', edgeVoice: 'kn-IN-SapnaNeural' },
-            'mr': { name: 'Marathi (मराठी)', base: 'https://news.google.com/rss?hl=mr&gl=IN&ceid=IN:mr', langCode: 'mr-IN', edgeVoice: 'mr-IN-AarohiNeural' },
-            'bn': { name: 'Bengali (বাংলা)', base: 'https://news.google.com/rss?hl=bn&gl=IN&ceid=IN:bn', langCode: 'bn-IN', edgeVoice: 'bn-IN-TanishaaNeural' },
-            'or': { name: 'Odia (ଓଡ଼ିଆ)', base: 'https://news.google.com/rss?hl=or&gl=IN&ceid=IN:or', langCode: 'or-IN', edgeVoice: 'en-IN-NeerjaNeural' }, // Odia TTS not available, using English-India
-            'pa': { name: 'Punjabi (ਪੰਜਾਬੀ)', base: 'https://news.google.com/rss?hl=pa&gl=IN&ceid=IN:pa', langCode: 'pa-IN', edgeVoice: 'en-IN-NeerjaNeural' }, // Punjabi TTS limited
-            'gu': { name: 'Gujarati (ગુજરાતી)', base: 'https://news.google.com/rss?hl=gu&gl=IN&ceid=IN:gu', langCode: 'gu-IN', edgeVoice: 'gu-IN-DhwaniNeural' },
-            'es': { name: 'Spanish (Español)', base: 'https://news.google.com/rss?hl=es-419&gl=US&ceid=US:es-419', langCode: 'es-ES', edgeVoice: 'es-ES-ElviraNeural' },
-            'fr': { name: 'French (Français)', base: 'https://news.google.com/rss?hl=fr&gl=FR&ceid=FR:fr', langCode: 'fr-FR', edgeVoice: 'fr-FR-DeniseNeural' },
-            'de': { name: 'German (Deutsch)', base: 'https://news.google.com/rss?hl=de&gl=DE&ceid=DE:de', langCode: 'de-DE', edgeVoice: 'de-DE-KatjaNeural' },
-            'it': { name: 'Italian (Italiano)', base: 'https://news.google.com/rss?hl=it&gl=IT&ceid=IT:it', langCode: 'it-IT', edgeVoice: 'it-IT-ElsaNeural' },
-            'ru': { name: 'Russian (Русский)', base: 'https://news.google.com/rss?hl=ru&gl=RU&ceid=RU:ru', langCode: 'ru-RU', edgeVoice: 'ru-RU-SvetlanaNeural' },
-            'ja': { name: 'Japanese (日本語)', base: 'https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja', langCode: 'ja-JP', edgeVoice: 'ja-JP-NanamiNeural' },
-            'zh': { name: 'Chinese (中文)', base: 'https://news.google.com/rss?hl=zh-CN&gl=CN&ceid=CN:zh-CN', langCode: 'zh-CN', edgeVoice: 'zh-CN-XiaoxiaoNeural' },
-            'ar': { name: 'Arabic (العربية)', base: 'https://news.google.com/rss?hl=ar&gl=EG&ceid=EG:ar', langCode: 'ar-SA', edgeVoice: 'ar-SA-ZariyahNeural' }
-        };
-
-        // Edge TTS Available Voices (comprehensive list)
-        const EDGE_VOICES = {
-            'ta-IN': ['ta-IN-PallaviNeural', 'ta-IN-ValluvarNeural'],
-            'hi-IN': ['hi-IN-SwaraNeural', 'hi-IN-MadhurNeural'],
-            'te-IN': ['te-IN-ShrutiNeural', 'te-IN-MohanNeural'],
-            'ml-IN': ['ml-IN-SobhanaNeural', 'ml-IN-MidhunNeural'],
-            'kn-IN': ['kn-IN-SapnaNeural', 'kn-IN-GaganNeural'],
-            'mr-IN': ['mr-IN-AarohiNeural', 'mr-IN-ManoharNeural'],
-            'bn-IN': ['bn-IN-TanishaaNeural', 'bn-IN-BashkarNeural'],
-            'gu-IN': ['gu-IN-DhwaniNeural', 'gu-IN-NiranjanNeural'],
-            'en-US': ['en-US-JennyNeural', 'en-US-GuyNeural', 'en-US-AriaNeural', 'en-US-DavisNeural'],
-            'en-IN': ['en-IN-NeerjaNeural', 'en-IN-PrabhatNeural'],
-            'es-ES': ['es-ES-ElviraNeural', 'es-ES-AlvaroNeural'],
-            'fr-FR': ['fr-FR-DeniseNeural', 'fr-FR-HenriNeural'],
-            'de-DE': ['de-DE-KatjaNeural', 'de-DE-ConradNeural'],
-            'it-IT': ['it-IT-ElsaNeural', 'it-IT-DiegoNeural'],
-            'ru-RU': ['ru-RU-SvetlanaNeural', 'ru-RU-DmitryNeural'],
-            'ja-JP': ['ja-JP-NanamiNeural', 'ja-JP-KeitaNeural'],
-            'zh-CN': ['zh-CN-XiaoxiaoNeural', 'zh-CN-YunxiNeural'],
-            'ar-SA': ['ar-SA-ZariyahNeural', 'ar-SA-HamedNeural']
+            'ta': { name: 'Tamil (தமிழ்)', base: 'https://news.google.com/rss?hl=ta&gl=IN&ceid=IN:ta', langCode: 'ta-IN' },
+            'en': { name: 'English (World)', base: 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en', langCode: 'en-US' },
+            'hi': { name: 'Hindi (हिंदी)', base: 'https://news.google.com/rss?hl=hi&gl=IN&ceid=IN:hi', langCode: 'hi-IN' },
+            'ml': { name: 'Malayalam (മലയാളം)', base: 'https://news.google.com/rss?hl=ml&gl=IN&ceid=IN:ml', langCode: 'ml-IN' },
+            'te': { name: 'Telugu (తెలుగు)', base: 'https://news.google.com/rss?hl=te&gl=IN&ceid=IN:te', langCode: 'te-IN' },
+            'kn': { name: 'Kannada (ಕನ್ನಡ)', base: 'https://news.google.com/rss?hl=kn&gl=IN&ceid=IN:kn', langCode: 'kn-IN' },
+            'mr': { name: 'Marathi (मराठी)', base: 'https://news.google.com/rss?hl=mr&gl=IN&ceid=IN:mr', langCode: 'mr-IN' },
+            'bn': { name: 'Bengali (বাংলা)', base: 'https://news.google.com/rss?hl=bn&gl=IN&ceid=IN:bn', langCode: 'bn-IN' },
+            'or': { name: 'Odia (ଓଡ଼ିଆ)', base: 'https://news.google.com/rss?hl=or&gl=IN&ceid=IN:or', langCode: 'or-IN' },
+            'pa': { name: 'Punjabi (ਪੰਜਾਬੀ)', base: 'https://news.google.com/rss?hl=pa&gl=IN&ceid=IN:pa', langCode: 'pa-IN' },
+            'gu': { name: 'Gujarati (ગુજરાતી)', base: 'https://news.google.com/rss?hl=gu&gl=IN&ceid=IN:gu', langCode: 'gu-IN' },
+            'es': { name: 'Spanish (Español)', base: 'https://news.google.com/rss?hl=es-419&gl=US&ceid=US:es-419', langCode: 'es-ES' },
+            'fr': { name: 'French (Français)', base: 'https://news.google.com/rss?hl=fr&gl=FR&ceid=FR:fr', langCode: 'fr-FR' },
+            'de': { name: 'German (Deutsch)', base: 'https://news.google.com/rss?hl=de&gl=DE&ceid=DE:de', langCode: 'de-DE' },
+            'it': { name: 'Italian (Italiano)', base: 'https://news.google.com/rss?hl=it&gl=IT&ceid=IT:it', langCode: 'it-IT' },
+            'ru': { name: 'Russian (Русский)', base: 'https://news.google.com/rss?hl=ru&gl=RU&ceid=RU:ru', langCode: 'ru-RU' },
+            'ja': { name: 'Japanese (日本語)', base: 'https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja', langCode: 'ja-JP' },
+            'zh': { name: 'Chinese (中文)', base: 'https://news.google.com/rss?hl=zh-CN&gl=CN&ceid=CN:zh-CN', langCode: 'zh-CN' },
+            'ar': { name: 'Arabic (العربية)', base: 'https://news.google.com/rss?hl=ar&gl=EG&ceid=EG:ar', langCode: 'ar-SA' }
         };
 
         // --- 2. TTS ENGINE ---
         const tts = {
             synth: window.speechSynthesis,
-            nativeVoices: [],
-            currentEngine: 'edge',
-            currentAudio: null,
+            voices: [],
             
             init() {
+                // Load voices multiple times to ensure they're available
+                this.loadVoices();
+                
                 if (this.synth.onvoiceschanged !== undefined) {
-                    this.synth.onvoiceschanged = () => this.loadNativeVoices();
+                    this.synth.onvoiceschanged = () => this.loadVoices();
                 }
-                setTimeout(() => this.loadNativeVoices(), 100);
-                this.updateDropdown();
+                
+                // Fallback loading
+                setTimeout(() => this.loadVoices(), 100);
+                setTimeout(() => this.loadVoices(), 500);
             },
 
-            loadNativeVoices() {
-                this.nativeVoices = this.synth.getVoices();
+            loadVoices() {
+                this.voices = this.synth.getVoices();
+                if (this.voices.length > 0) {
+                    console.log('Loaded voices:', this.voices.length);
+                    this.updateDropdown();
+                }
             },
 
-            switchEngine() {
-                this.currentEngine = document.getElementById('tts-engine').value;
-                this.cancel();
-                this.updateDropdown();
-            },
-
-            async updateDropdown() {
+            updateDropdown() {
                 const select = document.getElementById('voice-select');
                 const langCode = document.getElementById('lang-select').value;
                 const source = SOURCES[langCode];
                 
                 select.innerHTML = '';
 
-                if (this.currentEngine === 'edge') {
-                    // Edge TTS voices
-                    const voices = EDGE_VOICES[source.langCode] || EDGE_VOICES['en-US'];
-                    voices.forEach((voice, i) => {
-                        const opt = document.createElement('option');
-                        opt.value = voice;
-                        opt.innerText = `${voice} (Edge TTS - Premium)`;
-                        if (i === 0) opt.selected = true;
-                        select.appendChild(opt);
-                    });
-                } else {
-                    // Native voices
-                    let matches = this.nativeVoices.filter(v => v.lang.startsWith(langCode));
-                    
+                if (this.voices.length === 0) {
+                    const opt = document.createElement('option');
+                    opt.innerText = "Loading voices...";
+                    select.appendChild(opt);
+                    return;
+                }
+
+                // Try multiple matching strategies
+                let matches = [];
+                
+                // 1. Exact language code match (e.g., ta-IN)
+                if (source && source.langCode) {
+                    matches = this.voices.filter(v => v.lang === source.langCode);
+                }
+                
+                // 2. Partial language match (e.g., ta)
+                if (matches.length === 0) {
+                    const shortLang = langCode.substring(0, 2);
+                    matches = this.voices.filter(v => v.lang.startsWith(shortLang));
+                }
+                
+                // 3. Check if voice name contains language
+                if (matches.length === 0 && source) {
+                    const langName = source.name.split('(')[0].trim().toLowerCase();
+                    matches = this.voices.filter(v => 
+                        v.name.toLowerCase().includes(langName) || 
+                        v.name.toLowerCase().includes(langCode)
+                    );
+                }
+                
+                // 4. Fallback to English or any available voice
+                if (matches.length === 0) {
+                    matches = this.voices.filter(v => v.lang.startsWith('en'));
                     if (matches.length === 0) {
-                        matches = this.nativeVoices.filter(v => v.lang.startsWith('en'));
+                        matches = [this.voices[0]];
                     }
+                }
 
-                    if (matches.length === 0 && this.nativeVoices.length > 0) {
-                        matches = [this.nativeVoices[0]];
-                    }
+                // Sort to prioritize Google and Microsoft voices
+                matches.sort((a, b) => {
+                    const aScore = (a.name.includes('Google') ? 3 : 0) + 
+                                  (a.name.includes('Microsoft') ? 2 : 0) + 
+                                  (a.localService ? 0 : 1);
+                    const bScore = (b.name.includes('Google') ? 3 : 0) + 
+                                  (b.name.includes('Microsoft') ? 2 : 0) + 
+                                  (b.localService ? 0 : 1);
+                    return bScore - aScore;
+                });
 
-                    matches.forEach((v, i) => {
-                        const opt = document.createElement('option');
-                        opt.value = v.name;
-                        opt.innerText = `${v.name} (${v.lang})`;
-                        if (i === 0) opt.selected = true;
-                        select.appendChild(opt);
-                    });
+                // Add all matching voices
+                matches.forEach((v, i) => {
+                    const opt = document.createElement('option');
+                    opt.value = v.name;
+                    
+                    // Label voice quality
+                    let quality = '';
+                    if (v.name.includes('Google')) quality = '🌟 ';
+                    else if (v.name.includes('Microsoft')) quality = '⭐ ';
+                    
+                    opt.innerText = `${quality}${v.name} (${v.lang})`;
+                    if (i === 0) opt.selected = true;
+                    select.appendChild(opt);
+                });
+
+                // Add note if using fallback
+                if (matches.length > 0 && !matches[0].lang.startsWith(langCode.substring(0, 2))) {
+                    const noteOpt = document.createElement('option');
+                    noteOpt.disabled = true;
+                    noteOpt.innerText = "━━━━━━━━━━━━━━━━";
+                    select.appendChild(noteOpt);
+                    
+                    const warningOpt = document.createElement('option');
+                    warningOpt.disabled = true;
+                    warningOpt.innerText = `⚠️ ${source.name} voice not found`;
+                    select.appendChild(warningOpt);
                 }
             },
 
             setVoice(name) {
-                // Preference saved for later use
+                // Voice preference saved
             },
 
-            async speak(text, onProgress, onEnd) {
+            speak(text, onBound, onEnd) {
                 this.cancel();
-
-                if (this.currentEngine === 'edge') {
-                    await this.speakEdge(text, onProgress, onEnd);
-                } else {
-                    this.speakNative(text, onProgress, onEnd);
-                }
-            },
-
-            async speakEdge(text, onProgress, onEnd) {
-                try {
-                    const voiceName = document.getElementById('voice-select').value;
-                    
-                    // Check if EdgeTTSClient is loaded
-                    if (typeof window.EdgeTTSClient === 'undefined') {
-                        console.error('Edge TTS not loaded, falling back to native');
-                        this.speakNative(text, onProgress, onEnd);
-                        return;
-                    }
-
-                    const edgeTTS = new window.EdgeTTSClient();
-                    await edgeTTS.setMetadata(voiceName, 'webm', 'opus');
-                    
-                    const audioData = await edgeTTS.toStream(text);
-                    const audioBlob = new Blob([audioData], { type: 'audio/webm' });
-                    const audioUrl = URL.createObjectURL(audioBlob);
-                    
-                    this.currentAudio = new Audio(audioUrl);
-                    
-                    // Simple progress simulation (Edge TTS doesn't provide word boundaries)
-                    let progressInterval;
-                    this.currentAudio.addEventListener('play', () => {
-                        const duration = this.currentAudio.duration;
-                        const words = text.split(' ');
-                        let currentWord = 0;
-                        
-                        progressInterval = setInterval(() => {
-                            if (this.currentAudio && !this.currentAudio.paused) {
-                                const progress = this.currentAudio.currentTime / duration;
-                                const wordIndex = Math.floor(progress * words.length);
-                                
-                                if (wordIndex !== currentWord && wordIndex < words.length) {
-                                    currentWord = wordIndex;
-                                    // Calculate approximate character position
-                                    const charPos = words.slice(0, wordIndex).join(' ').length;
-                                    if (onProgress) onProgress({ charIndex: charPos });
-                                }
-                            }
-                        }, 100);
-                    });
-                    
-                    this.currentAudio.addEventListener('ended', () => {
-                        clearInterval(progressInterval);
-                        URL.revokeObjectURL(audioUrl);
-                        if (onEnd) onEnd();
-                    });
-
-                    this.currentAudio.addEventListener('error', (e) => {
-                        console.error('Audio playback error:', e);
-                        clearInterval(progressInterval);
-                        if (onEnd) onEnd();
-                    });
-                    
-                    await this.currentAudio.play();
-                    
-                } catch (error) {
-                    console.error('Edge TTS Error:', error);
-                    // Fallback to native
-                    this.speakNative(text, onProgress, onEnd);
-                }
-            },
-
-            speakNative(text, onProgress, onEnd) {
+                
                 const u = new SpeechSynthesisUtterance(text);
                 const selectedName = document.getElementById('voice-select').value;
-                const voice = this.nativeVoices.find(v => v.name === selectedName);
+                const voice = this.voices.find(v => v.name === selectedName);
                 
-                if (voice) u.voice = voice;
+                if (voice) {
+                    u.voice = voice;
+                } else {
+                    // Try to find any voice for the current language
+                    const langCode = document.getElementById('lang-select').value;
+                    const langVoice = this.voices.find(v => v.lang.startsWith(langCode.substring(0, 2)));
+                    if (langVoice) u.voice = langVoice;
+                }
                 
-                u.rate = 1.0;
+                // Get rate from settings
+                const rate = parseFloat(document.getElementById('rate-select').value);
+                u.rate = rate;
                 u.pitch = 1.0;
                 u.volume = 1.0;
-                u.onboundary = onProgress;
+                
+                u.onboundary = onBound;
                 u.onend = onEnd;
                 u.onerror = (e) => {
-                    console.error('Native TTS Error:', e);
+                    console.error('TTS Error:', e);
                     if (onEnd) onEnd();
                 };
                 
@@ -444,10 +404,6 @@
 
             cancel() { 
                 if (this.synth.speaking) this.synth.cancel();
-                if (this.currentAudio) {
-                    this.currentAudio.pause();
-                    this.currentAudio = null;
-                }
             }
         };
 
@@ -546,7 +502,7 @@
                 
                 if(name && url) {
                     const key = 'custom_' + Date.now();
-                    SOURCES[key] = { name: `Custom: ${name}`, base: url, langCode: 'en-US', edgeVoice: 'en-US-JennyNeural' };
+                    SOURCES[key] = { name: `Custom: ${name}`, base: url, langCode: 'en-US' };
                     
                     const langSel = document.getElementById('lang-select');
                     const opt = document.createElement('option');
@@ -560,6 +516,8 @@
                     
                     ui.closeAddFeed();
                     this.changeSource();
+                } else {
+                    alert('Please enter both feed name and URL');
                 }
             },
 
@@ -575,7 +533,7 @@
                 }
             },
 
-            async playStory() {
+            playStory() {
                 if(this.idx >= this.items.length) {
                     this.isPlaying = false;
                     document.getElementById('play-btn').innerText = "▶";
@@ -591,7 +549,7 @@
                 const hEl = document.getElementById(`h-${this.idx}`);
                 const spans = document.querySelectorAll(`#c-${this.idx} .s`);
 
-                await tts.speak(fullText, 
+                tts.speak(fullText, 
                     (e) => {
                         if (e.charIndex < title.length + 2) {
                             hEl.classList.add('hl-title');
@@ -651,8 +609,12 @@
             }
         };
 
-        // Initialize
-        window.onload = () => app.init();
+        // Initialize on load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => app.init());
+        } else {
+            app.init();
+        }
     </script>
 </body>
 </html>
