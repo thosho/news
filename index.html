@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>News Flow Global - Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&family=Noto+Sans+Tamil:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&family=Noto+Sans+Tamil:wght@400;700&family+Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #2563eb; 
@@ -223,7 +223,6 @@
     </div>
 
     <script>
-        // NEWS SOURCES (Same as before - keeping your existing sources)
         const NEWS_SOURCES = {
             'toi': { 
                 name: '📰 Times of India', 
@@ -305,7 +304,7 @@
             }
         };
 
-        // === WORKING TTS ENGINE (Google Translate) ===
+        // === FIXED TTS ENGINE (No duplicates) ===
         const tts = {
             currentAudio: null,
             audioQueue: [],
@@ -314,7 +313,6 @@
             async speak(text, lang, onProgress, onEnd) {
                 this.cancel();
                 
-                // Split text into chunks (Google TTS has character limit)
                 const chunks = this.splitText(text, 200);
                 this.audioQueue = [];
                 
@@ -322,7 +320,6 @@
                 const voice = document.getElementById('voice-select').value || lang;
                 
                 try {
-                    // Load all audio chunks
                     for (let chunk of chunks) {
                         const cleanChunk = chunk.trim();
                         if (cleanChunk) {
@@ -331,7 +328,6 @@
                         }
                     }
                     
-                    // Play queue
                     await this.playQueue(text, rate, onProgress, onEnd);
                     
                 } catch (error) {
@@ -383,7 +379,6 @@
             },
 
             splitText(text, maxLength) {
-                // Split by sentences first
                 const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
                 const chunks = [];
                 let currentChunk = '';
@@ -410,7 +405,7 @@
             }
         };
 
-        // === APP LOGIC ===
+        // === FIXED APP LOGIC (Removes duplicates) ===
         const app = {
             items: [],
             idx: 0,
@@ -469,7 +464,6 @@
                 const sourceKey = document.getElementById('source-select').value;
                 this.currentSource = sourceKey;
                 
-                // Auto-select voice based on source language
                 const source = NEWS_SOURCES[sourceKey];
                 if (source.voice) {
                     document.getElementById('voice-select').value = source.voice;
@@ -481,6 +475,40 @@
                 await this.fetchFeed(feedUrl, source.name);
             },
 
+            // FIXED: Remove duplicate content from description
+            cleanDescription(description, title) {
+                if (!description) return '';
+                
+                // Remove HTML tags
+                let clean = description.replace(/<[^>]*>/g, ' ').trim();
+                
+                // Remove the title if it appears at the start of description
+                const titleWords = title.toLowerCase().split(' ').slice(0, 5).join(' ');
+                const descStart = clean.toLowerCase().substring(0, 50);
+                
+                if (descStart.includes(titleWords)) {
+                    // Title found in description, remove it
+                    const titleLen = title.split(' ').length;
+                    const words = clean.split(' ');
+                    clean = words.slice(titleLen).join(' ').trim();
+                }
+                
+                // Remove duplicate sentences
+                const sentences = clean.match(/[^.!?]+[.!?]+/g) || [clean];
+                const uniqueSentences = [];
+                const seen = new Set();
+                
+                for (let sentence of sentences) {
+                    const normalized = sentence.toLowerCase().trim();
+                    if (!seen.has(normalized) && normalized.length > 10) {
+                        seen.add(normalized);
+                        uniqueSentences.push(sentence.trim());
+                    }
+                }
+                
+                return uniqueSentences.join(' ');
+            },
+
             async fetchFeed(url, sourceName) {
                 const container = document.getElementById('feed');
                 container.innerHTML = '<div class="card-wrapper"><div class="news-card"><div class="loading-spinner"></div><h3 style="text-align:center; margin-top: 20px;">Loading News...</h3></div></div>';
@@ -490,7 +518,16 @@
                     const data = await res.json();
                     
                     if (data.status === 'ok' && data.items && data.items.length > 0) {
-                        this.items = data.items.map(item => ({...item, source: sourceName}));
+                        this.items = data.items.map(item => {
+                            // Clean description to remove duplicates
+                            const cleanDesc = this.cleanDescription(item.description || item.content || '', item.title);
+                            
+                            return {
+                                ...item, 
+                                source: sourceName,
+                                cleanDescription: cleanDesc
+                            };
+                        });
                         this.render();
                     } else {
                         throw new Error('No news items found');
@@ -505,9 +542,12 @@
                 container.innerHTML = '';
                 
                 this.items.forEach((item, i) => {
-                    const cleanText = (item.description || item.content || '').replace(/<[^>]*>/g, '').trim();
-                    const sentences = cleanText.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [cleanText];
-                    const spanHtml = sentences.slice(0, 3).map((s, si) => 
+                    const cleanText = item.cleanDescription || '';
+                    const sentences = cleanText.match(/[^.!?]+[.!?]+/g) || [cleanText];
+                    
+                    // Take only first 3 unique sentences for display
+                    const displaySentences = sentences.slice(0, 3);
+                    const spanHtml = displaySentences.map((s, si) => 
                         `<span id="s-${i}-${si}" class="s">${s.trim()}</span>`
                     ).join(' ');
 
@@ -567,6 +607,7 @@
                 }
             },
 
+            // FIXED: Clean speech text to avoid reading source name twice
             async playStory() {
                 if(this.idx >= this.items.length) {
                     this.isPlaying = false;
@@ -577,13 +618,14 @@
                 document.getElementById(`c-${this.idx}`).scrollIntoView({behavior:'smooth'});
                 
                 const title = this.items[this.idx].title;
-                const bodyText = document.getElementById(`b-${this.idx}`).innerText;
-                const fullText = `${title}. ${bodyText}`;
+                const bodyText = document.getElementById(`b-${this.idx}`).innerText.trim();
+                
+                // FIXED: Only combine title and body, no source name
+                const fullText = bodyText ? `${title}. ${bodyText}` : title;
 
                 const hEl = document.getElementById(`h-${this.idx}`);
                 const spans = document.querySelectorAll(`#c-${this.idx} .s`);
 
-                // Get voice from current source
                 const sourceKey = document.getElementById('source-select').value;
                 const lang = NEWS_SOURCES[sourceKey].voice;
 
