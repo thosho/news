@@ -3,60 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tamil News Reader - Frontend Only</title>
+    <title>Tamil News - Voice Reader</title>
     <style>
-        :root { --bg: #f0f2f5; --text: #1c1e21; --accent: #d63031; --card: #ffffff; }
-        [data-theme="dark"] { --bg: #18191a; --text: #e4e6eb; --accent: #ff7675; --card: #242526; }
+        :root { --bg: #f8f9fa; --text: #212529; --accent: #007bff; --card: #ffffff; }
+        [data-theme="dark"] { --bg: #121212; --text: #e9ecef; --accent: #375a7f; --card: #1e1e1e; }
 
-        body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
+        body { margin: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
         
         .header {
             position: fixed; top: 0; width: 100%; height: 60px;
             background: var(--card); display: flex; align-items: center; 
             justify-content: space-between; padding: 0 20px; z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .nav-tabs {
-            position: fixed; top: 60px; width: 100%; height: 50px;
-            background: var(--card); display: flex; overflow-x: auto;
-            border-bottom: 1px solid rgba(0,0,0,0.1); z-index: 900;
+        .settings-bar {
+            position: fixed; top: 60px; width: 100%; height: auto;
+            background: var(--card); padding: 10px 20px; box-sizing: border-box;
+            border-bottom: 1px solid rgba(0,0,0,0.1); z-index: 950;
+            display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
         }
-        .tab { 
-            padding: 12px 20px; white-space: nowrap; cursor: pointer; 
-            border-bottom: 3px solid transparent; opacity: 0.7; font-weight: bold;
-        }
-        .tab.active { border-bottom-color: var(--accent); opacity: 1; color: var(--accent); }
 
-        .feed { height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; padding-top: 110px; }
-        .news-card { height: calc(100vh - 110px); scroll-snap-align: start; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
-        .box { background: var(--card); padding: 25px; border-radius: 15px; max-width: 500px; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        select { padding: 5px; border-radius: 5px; border: 1px solid #ccc; font-size: 0.9rem; max-width: 200px; }
+
+        .feed { height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; padding-top: 150px; }
+        .news-card { height: calc(100vh - 150px); scroll-snap-align: start; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+        .box { background: var(--card); padding: 25px; border-radius: 12px; max-width: 500px; width: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
-        h3 { margin-top: 0; line-height: 1.4; color: var(--accent); }
-        p { line-height: 1.8; font-size: 1.1rem; }
+        h3 { margin-top: 0; color: var(--accent); font-size: 1.25rem; }
+        .active-sentence { background: #fff59d; color: #000; border-radius: 3px; }
+        .active-title { color: #d32f2f; text-decoration: underline; }
 
-        .active-sentence { background: #fff176; color: #000; border-radius: 4px; padding: 0 2px; }
-        
         .controls {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            background: var(--accent); padding: 12px 25px; border-radius: 40px;
-            display: flex; gap: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); z-index: 2000;
+            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
+            background: var(--accent); padding: 10px 20px; border-radius: 30px;
+            display: flex; gap: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 2000;
         }
-        .controls button { background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer; }
+        .controls button { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; }
     </style>
 </head>
 <body data-theme="light">
 
     <div class="header">
-        <b style="font-size: 1.3rem;">செய்தி வாசிப்பாளர் (News Reader)</b>
-        <button onclick="toggleTheme()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">🌓</button>
+        <b>TAMIL NEWS READER</b>
+        <button onclick="toggleTheme()" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">🌓</button>
     </div>
 
-    <div class="nav-tabs" id="tabs">
-        <div class="tab active" onclick="loadNews('https://www.dailythanthi.com/rss/News/TopNews', this)">Trending</div>
-        <div class="tab" onclick="loadNews('https://www.dailythanthi.com/rss/News/State/TamilNadu', this)">Tamil Nadu</div>
-        <div class="tab" onclick="loadNews('https://www.dailythanthi.com/rss/Sports/Cricket', this)">Sports</div>
-        <div class="tab" onclick="loadNews('http://feeds.bbci.co.uk/news/rss.xml', this)">English (World)</div>
+    <div class="settings-bar">
+        <span>Voice: </span>
+        <select id="voice-select"></select>
+        <button onclick="loadNews('https://www.dailythanthi.com/rss/News/TopNews')">🔄 Refresh</button>
     </div>
 
     <div class="feed" id="feed">
@@ -74,103 +70,108 @@
         let articles = [];
         let currentIdx = 0;
         let isPlaying = false;
+        let voiceSelect = document.getElementById('voice-select');
 
-        // Using a public RSS to JSON converter to bypass CORS
-        async function loadNews(rssUrl, tabEl) {
-            if(tabEl) {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                tabEl.classList.add('active');
-            }
+        // 1. Voice Management
+        function populateVoices() {
+            const voices = synth.getVoices();
+            voiceSelect.innerHTML = '';
             
+            // Only show Tamil and English voices to keep it clean
+            const filtered = voices.filter(v => v.lang.startsWith('ta') || v.lang.startsWith('en'));
+            
+            filtered.forEach(voice => {
+                const option = document.createElement('option');
+                option.textContent = `${voice.name} (${voice.lang})`;
+                option.value = voice.name;
+                // Auto-select Valluvar (Edge) or Google Tamil if available
+                if (voice.name.includes('Valluvar') || voice.name === 'Google தமிழ்') option.selected = true;
+                voiceSelect.appendChild(option);
+            });
+        }
+
+        // 2. Fetch News
+        async function loadNews(rssUrl) {
             const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
-            
             try {
                 const res = await fetch(apiUrl);
                 const data = await res.json();
                 articles = data.items;
-                renderNews();
-            } catch (e) {
-                alert("Error loading news. Please try again later.");
-            }
+                render();
+            } catch (e) { console.error("Error", e); }
         }
 
-        function renderNews() {
+        function render() {
             const feed = document.getElementById('feed');
             feed.innerHTML = '';
-            
             articles.forEach((item, i) => {
-                // Split text into sentences for highlighting
-                const text = item.description || item.content || "விவரம் இல்லை.";
-                const cleanText = text.replace(/<[^>]*>?/gm, ''); // Remove HTML tags
-                const sentences = cleanText.split(/(?<=[.!?])\s+/);
-                
-                const wrappedSentences = sentences.map((s, si) => 
-                    `<span class="sentence" id="s-${i}-${si}">${s}</span>`
-                ).join(' ');
+                const cleanDesc = item.description.replace(/<[^>]*>?/gm, '');
+                const sentences = cleanDesc.split(/(?<=[.!?])\s+/);
+                const bodyHtml = sentences.map((s, si) => `<span class="s" id="s-${i}-${si}">${s}</span>`).join(' ');
 
                 feed.innerHTML += `
                     <div class="news-card" id="card-${i}">
                         <div class="box">
-                            <h3>${item.title}</h3>
-                            <p>${wrappedSentences}</p>
+                            <h3 id="t-${i}">${item.title}</h3>
+                            <p id="b-${i}">${bodyHtml}</p>
                         </div>
                     </div>
                 `;
             });
             currentIdx = 0;
-            feed.scrollTo(0, 0);
         }
 
-        function getTamilVoice() {
-            const voices = synth.getVoices();
-            return voices.find(v => v.name.includes('Valluvar') || v.lang === 'ta-IN') || 
-                   voices.find(v => v.lang.startsWith('ta'));
-        }
-
+        // 3. Narration Logic
         function speak() {
             if (currentIdx >= articles.length) { isPlaying = false; updateBtn(); return; }
 
-            // Scroll to the current card
             document.getElementById(`card-${currentIdx}`).scrollIntoView({ behavior: 'smooth' });
-
-            const textToRead = document.querySelector(`#card-${currentIdx} p`).innerText;
-            const utt = new SpeechSynthesisUtterance(textToRead);
-            const spans = document.querySelectorAll(`#card-${currentIdx} .sentence`);
             
-            utt.voice = getTamilVoice();
-            utt.lang = 'ta-IN';
+            // Combine Title and Body
+            const titleText = articles[currentIdx].title;
+            const bodyText = document.getElementById(`b-${currentIdx}`).innerText;
+            const fullText = `${titleText}. . . ${bodyText}`; // Pause slightly between title and body
+
+            const utt = new SpeechSynthesisUtterance(fullText);
+            const selectedVoiceName = voiceSelect.value;
+            utt.voice = synth.getVoices().find(v => v.name === selectedVoiceName);
+            utt.lang = utt.voice ? utt.voice.lang : 'ta-IN';
             utt.rate = 0.9;
 
+            // Highlight Title during start
+            const titleElem = document.getElementById(`t-${currentIdx}`);
+            const bodySpans = document.querySelectorAll(`#card-${currentIdx} .s`);
+
+            utt.onstart = () => { titleElem.classList.add('active-title'); };
+
             utt.onboundary = (event) => {
-                let charCount = 0;
-                spans.forEach(span => {
+                // Remove title highlight once we move to body (rough estimate)
+                if (event.charIndex > titleText.length) {
+                    titleElem.classList.remove('active-title');
+                }
+
+                let cumulative = titleText.length + 3; // +3 for the dots/pause
+                bodySpans.forEach(span => {
                     const len = span.innerText.length + 1;
-                    if (event.charIndex >= charCount && event.charIndex < charCount + len) {
-                        document.querySelectorAll('.sentence').forEach(s => s.classList.remove('active-sentence'));
+                    if (event.charIndex >= cumulative && event.charIndex < cumulative + len) {
+                        document.querySelectorAll('.s').forEach(s => s.classList.remove('active-sentence'));
                         span.classList.add('active-sentence');
                     }
-                    charCount += len;
+                    cumulative += len;
                 });
             };
 
             utt.onend = () => {
-                if (isPlaying) {
-                    currentIdx++;
-                    setTimeout(speak, 1000);
-                }
+                titleElem.classList.remove('active-title');
+                if (isPlaying) { currentIdx++; setTimeout(speak, 1200); }
             };
 
             synth.speak(utt);
         }
 
         function togglePlay() {
-            if (isPlaying) {
-                synth.cancel();
-                isPlaying = false;
-            } else {
-                isPlaying = true;
-                speak();
-            }
+            if (isPlaying) { synth.cancel(); isPlaying = false; } 
+            else { isPlaying = true; speak(); }
             updateBtn();
         }
 
@@ -181,17 +182,14 @@
             else document.getElementById(`card-${currentIdx}`).scrollIntoView({ behavior: 'smooth' });
         }
 
-        function updateBtn() {
-            document.getElementById('play-btn').innerText = isPlaying ? "⏸️ Pause" : "▶️ Play";
-        }
+        function updateBtn() { document.getElementById('play-btn').innerText = isPlaying ? "⏸️ Pause" : "▶️ Play"; }
+        function toggleTheme() { document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light'); }
 
-        function toggleTheme() {
-            const b = document.body;
-            b.setAttribute('data-theme', b.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+        // Setup voices
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = populateVoices;
         }
-
-        // Initialize
-        window.speechSynthesis.onvoiceschanged = () => getTamilVoice();
+        populateVoices();
         loadNews('https://www.dailythanthi.com/rss/News/TopNews');
     </script>
 </body>
