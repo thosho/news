@@ -3,778 +3,293 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>News Flow Global</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&family=Noto+Sans+Tamil:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
+    <title>News Flow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #2563eb; 
-            --glass: rgba(255, 255, 255, 0.90);
-            --glass-border: rgba(255, 255, 255, 0.4);
-            --bg-grad: linear-gradient(135deg, #f0f9ff 0%, #cbebff 100%);
-            --text: #1e293b;
-            --subtext: #64748b;
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            --highlight: #fef08a;
+            --primary: #2563eb;
+            --glass: rgba(255, 255, 255, 0.95);
+            --bg: #f3f4f6;
+            --text: #1f2937;
+            --highlight: #fde047;
+            --active-title: #dc2626;
         }
-
         [data-theme="dark"] {
-            --glass: rgba(15, 23, 42, 0.90);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --bg-grad: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            --text: #f8fafc;
-            --subtext: #94a3b8;
+            --primary: #60a5fa;
+            --glass: rgba(17, 24, 39, 0.95);
+            --bg: #0f172a;
+            --text: #f3f4f6;
             --highlight: #854d0e;
+            --active-title: #f87171;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; font-family: 'Poppins', 'Noto Sans Tamil', 'Noto Sans Devanagari', sans-serif; background: var(--bg-grad); color: var(--text); height: 100vh; overflow: hidden; transition: background 0.3s; }
+        body { margin: 0; font-family: 'Poppins', 'Noto Sans Tamil', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; transition: background 0.3s; }
 
-        .app-header {
-            position: fixed; top: 0; width: 100%; height: 65px;
-            background: var(--glass); backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--glass-border);
+        /* Header */
+        .header {
+            position: fixed; top: 0; width: 100%; height: 60px;
+            background: var(--glass); border-bottom: 1px solid rgba(0,0,0,0.1);
             display: flex; align-items: center; justify-content: space-between;
-            padding: 0 20px; z-index: 1000;
+            padding: 0 20px; z-index: 1000; backdrop-filter: blur(10px);
         }
-        .logo { font-weight: 800; font-size: 1.4rem; background: linear-gradient(45deg, #2563eb, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .header-icons button { background: none; border: none; font-size: 1.3rem; margin-left: 10px; cursor: pointer; color: var(--text); }
+        .logo { font-weight: 800; font-size: 1.4rem; color: var(--primary); }
+        .icon-btn { background: none; border: none; font-size: 1.4rem; cursor: pointer; margin-left: 10px; }
 
-        .category-bar {
-            position: fixed; top: 65px; width: 100%; height: 50px;
-            background: var(--glass); backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--glass-border);
-            display: flex; align-items: center; padding: 0 10px;
-            overflow-x: auto; overflow-y: hidden; z-index: 999;
-            scrollbar-width: none;
+        /* Feed */
+        .feed {
+            height: 100vh; padding-top: 60px; padding-bottom: 90px;
+            overflow-y: scroll; scroll-snap-type: y mandatory; scroll-behavior: smooth;
         }
-        .category-bar::-webkit-scrollbar { display: none; }
-        .cat-pill {
-            padding: 8px 18px; border-radius: 20px; border: 2px solid var(--glass-border);
-            background: transparent; color: var(--text); font-weight: 600;
-            font-size: 0.85rem; white-space: nowrap; margin-right: 10px;
-            cursor: pointer; transition: all 0.2s;
+        .card-wrapper {
+            height: calc(100vh - 150px); width: 100%;
+            scroll-snap-align: center;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px; box-sizing: border-box;
         }
-        .cat-pill.active {
-            background: var(--primary); color: white; border-color: var(--primary);
+        .card {
+            background: var(--glass); width: 100%; max-width: 600px;
+            padding: 25px; border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.05);
+            display: flex; flex-direction: column;
+            max-height: 80vh; overflow-y: auto;
         }
+        
+        .badge { background: rgba(37,99,235,0.1); color: var(--primary); padding: 5px 12px; border-radius: 15px; font-size: 0.8rem; font-weight: 700; align-self: flex-start; margin-bottom: 15px; }
+        .headline { font-size: 1.5rem; font-weight: 700; margin-bottom: 15px; line-height: 1.3; }
+        .body-text { font-size: 1.1rem; line-height: 1.7; color: var(--text); opacity: 0.9; }
+        .read-more { display: block; text-align: center; margin-top: 20px; color: var(--primary); text-decoration: none; font-weight: 600; padding: 12px; background: rgba(0,0,0,0.05); border-radius: 12px; }
 
+        /* Highlights */
+        .hl-active { background-color: var(--highlight); color: black; border-radius: 4px; box-shadow: 0 0 0 2px var(--highlight); }
+        .hl-title { color: var(--active-title); text-decoration: underline; }
+
+        /* Controls */
+        .controls {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: var(--glass); padding: 8px 25px; border-radius: 50px;
+            display: flex; align-items: center; gap: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); z-index: 1000;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        .ctrl-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text); }
+        .play-btn { color: var(--primary); font-size: 2rem; }
+
+        /* Settings Modal */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); backdrop-filter: blur(5px);
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
             z-index: 2000; display: none; align-items: center; justify-content: center;
         }
         .modal.open { display: flex; }
-        .modal-content {
-            background: var(--glass); width: 90%; max-width: 450px;
-            padding: 25px; border-radius: 20px; box-shadow: var(--shadow);
-            border: 1px solid var(--glass-border); max-height: 80vh; overflow-y: auto;
+        .modal-box {
+            background: var(--glass); width: 90%; max-width: 400px;
+            padding: 25px; border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
         }
-        .modal h2 { margin-top: 0; font-size: 1.2rem; }
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; font-size: 0.85rem; color: var(--subtext); margin-bottom: 5px; font-weight: 600; }
-        select, input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ccc; background: rgba(255,255,255,0.5); color: #000; font-size: 1rem; }
-        [data-theme="dark"] select, [data-theme="dark"] input { background: rgba(30, 41, 59, 0.8); color: #fff; }
-        .btn-primary { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; margin-top: 10px; cursor: pointer; }
-        .btn-close { background: transparent; color: var(--subtext); margin-top: 10px; width: 100%; border: none; padding: 10px; cursor: pointer; }
-        .info-badge { 
-            background: #dbeafe; color: #1e40af; padding: 10px; border-radius: 8px;
-            font-size: 0.8rem; margin-top: 10px; border: 1px solid #93c5fd;
-        }
-        [data-theme="dark"] .info-badge { background: #1e3a8a; color: #93c5fd; border-color: #1e40af; }
-
-        .feed-container {
-            height: 100vh; padding-top: 115px; overflow-y: scroll; scroll-snap-type: y mandatory;
-            scroll-behavior: smooth;
-        }
-        .card-wrapper {
-            height: calc(100vh - 115px); width: 100%;
-            scroll-snap-align: start;
-            display: flex; align-items: center; justify-content: center;
-            padding: 20px;
-        }
-        .news-card {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            width: 100%; max-width: 600px; max-height: 75vh;
-            border-radius: 24px; padding: 30px;
-            box-shadow: var(--shadow);
-            overflow-y: auto; position: relative;
-            display: flex; flex-direction: column;
-        }
-
-        .badge { display: inline-block; padding: 5px 12px; border-radius: 20px; background: rgba(37, 99, 235, 0.1); color: var(--primary); font-size: 0.8rem; font-weight: 700; align-self: flex-start; margin-bottom: 15px; }
-        .source-badge { display: inline-block; padding: 5px 12px; border-radius: 20px; background: rgba(16, 185, 129, 0.1); color: #059669; font-size: 0.75rem; font-weight: 600; margin-left: 8px; }
-        .headline { font-size: 1.5rem; font-weight: 700; line-height: 1.3; margin-bottom: 15px; color: var(--text); }
-        .body-text { font-size: 1.1rem; line-height: 1.8; color: var(--subtext); flex-grow: 1; }
-        .summary-text { font-size: 0.95rem; line-height: 1.6; color: var(--subtext); background: rgba(37, 99, 235, 0.05); padding: 15px; border-radius: 12px; margin-bottom: 15px; border-left: 3px solid var(--primary); }
-        
-        .read-more {
-            display: block; text-align: center; margin-top: 20px; padding: 12px;
-            background: rgba(0,0,0,0.05); color: var(--primary); text-decoration: none;
-            border-radius: 12px; font-weight: 600; font-size: 0.9rem;
-        }
-
-        .hl-active { background-color: var(--highlight); color: #000; border-radius: 4px; box-shadow: 0 0 0 2px var(--highlight); }
-        .hl-title { color: #dc2626; text-decoration: underline; }
-
-        .controls {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px);
-            padding: 8px 15px; border-radius: 50px;
-            display: flex; align-items: center; gap: 15px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2); z-index: 1000;
-            border: 1px solid rgba(255,255,255,0.5);
-        }
-        [data-theme="dark"] .controls { background: rgba(30, 41, 59, 0.95); border-color: rgba(255,255,255,0.1); }
-
-        .c-btn {
-            background: none; border: none; font-size: 1.5rem; cursor: pointer;
-            color: var(--text); width: 45px; height: 45px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; transition: all 0.2s;
-        }
-        .c-btn:active { transform: scale(0.9); }
-        .play-btn { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); }
-
-        .loading-spinner {
-            display: inline-block; width: 20px; height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%; border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
+        select, input { width: 100%; padding: 12px; margin: 8px 0 20px 0; border-radius: 10px; border: 1px solid #ccc; font-size: 1rem; }
+        label { font-weight: 600; font-size: 0.9rem; }
+        .btn-save { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer; }
     </style>
 </head>
 <body data-theme="light">
 
-    <header class="app-header">
+    <header class="header">
         <div class="logo">News Flow</div>
-        <div class="header-icons">
-            <button onclick="ui.openAddFeed()">➕</button>
-            <button onclick="ui.openSettings()">⚙️</button>
-            <button onclick="ui.toggleTheme()">🌓</button>
+        <div>
+            <button class="icon-btn" onclick="ui.openSettings()">⚙️</button>
+            <button class="icon-btn" onclick="ui.toggleTheme()">🌓</button>
         </div>
     </header>
 
-    <div class="category-bar" id="category-bar"></div>
-
     <div class="modal" id="settings-modal">
-        <div class="modal-content">
-            <h2>⚙️ App Settings</h2>
+        <div class="modal-box">
+            <h2>Settings</h2>
             
-            <div class="input-group">
-                <label>News Source</label>
-                <select id="source-select" onchange="app.changeSource()"></select>
-            </div>
-
-            <div class="input-group">
-                <label>TTS Engine</label>
-                <select id="tts-engine" onchange="tts.switchEngine()">
-                    <option value="google">🌟 Google TTS (Online - Best for Indian Languages)</option>
-                    <option value="browser">📱 Browser Native (Offline)</option>
-                    <option value="edge">🔷 Edge Browser (If Available)</option>
+            <label>1. Language / Region</label>
+            <select id="lang-select" onchange="app.changeLanguage()">
                 </select>
-            </div>
 
-            <div class="input-group" id="voice-group">
-                <label>Narrator Voice</label>
-                <select id="voice-select"></select>
-            </div>
-
-            <div class="input-group">
-                <label>Speech Rate</label>
-                <select id="rate-select">
-                    <option value="0.75">0.75x (Slow)</option>
-                    <option value="1.0" selected>1.0x (Normal)</option>
-                    <option value="1.25">1.25x (Fast)</option>
-                    <option value="1.5">1.5x (Very Fast)</option>
-                </select>
-            </div>
-
-            <div class="input-group">
-                <label>Enable AI Summary</label>
-                <select id="summary-toggle">
-                    <option value="true">Yes - Summarize content</option>
-                    <option value="false">No - Full content</option>
-                </select>
-            </div>
-
-            <div class="info-badge" id="tts-info">
-                ✨ Google TTS provides natural-sounding voices for Tamil, Telugu, Hindi, Malayalam, Kannada, and all Indian languages!
-            </div>
-
-            <button class="btn-primary" onclick="ui.closeSettings()">Save & Close</button>
+            <label>2. Voice (Auto-filtered)</label>
+            <select id="voice-select">
+                <option>Loading...</option>
+            </select>
+            
+            <label>3. Add Custom Feed (Optional)</label>
+            <input type="text" id="custom-url" placeholder="Paste RSS Link Here">
+            
+            <button class="btn-save" onclick="app.saveSettings()">Save & Play</button>
         </div>
     </div>
 
-    <div class="modal" id="add-feed-modal">
-        <div class="modal-content">
-            <h2>➕ Add Custom RSS</h2>
-            <div class="input-group">
-                <label>Feed Name</label>
-                <input type="text" id="custom-name" placeholder="e.g., Tech Blog">
-            </div>
-            <div class="input-group">
-                <label>RSS URL</label>
-                <input type="url" id="custom-url" placeholder="https://example.com/rss">
-            </div>
-            <button class="btn-primary" onclick="app.addCustomFeed()">Add Feed</button>
-            <button class="btn-close" onclick="ui.closeAddFeed()">Cancel</button>
-        </div>
-    </div>
-
-    <div class="feed-container" id="feed"></div>
+    <div class="feed" id="feed"></div>
 
     <div class="controls">
-        <button class="c-btn" onclick="app.prev()">⏮</button>
-        <button class="c-btn play-btn" id="play-btn" onclick="app.togglePlay()">▶</button>
-        <button class="c-btn" onclick="app.next()">⏭</button>
+        <button class="ctrl-btn" onclick="app.prev()">⏮</button>
+        <button class="ctrl-btn play-btn" id="play-btn" onclick="app.togglePlay()">▶</button>
+        <button class="ctrl-btn" onclick="app.next()">⏭</button>
     </div>
 
     <script>
-        // === COMPREHENSIVE NEWS SOURCES ===
-        const NEWS_SOURCES = {
-            // Indian English Sources
-            'toi': { 
-                name: '📰 Times of India', 
-                feeds: {
-                    'all': 'https://timesofindia.indiatimes.com/rssfeedstopstories.cms',
-                    'india': 'https://timesofindia.indiatimes.com/rssfeeds/296589292.cms',
-                    'world': 'https://timesofindia.indiatimes.com/rssfeeds/-2128936835.cms',
-                    'business': 'https://timesofindia.indiatimes.com/rssfeeds/1898055.cms',
-                    'tech': 'https://timesofindia.indiatimes.com/rssfeeds/5880659.cms',
-                    'sports': 'https://timesofindia.indiatimes.com/rssfeeds/4719148.cms',
-                    'entertainment': 'https://timesofindia.indiatimes.com/rssfeeds/1081479906.cms'
-                },
-                lang: 'en-IN'
-            },
-            'hindu': {
-                name: '📰 The Hindu',
-                feeds: {
-                    'all': 'https://www.thehindu.com/feeder/default.rss',
-                    'india': 'https://www.thehindu.com/news/national/feeder/default.rss',
-                    'world': 'https://www.thehindu.com/news/international/feeder/default.rss',
-                    'business': 'https://www.thehindu.com/business/feeder/default.rss',
-                    'tech': 'https://www.thehindu.com/sci-tech/technology/feeder/default.rss',
-                    'sports': 'https://www.thehindu.com/sport/feeder/default.rss'
-                },
-                lang: 'en-IN'
-            },
-            'indianexpress': {
-                name: '📰 Indian Express',
-                feeds: {
-                    'all': 'https://indianexpress.com/feed/',
-                    'india': 'https://indianexpress.com/section/india/feed/',
-                    'world': 'https://indianexpress.com/section/world/feed/',
-                    'business': 'https://indianexpress.com/section/business/feed/',
-                    'tech': 'https://indianexpress.com/section/technology/feed/',
-                    'sports': 'https://indianexpress.com/section/sports/feed/',
-                    'entertainment': 'https://indianexpress.com/section/entertainment/feed/'
-                },
-                lang: 'en-IN'
-            },
-            // Tamil Sources
-            'dinamalar': {
-                name: '📰 Dinamalar (தமிழ்)',
-                feeds: {
-                    'all': 'https://www.dinamalar.com/rss/rss_tamilnadu.xml',
-                    'india': 'https://www.dinamalar.com/rss/rss_india.xml',
-                    'world': 'https://www.dinamalar.com/rss/rss_world.xml',
-                    'sports': 'https://www.dinamalar.com/rss/rss_sports.xml',
-                    'cinema': 'https://www.dinamalar.com/rss/rss_cinema.xml'
-                },
-                lang: 'ta-IN'
-            },
-            'tamil-oneindia': {
-                name: '📰 OneIndia Tamil',
-                feeds: {
-                    'all': 'https://tamil.oneindia.com/rss/news-fb.xml',
-                    'india': 'https://tamil.oneindia.com/rss/india-fb.xml',
-                    'world': 'https://tamil.oneindia.com/rss/world-fb.xml',
-                    'sports': 'https://tamil.oneindia.com/rss/sports-fb.xml',
-                    'cinema': 'https://tamil.oneindia.com/rss/cinema-fb.xml'
-                },
-                lang: 'ta-IN'
-            },
-            // Telugu Sources
-            'telugu-oneindia': {
-                name: '📰 OneIndia Telugu',
-                feeds: {
-                    'all': 'https://telugu.oneindia.com/rss/news-fb.xml',
-                    'india': 'https://telugu.oneindia.com/rss/india-fb.xml',
-                    'world': 'https://telugu.oneindia.com/rss/world-fb.xml',
-                    'sports': 'https://telugu.oneindia.com/rss/sports-fb.xml',
-                    'cinema': 'https://telugu.oneindia.com/rss/cinema-fb.xml'
-                },
-                lang: 'te-IN'
-            },
-            'telangana-today': {
-                name: '📰 Telangana Today',
-                feeds: {
-                    'all': 'https://telanganatoday.com/feed',
-                    'telangana': 'https://telanganatoday.com/category/telangana/feed',
-                    'sports': 'https://telanganatoday.com/category/sports/feed',
-                    'business': 'https://telanganatoday.com/category/business/feed'
-                },
-                lang: 'te-IN'
-            },
-            // Hindi Sources
-            'abp-hindi': {
-                name: '📰 ABP News Hindi',
-                feeds: {
-                    'all': 'https://www.abplive.com/home/feed',
-                    'india': 'https://www.abplive.com/news/india/feed',
-                    'world': 'https://www.abplive.com/news/world/feed',
-                    'business': 'https://www.abplive.com/business/feed',
-                    'sports': 'https://www.abplive.com/sports/feed',
-                    'tech': 'https://www.abplive.com/technology/feed',
-                    'entertainment': 'https://www.abplive.com/entertainment/bollywood/feed'
-                },
-                lang: 'hi-IN'
-            },
-            // Malayalam Sources
-            'malayalam-oneindia': {
-                name: '📰 OneIndia Malayalam',
-                feeds: {
-                    'all': 'https://malayalam.oneindia.com/rss/news-fb.xml',
-                    'india': 'https://malayalam.oneindia.com/rss/india-fb.xml',
-                    'world': 'https://malayalam.oneindia.com/rss/world-fb.xml',
-                    'sports': 'https://malayalam.oneindia.com/rss/sports-fb.xml'
-                },
-                lang: 'ml-IN'
-            },
-            // Kannada Sources
-            'kannada-oneindia': {
-                name: '📰 OneIndia Kannada',
-                feeds: {
-                    'all': 'https://kannada.oneindia.com/rss/news-fb.xml',
-                    'india': 'https://kannada.oneindia.com/rss/india-fb.xml',
-                    'world': 'https://kannada.oneindia.com/rss/world-fb.xml',
-                    'sports': 'https://kannada.oneindia.com/rss/sports-fb.xml'
-                },
-                lang: 'kn-IN'
-            },
-            // International
-            'bbc': {
-                name: '🌍 BBC News',
-                feeds: {
-                    'all': 'http://feeds.bbci.co.uk/news/rss.xml',
-                    'world': 'http://feeds.bbci.co.uk/news/world/rss.xml',
-                    'business': 'http://feeds.bbci.co.uk/news/business/rss.xml',
-                    'tech': 'http://feeds.bbci.co.uk/news/technology/rss.xml',
-                    'sports': 'http://feeds.bbci.co.uk/sport/rss.xml'
-                },
-                lang: 'en-GB'
-            },
-            'cnn': {
-                name: '🌍 CNN',
-                feeds: {
-                    'all': 'http://rss.cnn.com/rss/cnn_topstories.rss',
-                    'world': 'http://rss.cnn.com/rss/cnn_world.rss',
-                    'business': 'http://rss.cnn.com/rss/money_latest.rss',
-                    'tech': 'http://rss.cnn.com/rss/cnn_tech.rss',
-                    'sports': 'http://rss.cnn.com/rss/si_topstories.rss'
-                },
-                lang: 'en-US'
-            }
+        // --- 1. DATA: Pre-loaded Google & Public Feeds ---
+        const FEEDS = {
+            'en': { name: 'English (World)', url: 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en' },
+            'ta': { name: 'Tamil (தமிழ்)', url: 'https://news.google.com/rss?hl=ta&gl=IN&ceid=IN:ta' },
+            'hi': { name: 'Hindi (हिंदी)', url: 'https://news.google.com/rss?hl=hi&gl=IN&ceid=IN:hi' },
+            'ml': { name: 'Malayalam (മലയാളം)', url: 'https://news.google.com/rss?hl=ml&gl=IN&ceid=IN:ml' },
+            'te': { name: 'Telugu (తెలుగు)', url: 'https://news.google.com/rss?hl=te&gl=IN&ceid=IN:te' },
+            'kn': { name: 'Kannada (ಕನ್ನಡ)', url: 'https://news.google.com/rss?hl=kn&gl=IN&ceid=IN:kn' },
+            'mr': { name: 'Marathi (मराठी)', url: 'https://news.google.com/rss?hl=mr&gl=IN&ceid=IN:mr' },
+            'bn': { name: 'Bengali (বাংলা)', url: 'https://news.google.com/rss?hl=bn&gl=IN&ceid=IN:bn' },
+            'or': { name: 'Odia (ଓଡ଼ିଆ)', url: 'https://news.google.com/rss?hl=or&gl=IN&ceid=IN:or' },
+            'es': { name: 'Spanish (Español)', url: 'https://news.google.com/rss?hl=es-419&gl=US&ceid=US:es-419' },
+            'fr': { name: 'French (Français)', url: 'https://news.google.com/rss?hl=fr&gl=FR&ceid=FR:fr' },
+            'de': { name: 'German (Deutsch)', url: 'https://news.google.com/rss?hl=de&gl=DE&ceid=DE:de' },
+            'it': { name: 'Italian (Italiano)', url: 'https://news.google.com/rss?hl=it&gl=IT&ceid=IT:it' },
+            'ru': { name: 'Russian (Русский)', url: 'https://news.google.com/rss?hl=ru&gl=RU&ceid=RU:ru' },
+            'ja': { name: 'Japanese (日本語)', url: 'https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja' },
+            'zh': { name: 'Chinese (中文)', url: 'https://news.google.com/rss?hl=zh-CN&gl=CN&ceid=CN:zh-CN' },
+            'ar': { name: 'Arabic (العربية)', url: 'https://news.google.com/rss?hl=ar&gl=EG&ceid=EG:ar' }
         };
 
-        // Google TTS Voice Mapping
-        const GOOGLE_TTS_VOICES = {
-            'ta-IN': 'ta-IN-Standard-A',
-            'te-IN': 'te-IN-Standard-A',
-            'hi-IN': 'hi-IN-Standard-A',
-            'ml-IN': 'ml-IN-Standard-A',
-            'kn-IN': 'kn-IN-Standard-A',
-            'mr-IN': 'mr-IN-Standard-A',
-            'bn-IN': 'bn-IN-Standard-A',
-            'gu-IN': 'gu-IN-Standard-A',
-            'en-IN': 'en-IN-Standard-A',
-            'en-US': 'en-US-Standard-C',
-            'en-GB': 'en-GB-Standard-A'
-        };
-
-        // === TTS ENGINE ===
+        // --- 2. TTS ENGINE ---
         const tts = {
             synth: window.speechSynthesis,
-            browserVoices: [],
-            currentEngine: 'google',
-            currentAudio: null,
-            
+            voices: [],
+
             init() {
-                this.loadBrowserVoices();
                 if (this.synth.onvoiceschanged !== undefined) {
-                    this.synth.onvoiceschanged = () => this.loadBrowserVoices();
+                    this.synth.onvoiceschanged = () => this.loadVoices();
                 }
-                setTimeout(() => this.loadBrowserVoices(), 100);
-                this.updateDropdown();
+                this.loadVoices();
             },
 
-            loadBrowserVoices() {
-                this.browserVoices = this.synth.getVoices();
-                console.log('Browser voices loaded:', this.browserVoices.length);
+            loadVoices() {
+                this.voices = this.synth.getVoices();
+                // If the user has language selected, filter immediately
+                if(document.getElementById('settings-modal').classList.contains('open')) {
+                    app.filterVoices(); 
+                }
             },
 
-            switchEngine() {
-                this.currentEngine = document.getElementById('tts-engine').value;
+            speak(text, onBound, onEnd) {
                 this.cancel();
-                this.updateDropdown();
+                const u = new SpeechSynthesisUtterance(text);
                 
-                const info = document.getElementById('tts-info');
-                if (this.currentEngine === 'google') {
-                    info.innerHTML = '✨ Google TTS provides natural-sounding voices for all Indian languages with proper pronunciation!';
-                } else if (this.currentEngine === 'edge') {
-                    info.innerHTML = '🔷 Edge browser voices provide high-quality neural TTS when using Microsoft Edge browser.';
-                } else {
-                    info.innerHTML = '📱 Using device native voices. Install language packs for better quality.';
-                }
-            },
-
-            updateDropdown() {
+                // Get selected voice index
                 const select = document.getElementById('voice-select');
-                const sourceKey = document.getElementById('source-select').value;
-                const source = NEWS_SOURCES[sourceKey];
-                const lang = source ? source.lang : 'en-IN';
-                
-                select.innerHTML = '';
+                const voiceName = select.value;
+                const voice = this.voices.find(v => v.name === voiceName);
 
-                if (this.currentEngine === 'google') {
-                    // Google TTS voices
-                    const googleVoice = GOOGLE_TTS_VOICES[lang] || GOOGLE_TTS_VOICES['en-IN'];
-                    const opt = document.createElement('option');
-                    opt.value = googleVoice;
-                    opt.innerText = `🌟 ${googleVoice} (Google - High Quality)`;
-                    opt.selected = true;
-                    select.appendChild(opt);
-                    
-                    // Add alternative gender
-                    const altVoice = googleVoice.replace('-A', '-B');
-                    const opt2 = document.createElement('option');
-                    opt2.value = altVoice;
-                    opt2.innerText = `🌟 ${altVoice} (Google - Alternative)`;
-                    select.appendChild(opt2);
-                    
-                } else {
-                    // Browser/Edge voices
-                    let matches = this.browserVoices.filter(v => v.lang.startsWith(lang.substring(0, 2)));
-                    
-                    if (matches.length === 0) {
-                        matches = this.browserVoices.filter(v => v.lang.startsWith('en'));
-                    }
-                    
-                    if (matches.length === 0 && this.browserVoices.length > 0) {
-                        matches = [this.browserVoices[0]];
-                    }
-
-                    // Prioritize based on engine
-                    if (this.currentEngine === 'edge') {
-                        matches.sort((a, b) => {
-                            const aScore = a.name.includes('Microsoft') ? 2 : 0;
-                            const bScore = b.name.includes('Microsoft') ? 2 : 0;
-                            return bScore - aScore;
-                        });
-                    } else {
-                        matches.sort((a, b) => {
-                            const aScore = (a.name.includes('Google') ? 2 : 0) + (a.localService ? 0 : 1);
-                            const bScore = (b.name.includes('Google') ? 2 : 0) + (b.localService ? 0 : 1);
-                            return bScore - aScore;
-                        });
-                    }
-
-                    matches.forEach((v, i) => {
-                        const opt = document.createElement('option');
-                        opt.value = v.name;
-                        let icon = '📱';
-                        if (v.name.includes('Google')) icon = '🌟';
-                        else if (v.name.includes('Microsoft')) icon = '🔷';
-                        opt.innerText = `${icon} ${v.name} (${v.lang})`;
-                        if (i === 0) opt.selected = true;
-                        select.appendChild(opt);
-                    });
+                if (voice) {
+                    u.voice = voice;
+                    u.lang = voice.lang; 
                 }
-            },
 
-            addNaturalPauses(text) {
-                // Add SSML-like breaks for natural speech
-                text = text.replace(/\.\s+/g, '. <break time="500ms"/> ');
-                text = text.replace(/,\s+/g, ', <break time="300ms"/> ');
-                text = text.replace(/:\s+/g, ': <break time="400ms"/> ');
-                text = text.replace(/;\s+/g, '; <break time="400ms"/> ');
-                text = text.replace(/\?\s+/g, '? <break time="600ms"/> ');
-                text = text.replace(/!\s+/g, '! <break time="600ms"/> ');
-                return text;
-            },
-
-            async speak(text, onProgress, onEnd) {
-                this.cancel();
-                
-                // Add natural pauses
-                const processedText = this.addNaturalPauses(text);
-
-                if (this.currentEngine === 'google') {
-                    await this.speakGoogle(processedText, text, onProgress, onEnd);
-                } else {
-                    this.speakBrowser(processedText, onProgress, onEnd);
-                }
-            },
-
-            async speakGoogle(processedText, originalText, onProgress, onEnd) {
-                try {
-                    const voiceName = document.getElementById('voice-select').value;
-                    const rate = parseFloat(document.getElementById('rate-select').value);
-                    
-                    // Clean text for Google TTS (remove break tags)
-                    const cleanText = processedText.replace(/<break time="[^"]*"\/>/g, '');
-                    
-                    // Using Google Cloud TTS API (requires API key for production)
-                    // For demo, using unofficial endpoint
-                    const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${voiceName.substring(0, 5)}&client=tw-ob&q=${encodeURIComponent(cleanText)}`;
-                    
-                    this.currentAudio = new Audio(url);
-                    
-                    let progressInterval;
-                    this.currentAudio.addEventListener('play', () => {
-                        const duration = this.currentAudio.duration;
-                        const words = originalText.split(' ');
-                        let currentWord = 0;
-                        
-                        progressInterval = setInterval(() => {
-                            if (this.currentAudio && !this.currentAudio.paused) {
-                                const progress = this.currentAudio.currentTime / duration;
-                                const wordIndex = Math.floor(progress * words.length);
-                                
-                                if (wordIndex !== currentWord && wordIndex < words.length) {
-                                    currentWord = wordIndex;
-                                    const charPos = words.slice(0, wordIndex).join(' ').length;
-                                    if (onProgress) onProgress({ charIndex: charPos });
-                                }
-                            }
-                        }, 100);
-                    });
-                    
-                    this.currentAudio.addEventListener('ended', () => {
-                        clearInterval(progressInterval);
-                        if (onEnd) onEnd();
-                    });
-
-                    this.currentAudio.addEventListener('error', (e) => {
-                        console.warn('Google TTS failed, falling back to browser TTS');
-                        clearInterval(progressInterval);
-                        this.speakBrowser(processedText, onProgress, onEnd);
-                    });
-                    
-                    this.currentAudio.playbackRate = rate;
-                    await this.currentAudio.play();
-                    
-                } catch (error) {
-                    console.error('Google TTS Error:', error);
-                    this.speakBrowser(processedText, onProgress, onEnd);
-                }
-            },
-
-            speakBrowser(text, onProgress, onEnd) {
-                // Remove break tags for browser TTS
-                const cleanText = text.replace(/<break time="[^"]*"\/>/g, ' ');
-                
-                const u = new SpeechSynthesisUtterance(cleanText);
-                const selectedName = document.getElementById('voice-select').value;
-                
-                if (this.currentEngine !== 'google') {
-                    const voice = this.browserVoices.find(v => v.name === selectedName);
-                    if (voice) u.voice = voice;
-                }
-                
-                const rate = parseFloat(document.getElementById('rate-select').value);
-                u.rate = rate;
-                u.pitch = 1.0;
-                u.volume = 1.0;
-                
-                u.onboundary = onProgress;
+                u.rate = 1.0;
+                u.onboundary = onBound;
                 u.onend = onEnd;
-                u.onerror = (e) => {
-                    console.error('Browser TTS Error:', e);
-                    if (onEnd) onEnd();
-                };
-                
                 this.synth.speak(u);
             },
-
-            cancel() { 
-                if (this.synth.speaking) this.synth.cancel();
-                if (this.currentAudio) {
-                    this.currentAudio.pause();
-                    this.currentAudio = null;
-                }
-            }
+            
+            cancel() { if (this.synth.speaking) this.synth.cancel(); }
         };
 
-        // === APP LOGIC ===
+        // --- 3. APP LOGIC ---
         const app = {
             items: [],
             idx: 0,
             isPlaying: false,
-            currentSource: 'toi',
-            currentCategory: 'all',
 
             init() {
-                // Populate source dropdown
-                const sourceSel = document.getElementById('source-select');
-                for (const [key, source] of Object.entries(NEWS_SOURCES)) {
+                const langSel = document.getElementById('lang-select');
+                for (const [code, info] of Object.entries(FEEDS)) {
                     const opt = document.createElement('option');
-                    opt.value = key;
-                    opt.innerText = source.name;
-                    sourceSel.appendChild(opt);
+                    opt.value = code;
+                    opt.innerText = info.name;
+                    if(code === 'en') opt.selected = true;
+                    langSel.appendChild(opt);
                 }
                 
-                this.updateCategories();
                 tts.init();
-                this.changeSource();
+                // Load default English feed immediately so app isn't empty
+                this.fetchFeed(FEEDS['en'].url);
             },
 
-            updateCategories() {
-                const sourceKey = document.getElementById('source-select').value;
-                const source = NEWS_SOURCES[sourceKey];
-                const catBar = document.getElementById('category-bar');
-                
-                catBar.innerHTML = '';
-                
-                const categories = {
-                    'all': '🌍 All',
-                    'india': '🏛️ India',
-                    'world': '🗺️ World',
-                    'business': '💼 Business',
-                    'tech': '💻 Tech',
-                    'sports': '⚽ Sports',
-                    'entertainment': '🎬 Entertainment',
-                    'cinema': '🎥 Cinema',
-                    'telangana': '🏛️ Telangana'
-                };
-                
-                for (const [cat, label] of Object.entries(categories)) {
-                    if (source.feeds[cat]) {
-                        const pill = document.createElement('button');
-                        pill.className = 'cat-pill' + (cat === 'all' ? ' active' : '');
-                        pill.dataset.category = cat;
-                        pill.innerText = label;
-                        pill.onclick = () => {
-                            document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
-                            pill.classList.add('active');
-                            this.currentCategory = cat;
-                            this.changeSource();
-                        };
-                        catBar.appendChild(pill);
-                    }
+            changeLanguage() {
+                this.filterVoices();
+            },
+
+            filterVoices() {
+                const langCode = document.getElementById('lang-select').value;
+                const voiceSel = document.getElementById('voice-select');
+                voiceSel.innerHTML = '';
+
+                // Filter voices that match the language code (e.g., 'ta' matches 'ta-IN', 'ta-LK')
+                let matches = tts.voices.filter(v => v.lang.toLowerCase().includes(langCode));
+
+                if (matches.length === 0) {
+                    // Fallback: Show all if none found
+                    matches = tts.voices;
                 }
+
+                matches.forEach(v => {
+                    const opt = document.createElement('option');
+                    opt.value = v.name;
+                    opt.innerText = `${v.name} (${v.lang})`;
+                    voiceSel.appendChild(opt);
+                });
             },
 
-            async changeSource() {
-                const sourceKey = document.getElementById('source-select').value;
-                this.currentSource = sourceKey;
+            saveSettings() {
+                const customUrl = document.getElementById('custom-url').value;
+                const langCode = document.getElementById('lang-select').value;
                 
-                this.updateCategories();
-                tts.updateDropdown();
-                
-                const source = NEWS_SOURCES[sourceKey];
-                const feedUrl = source.feeds[this.currentCategory] || source.feeds['all'];
-                
-                await this.fetchFeed(feedUrl, source.name);
+                let url = FEEDS[langCode].url;
+                if(customUrl) url = customUrl;
+
+                ui.closeSettings();
+                this.fetchFeed(url);
             },
 
-            async fetchFeed(url, sourceName) {
-                const container = document.getElementById('feed');
-                container.innerHTML = '<div class="card-wrapper"><div class="news-card"><div class="loading-spinner"></div><h3 style="text-align:center; margin-top: 20px;">Loading News...</h3></div></div>';
+            async fetchFeed(url) {
+                const feedEl = document.getElementById('feed');
+                feedEl.innerHTML = '<div class="card-wrapper"><div class="card"><h3>Loading News...</h3></div></div>';
                 
                 try {
-                    const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}&api_key=bseegz0mtnecqb2qexfqdhwj8o0vfwldl5s9yydy&count=20`);
+                    const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`);
                     const data = await res.json();
                     
-                    if (data.status === 'ok' && data.items && data.items.length > 0) {
-                        this.items = data.items.map(item => ({...item, source: sourceName}));
-                        
-                        // AI Summarization if enabled
-                        if (document.getElementById('summary-toggle').value === 'true') {
-                            await this.summarizeItems();
-                        }
-                        
-                        this.render();
-                    } else {
-                        throw new Error('No news items found');
-                    }
-                } catch (e) {
-                    container.innerHTML = `<div class="card-wrapper"><div class="news-card"><h3>❌ Error Loading Feed</h3><p>${e.message}</p></div></div>`;
-                }
-            },
-
-            async summarizeItems() {
-                // Using a free summarization approach
-                for (let item of this.items) {
-                    const text = (item.description || item.content || '').replace(/<[^>]*>/g, '').trim();
-                    if (text) {
-                        // Simple extractive summary - first 2 sentences
-                        const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
-                        item.summary = sentences.slice(0, 2).join(' ').trim();
-                    }
+                    if(data.status !== 'ok') throw new Error();
+                    
+                    this.items = data.items;
+                    this.render();
+                } catch(e) {
+                    feedEl.innerHTML = '<div class="card-wrapper"><div class="card"><h3>Failed to load feed.</h3><p>Try a different source.</p></div></div>';
                 }
             },
 
             render() {
-                const container = document.getElementById('feed');
-                const showSummary = document.getElementById('summary-toggle').value === 'true';
-                container.innerHTML = '';
+                const feedEl = document.getElementById('feed');
+                feedEl.innerHTML = '';
                 
                 this.items.forEach((item, i) => {
-                    const cleanText = (item.description || item.content || '').replace(/<[^>]*>/g, '').trim();
-                    const displayText = showSummary && item.summary ? item.summary : cleanText;
-                    
-                    const sentences = displayText.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [displayText];
-                    const spanHtml = sentences.map((s, si) => `<span id="s-${i}-${si}" class="s">${s.trim()}</span>`).join(' ');
+                    const clean = (item.description || item.content || "").replace(/<[^>]*>?/gm, '');
+                    const sentences = clean.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [clean];
+                    const spans = sentences.map((s, si) => `<span id="s-${i}-${si}" class="s">${s}</span>`).join(' ');
 
-                    const summaryHtml = showSummary && item.summary ? 
-                        `<div class="summary-text">📝 ${item.summary}</div>` : '';
-
-                    container.innerHTML += `
+                    feedEl.innerHTML += `
                         <div class="card-wrapper" id="c-${i}">
-                            <div class="news-card">
-                                <div>
-                                    <span class="badge">${this.currentCategory.toUpperCase()}</span>
-                                    <span class="source-badge">${item.source}</span>
-                                </div>
+                            <div class="card">
+                                <div class="badge">NEWS FLASH</div>
                                 <div class="headline" id="h-${i}">${item.title}</div>
-                                ${summaryHtml}
-                                <div class="body-text" id="b-${i}">${spanHtml}</div>
+                                <div class="body-text">${spans}</div>
                                 <a href="${item.link}" target="_blank" class="read-more">🔗 Read Full Story</a>
                             </div>
                         </div>
                     `;
                 });
                 this.idx = 0;
-            },
-
-            addCustomFeed() {
-                const name = document.getElementById('custom-name').value.trim();
-                const url = document.getElementById('custom-url').value.trim();
-                
-                if(name && url) {
-                    const key = 'custom_' + Date.now();
-                    NEWS_SOURCES[key] = { 
-                        name: `📰 ${name}`, 
-                        feeds: { 'all': url },
-                        lang: 'en-IN'
-                    };
-                    
-                    const sourceSel = document.getElementById('source-select');
-                    const opt = document.createElement('option');
-                    opt.value = key;
-                    opt.innerText = `📰 ${name}`;
-                    opt.selected = true;
-                    sourceSel.appendChild(opt);
-                    
-                    document.getElementById('custom-name').value = '';
-                    document.getElementById('custom-url').value = '';
-                    
-                    ui.closeAddFeed();
-                    this.changeSource();
-                }
             },
 
             togglePlay() {
@@ -789,50 +304,41 @@
                 }
             },
 
-            async playStory() {
-                if(this.idx >= this.items.length) {
-                    this.isPlaying = false;
-                    document.getElementById('play-btn').innerText = "▶";
-                    return;
-                }
-
-                document.getElementById(`c-${this.idx}`).scrollIntoView({behavior:'smooth'});
+            playStory() {
+                if(this.idx >= this.items.length) return;
+                
+                document.getElementById(`c-${this.idx}`).scrollIntoView({ behavior: 'smooth' });
                 
                 const title = this.items[this.idx].title;
-                const bodyText = document.getElementById(`b-${this.idx}`).innerText;
-                const fullText = `${title}. ${bodyText}`;
+                const body = document.getElementById(`c-${this.idx}`).innerText.replace('NEWS FLASH', '').replace('🔗 Read Full Story', '');
+                const fullText = title + ". . . " + body;
 
                 const hEl = document.getElementById(`h-${this.idx}`);
                 const spans = document.querySelectorAll(`#c-${this.idx} .s`);
 
-                await tts.speak(fullText, 
+                tts.speak(fullText, 
                     (e) => {
-                        if (e.charIndex < title.length + 2) {
+                        if(e.charIndex < title.length + 5) {
                             hEl.classList.add('hl-title');
                         } else {
                             hEl.classList.remove('hl-title');
-                            let count = title.length + 2;
+                            let count = title.length + 5;
                             spans.forEach(s => {
                                 const len = s.innerText.length;
-                                if (e.charIndex >= count && e.charIndex < count + len + 2) {
-                                    document.querySelectorAll('.s').forEach(sp => sp.classList.remove('hl-active'));
+                                if(e.charIndex >= count && e.charIndex < count + len + 5) {
+                                    document.querySelectorAll('.hl-active').forEach(x=>x.classList.remove('hl-active'));
                                     s.classList.add('hl-active');
                                 }
-                                count += len + 1;
+                                count += len;
                             });
                         }
                     },
                     () => {
                         hEl.classList.remove('hl-title');
-                        document.querySelectorAll('.s').forEach(sp => sp.classList.remove('hl-active'));
+                        document.querySelectorAll('.hl-active').forEach(x=>x.classList.remove('hl-active'));
                         if(this.isPlaying) {
                             this.idx++;
-                            if (this.idx < this.items.length) {
-                                setTimeout(() => this.playStory(), 1000);
-                            } else {
-                                this.isPlaying = false;
-                                document.getElementById('play-btn').innerText = "▶";
-                            }
+                            if(this.idx < this.items.length) setTimeout(()=>this.playStory(), 800);
                         }
                     }
                 );
@@ -840,11 +346,10 @@
 
             next() {
                 tts.cancel();
-                if(this.idx < this.items.length - 1) this.idx++;
+                if(this.idx < this.items.length-1) this.idx++;
                 if(this.isPlaying) this.playStory();
                 else document.getElementById(`c-${this.idx}`).scrollIntoView({behavior:'smooth'});
             },
-
             prev() {
                 tts.cancel();
                 if(this.idx > 0) this.idx--;
@@ -853,24 +358,19 @@
             }
         };
 
-        // === UI HELPERS ===
         const ui = {
-            openSettings: () => document.getElementById('settings-modal').classList.add('open'),
+            openSettings: () => {
+                document.getElementById('settings-modal').classList.add('open');
+                app.filterVoices(); // Refresh voices when opening settings
+            },
             closeSettings: () => document.getElementById('settings-modal').classList.remove('open'),
-            openAddFeed: () => document.getElementById('add-feed-modal').classList.add('open'),
-            closeAddFeed: () => document.getElementById('add-feed-modal').classList.remove('open'),
             toggleTheme: () => {
                 const b = document.body;
                 b.setAttribute('data-theme', b.getAttribute('data-theme')==='light'?'dark':'light');
             }
         };
 
-        // Initialize
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => app.init());
-        } else {
-            app.init();
-        }
+        window.onload = () => app.init();
     </script>
 </body>
 </html>
