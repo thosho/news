@@ -3,220 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>News Reader - Tamil</title>
+    <title>News Reader - No API Dependency</title>
     <style>
-        :root {
-            --bg: #ffffff;
-            --text: #333333;
-            --card-bg: #f9f9f9;
-            --accent: #ff4757;
-            --highlight: rgba(255, 71, 87, 0.2);
-        }
+        :root { --bg: #f0f2f5; --text: #1c1e21; --accent: #007bff; --card: #ffffff; }
+        [data-theme="dark"] { --bg: #18191a; --text: #e4e6eb; --accent: #2d88ff; --card: #242526; }
 
-        [data-theme="dark"] {
-            --bg: #121212;
-            --text: #e0e0e0;
-            --card-bg: #1e1e1e;
-            --highlight: rgba(255, 71, 87, 0.4);
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            transition: 0.3s;
-        }
-
-        /* Toolbar */
-        .toolbar {
-            position: fixed;
-            top: 0; width: 100%;
-            height: 60px;
-            background: var(--card-bg);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            box-sizing: border-box;
-            z-index: 100;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        /* Feed Container (Inshorts Style) */
-        .feed-container {
-            height: 100vh;
-            overflow-y: scroll;
-            scroll-snap-type: y mandatory;
-            padding-top: 60px;
-        }
-
-        .news-card {
-            height: calc(100vh - 60px);
-            width: 100%;
-            scroll-snap-align: start;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            box-sizing: border-box;
-            text-align: center;
-        }
-
-        .content-box {
-            max-width: 600px;
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        }
-
-        .title { font-size: 1.5rem; font-weight: bold; margin-bottom: 15px; }
+        body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
         
-        /* Highlighting Logic */
-        .sentence { transition: background 0.2s; border-radius: 4px; padding: 2px 0; }
-        .active-sentence { background-color: var(--highlight); font-weight: 500; }
+        /* Category Tabs */
+        .nav-tabs {
+            position: fixed; top: 60px; width: 100%; height: 50px;
+            background: var(--card); display: flex; overflow-x: auto;
+            border-bottom: 1px solid rgba(0,0,0,0.1); z-index: 900;
+        }
+        .tab { 
+            padding: 10px 20px; white-space: nowrap; cursor: pointer; 
+            border-bottom: 3px solid transparent; opacity: 0.7;
+        }
+        .tab.active { border-bottom-color: var(--accent); opacity: 1; font-weight: bold; }
 
-        .controls { margin-top: 20px; }
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 20px;
-            background: var(--accent);
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
+        .header {
+            position: fixed; top: 0; width: 100%; height: 60px;
+            background: var(--card); display: flex; align-items: center; 
+            justify-content: space-between; padding: 0 20px; z-index: 1000;
         }
 
-        #theme-toggle { background: transparent; color: var(--text); font-size: 20px; }
+        .feed { height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; padding-top: 110px; }
+        .news-card { height: calc(100vh - 110px); scroll-snap-align: start; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .box { background: var(--card); padding: 25px; border-radius: 12px; max-width: 500px; width: 100%; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        
+        .active-sentence { background: #ffeb3b; color: #000; border-radius: 4px; padding: 0 4px; }
+        
+        .controls {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: var(--accent); padding: 10px 20px; border-radius: 30px;
+            display: flex; gap: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 2000;
+        }
+        .controls button { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; }
     </style>
 </head>
 <body data-theme="light">
 
-    <div class="toolbar">
-        <div style="font-weight: bold; color: var(--accent);">NEWS READER</div>
-        <button id="theme-toggle">🌓</button>
+    <div class="header">
+        <b style="font-size: 1.2rem; color: var(--accent);">NEWS READER</b>
+        <button onclick="document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light')" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">🌓</button>
     </div>
 
-    <div class="feed-container" id="feed">
-        <div class="news-card">
-            <div class="content-box">
-                <p>Loading Tamil and English news...</p>
-            </div>
-        </div>
+    <div class="nav-tabs" id="tabs">
+        <div class="tab active" onclick="loadCategory('trending', this)">Trending</div>
+        <div class="tab" onclick="loadCategory('politics', this)">Politics</div>
+        <div class="tab" onclick="loadCategory('sports', this)">Sports</div>
+        <div class="tab" onclick="loadCategory('tech', this)">Technology</div>
+    </div>
+
+    <div class="feed" id="feed"></div>
+
+    <div class="controls">
+        <button onclick="move(-1)">⏮️</button>
+        <button id="p-btn" onclick="toggleAudio()">▶️ Play</button>
+        <button onclick="move(1)">⏭️</button>
     </div>
 
     <script>
-        const CORS_PROXY = "https://api.allorigins.win/get?url=";
-        const FEEDS = [
-            "https://www.dailythanthi.com/rss/News/TopNews", // Tamil
-            "http://feeds.bbci.co.uk/news/rss.xml"          // English
-        ];
+        const synth = window.speechSynthesis;
+        let articles = [];
+        let idx = 0;
+        let isPlaying = false;
 
-        let synth = window.speechSynthesis;
-        let currentUtterance = null;
+        async function loadCategory(cat, el) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            
+            const res = await fetch(`/api/news?category=${cat}`);
+            articles = await res.json();
+            render();
+        }
 
-        // 1. Fetch and Parse News
-        async function fetchNews() {
-            const feedElement = document.getElementById('feed');
-            feedElement.innerHTML = ''; // Clear loading
+        function render() {
+            const f = document.getElementById('feed');
+            f.innerHTML = '';
+            articles.forEach((a, i) => {
+                const s = a.summary.split(/(?<=[.!?])\s+/).map((txt, si) => 
+                    `<span class="s" id="s-${i}-${si}">${txt}</span>`).join(' ');
+                f.innerHTML += `<div class="news-card" id="c-${i}"><div class="box"><h3>${a.title}</h3><p>${s}</p></div></div>`;
+            });
+            idx = 0;
+            f.scrollTo(0,0);
+        }
 
-            for (const url of FEEDS) {
-                try {
-                    const response = await fetch(CORS_PROXY + encodeURIComponent(url));
-                    const data = await response.json();
-                    const parser = new DOMParser();
-                    const xml = parser.parseFromString(data.contents, "text/xml");
-                    const items = xml.querySelectorAll("item");
+        function getVoice() {
+            const vs = synth.getVoices();
+            return vs.find(v => v.name.includes('Valluvar') || v.lang === 'ta-IN') || vs.find(v => v.lang.startsWith('ta'));
+        }
 
-                    for (let i = 0; i < 3; i++) { // Limit to 3 items per feed for demo
-                        let title = items[i].querySelector("title").textContent;
-                        let description = items[i].querySelector("description").textContent;
-                        
-                        // If English, translate title (Note: Real apps use Google Cloud API for better results)
-                        if (url.includes("bbci")) {
-                            title = await translateToTamil(title);
-                            description = await translateToTamil(description);
-                        }
+        function play() {
+            if (idx >= articles.length) { isPlaying = false; updateBtn(); return; }
+            
+            document.getElementById(`c-${idx}`).scrollIntoView({ behavior: 'smooth' });
+            const utt = new SpeechSynthesisUtterance(articles[idx].summary);
+            const spans = document.querySelectorAll(`#c-${idx} .s`);
+            
+            utt.voice = getVoice();
+            utt.lang = 'ta-IN';
+            utt.rate = 0.9;
 
-                        createCard(title, description);
+            utt.onboundary = (e) => {
+                let count = 0;
+                spans.forEach(span => {
+                    const len = span.innerText.length + 1;
+                    if (e.charIndex >= count && e.charIndex < count + len) {
+                        document.querySelectorAll('.s').forEach(s => s.classList.remove('active-sentence'));
+                        span.classList.add('active-sentence');
                     }
-                } catch (e) { console.error("Error fetching feed", e); }
-            }
-        }
-
-        // 2. Simple Translation (Using a free public endpoint for demo)
-        async function translateToTamil(text) {
-            const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ta&dt=t&q=${encodeURIComponent(text)}`);
-            const data = await res.json();
-            return data[0][0][0];
-        }
-
-        // 3. UI Card Creation
-        function createCard(title, text) {
-            const container = document.getElementById('feed');
-            const card = document.createElement('div');
-            card.className = 'news-card';
-
-            // Split text into sentences for highlighting
-            const sentences = text.split(/(?<=[.!?])\s+/);
-            const wrappedText = sentences.map((s, i) => `<span class="sentence" id="s-${i}">${s}</span>`).join(' ');
-
-            card.innerHTML = `
-                <div class="content-box">
-                    <div class="title">${title}</div>
-                    <div class="body-text">${wrappedText}</div>
-                    <div class="controls">
-                        <button onclick="readAloud(this)">🔊 Listen in Tamil</button>
-                    </div>
-                </div>
-            `;
-            container.appendChild(card);
-        }
-
-        // 4. TTS with Highlighting
-        function readAloud(btn) {
-            if (synth.speaking) synth.cancel();
-
-            const card = btn.closest('.news-card');
-            const sentences = card.querySelectorAll('.sentence');
-            let fullText = Array.from(sentences).map(s => s.innerText).join(' ');
-
-            currentUtterance = new SpeechSynthesisUtterance(fullText);
-            currentUtterance.lang = 'ta-IN'; // Tamil Voice
-            currentUtterance.rate = 0.9;
-
-            currentUtterance.onboundary = (event) => {
-                if (event.name === 'sentence' || event.name === 'word') {
-                    // Logic to find which sentence index we are at based on character offset
-                    let charCount = 0;
-                    sentences.forEach((span, index) => {
-                        const spanLength = span.innerText.length + 1;
-                        if (event.charIndex >= charCount && event.charIndex < charCount + spanLength) {
-                            sentences.forEach(s => s.classList.remove('active-sentence'));
-                            span.classList.add('active-sentence');
-                        }
-                        charCount += spanLength;
-                    });
-                }
+                    count += len;
+                });
             };
 
-            currentUtterance.onend = () => {
-                sentences.forEach(s => s.classList.remove('active-sentence'));
-            };
-
-            synth.speak(currentUtterance);
+            utt.onend = () => { if (isPlaying) { idx++; setTimeout(play, 800); } };
+            synth.speak(utt);
         }
 
-        // Theme Toggle
-        document.getElementById('theme-toggle').onclick = () => {
-            const body = document.body;
-            const newTheme = body.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-            body.setAttribute('data-theme', newTheme);
-        };
+        function toggleAudio() {
+            if (isPlaying) { synth.cancel(); isPlaying = false; } 
+            else { isPlaying = true; play(); }
+            updateBtn();
+        }
 
-        fetchNews();
+        function move(d) {
+            synth.cancel();
+            idx = Math.max(0, Math.min(articles.length - 1, idx + d));
+            if (isPlaying) play();
+            else document.getElementById(`c-${idx}`).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function updateBtn() { document.getElementById('p-btn').innerText = isPlaying ? "⏸️ Pause" : "▶️ Play"; }
+
+        // Initial Load
+        window.speechSynthesis.onvoiceschanged = () => getVoice();
+        loadCategory('trending', document.querySelector('.tab'));
     </script>
 </body>
 </html>
