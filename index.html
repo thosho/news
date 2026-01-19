@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>News Flow Global - Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&family=Noto+Sans+Tamil:wght@400;700&family+Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
+    <title>News Flow Global</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&family=Noto+Sans+Tamil:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #2563eb; 
@@ -101,7 +101,6 @@
         }
 
         .badge { display: inline-block; padding: 5px 12px; border-radius: 20px; background: rgba(37, 99, 235, 0.1); color: var(--primary); font-size: 0.8rem; font-weight: 700; align-self: flex-start; margin-bottom: 15px; }
-        .source-badge { display: inline-block; padding: 5px 12px; border-radius: 20px; background: rgba(16, 185, 129, 0.1); color: #059669; font-size: 0.75rem; font-weight: 600; margin-left: 8px; }
         .headline { font-size: 1.5rem; font-weight: 700; line-height: 1.3; margin-bottom: 15px; color: var(--text); }
         .body-text { font-size: 1.1rem; line-height: 1.8; color: var(--subtext); flex-grow: 1; }
         
@@ -139,13 +138,12 @@
             animation: spin 1s ease-in-out infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-
     </style>
 </head>
 <body data-theme="light">
 
     <header class="app-header">
-        <div class="logo">News Flow Pro</div>
+        <div class="logo">News Flow</div>
         <div class="header-icons">
             <button onclick="ui.openAddFeed()">➕</button>
             <button onclick="ui.openSettings()">⚙️</button>
@@ -153,35 +151,29 @@
         </div>
     </header>
 
-    <div class="category-bar" id="category-bar"></div>
+    <div class="category-bar" id="category-bar">
+        <button class="cat-pill active" data-category="">🌍 Top Stories</button>
+        <button class="cat-pill" data-category="WORLD">🗺️ World</button>
+        <button class="cat-pill" data-category="NATION">🏛️ Nation</button>
+        <button class="cat-pill" data-category="BUSINESS">💼 Business</button>
+        <button class="cat-pill" data-category="TECHNOLOGY">💻 Technology</button>
+        <button class="cat-pill" data-category="ENTERTAINMENT">🎬 Entertainment</button>
+        <button class="cat-pill" data-category="SPORTS">⚽ Sports</button>
+        <button class="cat-pill" data-category="SCIENCE">🔬 Science</button>
+        <button class="cat-pill" data-category="HEALTH">🏥 Health</button>
+    </div>
 
     <div class="modal" id="settings-modal">
         <div class="modal-content">
             <h2>⚙️ Settings</h2>
             
             <div class="input-group">
-                <label>News Source</label>
-                <select id="source-select" onchange="app.changeSource()"></select>
+                <label>Language / Region</label>
+                <select id="lang-select" onchange="app.changeSource()"></select>
             </div>
 
             <div class="input-group">
-                <label>Voice (Auto-selected based on news language)</label>
-                <select id="voice-select">
-                    <option value="ta">🇮🇳 Tamil (தமிழ்)</option>
-                    <option value="te">🇮🇳 Telugu (తెలుగు)</option>
-                    <option value="hi">🇮🇳 Hindi (हिंदी)</option>
-                    <option value="ml">🇮🇳 Malayalam (മലയാളം)</option>
-                    <option value="kn">🇮🇳 Kannada (ಕನ್ನಡ)</option>
-                    <option value="mr">🇮🇳 Marathi (मराठी)</option>
-                    <option value="bn">🇮🇳 Bengali (বাংলা)</option>
-                    <option value="gu">🇮🇳 Gujarati (ગુજરાતી)</option>
-                    <option value="en-IN">🇮🇳 English (India)</option>
-                    <option value="en-US" selected>🇺🇸 English (US)</option>
-                </select>
-            </div>
-
-            <div class="input-group">
-                <label>Speech Speed</label>
+                <label>Speech Rate</label>
                 <select id="rate-select">
                     <option value="0.75">0.75x Slow</option>
                     <option value="1.0" selected>1.0x Normal</option>
@@ -191,7 +183,7 @@
             </div>
 
             <div class="info-badge">
-                ✨ Using Google Translate TTS - Works for ALL Indian languages without installing anything! Internet required.
+                ✨ Using Google Translate TTS - ALL Indian languages work without installing anything!
             </div>
 
             <button class="btn-primary" onclick="ui.closeSettings()">Save & Close</button>
@@ -223,120 +215,105 @@
     </div>
 
     <script>
-        const NEWS_SOURCES = {
-            'toi': { 
-                name: '📰 Times of India', 
-                feeds: {
-                    'all': 'https://timesofindia.indiatimes.com/rssfeedstopstories.cms',
-                    'india': 'https://timesofindia.indiatimes.com/rssfeeds/296589292.cms',
-                    'world': 'https://timesofindia.indiatimes.com/rssfeeds/-2128936835.cms',
-                    'business': 'https://timesofindia.indiatimes.com/rssfeeds/1898055.cms',
-                    'tech': 'https://timesofindia.indiatimes.com/rssfeeds/5880659.cms',
-                    'sports': 'https://timesofindia.indiatimes.com/rssfeeds/4719148.cms',
-                    'entertainment': 'https://timesofindia.indiatimes.com/rssfeeds/1081479906.cms'
-                },
-                lang: 'en-IN', voice: 'en-IN'
+        // ORIGINAL STRUCTURE - Language based sources with multiple RSS feeds
+        const SOURCES = {
+            'ta': { 
+                name: 'Tamil (தமிழ்)', 
+                feeds: [
+                    'https://www.dinamalar.com/rss/rss_tamilnadu.xml',
+                    'https://tamil.oneindia.com/rss/news-fb.xml',
+                    'https://news.google.com/rss?hl=ta&gl=IN&ceid=IN:ta'
+                ],
+                voice: 'ta'
             },
-            'dinamalar': {
-                name: '📰 Dinamalar (தமிழ்)',
-                feeds: {
-                    'all': 'https://www.dinamalar.com/rss/rss_tamilnadu.xml',
-                    'india': 'https://www.dinamalar.com/rss/rss_india.xml',
-                    'world': 'https://www.dinamalar.com/rss/rss_world.xml',
-                    'sports': 'https://www.dinamalar.com/rss/rss_sports.xml'
-                },
-                lang: 'ta', voice: 'ta'
+            'te': { 
+                name: 'Telugu (తెలుగు)', 
+                feeds: [
+                    'https://telugu.oneindia.com/rss/news-fb.xml',
+                    'https://news.google.com/rss?hl=te&gl=IN&ceid=IN:te'
+                ],
+                voice: 'te'
             },
-            'tamil-oneindia': {
-                name: '📰 OneIndia Tamil',
-                feeds: {
-                    'all': 'https://tamil.oneindia.com/rss/news-fb.xml',
-                    'sports': 'https://tamil.oneindia.com/rss/sports-fb.xml'
-                },
-                lang: 'ta', voice: 'ta'
+            'hi': { 
+                name: 'Hindi (हिंदी)', 
+                feeds: [
+                    'https://www.abplive.com/home/feed',
+                    'https://news.google.com/rss?hl=hi&gl=IN&ceid=IN:hi'
+                ],
+                voice: 'hi'
             },
-            'telugu-oneindia': {
-                name: '📰 OneIndia Telugu',
-                feeds: {
-                    'all': 'https://telugu.oneindia.com/rss/news-fb.xml',
-                    'sports': 'https://telugu.oneindia.com/rss/sports-fb.xml'
-                },
-                lang: 'te', voice: 'te'
+            'ml': { 
+                name: 'Malayalam (മലയാളം)', 
+                feeds: [
+                    'https://malayalam.oneindia.com/rss/news-fb.xml',
+                    'https://news.google.com/rss?hl=ml&gl=IN&ceid=IN:ml'
+                ],
+                voice: 'ml'
             },
-            'abp-hindi': {
-                name: '📰 ABP Hindi',
-                feeds: {
-                    'all': 'https://www.abplive.com/home/feed',
-                    'india': 'https://www.abplive.com/news/india/feed',
-                    'world': 'https://www.abplive.com/news/world/feed',
-                    'business': 'https://www.abplive.com/business/feed',
-                    'sports': 'https://www.abplive.com/sports/feed',
-                    'tech': 'https://www.abplive.com/technology/feed'
-                },
-                lang: 'hi', voice: 'hi'
+            'kn': { 
+                name: 'Kannada (ಕನ್ನಡ)', 
+                feeds: [
+                    'https://kannada.oneindia.com/rss/news-fb.xml',
+                    'https://news.google.com/rss?hl=kn&gl=IN&ceid=IN:kn'
+                ],
+                voice: 'kn'
             },
-            'malayalam-oneindia': {
-                name: '📰 OneIndia Malayalam',
-                feeds: {
-                    'all': 'https://malayalam.oneindia.com/rss/news-fb.xml',
-                    'sports': 'https://malayalam.oneindia.com/rss/sports-fb.xml'
-                },
-                lang: 'ml', voice: 'ml'
+            'mr': { 
+                name: 'Marathi (मराठी)', 
+                feeds: [
+                    'https://news.google.com/rss?hl=mr&gl=IN&ceid=IN:mr'
+                ],
+                voice: 'mr'
             },
-            'kannada-oneindia': {
-                name: '📰 OneIndia Kannada',
-                feeds: {
-                    'all': 'https://kannada.oneindia.com/rss/news-fb.xml',
-                    'sports': 'https://kannada.oneindia.com/rss/sports-fb.xml'
-                },
-                lang: 'kn', voice: 'kn'
+            'bn': { 
+                name: 'Bengali (বাংলা)', 
+                feeds: [
+                    'https://news.google.com/rss?hl=bn&gl=IN&ceid=IN:bn'
+                ],
+                voice: 'bn'
             },
-            'bbc': {
-                name: '🌍 BBC News',
-                feeds: {
-                    'all': 'http://feeds.bbci.co.uk/news/rss.xml',
-                    'world': 'http://feeds.bbci.co.uk/news/world/rss.xml',
-                    'business': 'http://feeds.bbci.co.uk/news/business/rss.xml',
-                    'tech': 'http://feeds.bbci.co.uk/news/technology/rss.xml',
-                    'sports': 'http://feeds.bbci.co.uk/sport/rss.xml'
-                },
-                lang: 'en', voice: 'en-US'
+            'gu': { 
+                name: 'Gujarati (ગુજરાતી)', 
+                feeds: [
+                    'https://news.google.com/rss?hl=gu&gl=IN&ceid=IN:gu'
+                ],
+                voice: 'gu'
+            },
+            'en': { 
+                name: 'English (World)', 
+                feeds: [
+                    'https://timesofindia.indiatimes.com/rssfeedstopstories.cms',
+                    'http://feeds.bbci.co.uk/news/rss.xml',
+                    'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en'
+                ],
+                voice: 'en-US'
             }
         };
 
-        // === FIXED TTS ENGINE (No duplicates) ===
+        // TTS using Google Translate
         const tts = {
             currentAudio: null,
             audioQueue: [],
-            isPlaying: false,
             
             async speak(text, lang, onProgress, onEnd) {
                 this.cancel();
                 
                 const chunks = this.splitText(text, 200);
                 this.audioQueue = [];
-                
                 const rate = parseFloat(document.getElementById('rate-select').value);
-                const voice = document.getElementById('voice-select').value || lang;
                 
-                try {
-                    for (let chunk of chunks) {
-                        const cleanChunk = chunk.trim();
-                        if (cleanChunk) {
-                            const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${voice}&client=tw-ob&q=${encodeURIComponent(cleanChunk)}`;
-                            this.audioQueue.push({ url, text: cleanChunk });
-                        }
+                for (let chunk of chunks) {
+                    const clean = chunk.trim();
+                    if (clean) {
+                        const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${lang}&client=tw-ob&q=${encodeURIComponent(clean)}`;
+                        this.audioQueue.push({ url, text: clean });
                     }
-                    
-                    await this.playQueue(text, rate, onProgress, onEnd);
-                    
-                } catch (error) {
-                    console.error('TTS Error:', error);
-                    if (onEnd) onEnd();
                 }
+                
+                await this.playQueue(rate, onProgress, onEnd);
             },
 
-            async playQueue(fullText, rate, onProgress, onEnd) {
+            async playQueue(rate, onProgress, onEnd) {
                 if (this.audioQueue.length === 0) {
                     if (onEnd) onEnd();
                     return;
@@ -346,16 +323,13 @@
                 this.currentAudio = new Audio(item.url);
                 this.currentAudio.playbackRate = rate;
                 
-                let charCount = 0;
                 let progressInterval;
-                
                 this.currentAudio.addEventListener('play', () => {
-                    const duration = this.currentAudio.duration;
                     progressInterval = setInterval(() => {
-                        if (this.currentAudio && !this.currentAudio.paused) {
-                            const progress = this.currentAudio.currentTime / duration;
-                            charCount = Math.floor(progress * item.text.length);
-                            if (onProgress) onProgress({ charIndex: charCount });
+                        if (this.currentAudio && !this.currentAudio.paused && onProgress) {
+                            const progress = this.currentAudio.currentTime / this.currentAudio.duration;
+                            const charPos = Math.floor(progress * item.text.length);
+                            onProgress({ charIndex: charPos });
                         }
                     }, 100);
                 });
@@ -363,14 +337,11 @@
                 this.currentAudio.addEventListener('ended', async () => {
                     clearInterval(progressInterval);
                     if (this.audioQueue.length > 0) {
-                        await this.playQueue(fullText, rate, onProgress, onEnd);
-                    } else {
-                        if (onEnd) onEnd();
-                    }
+                        await this.playQueue(rate, onProgress, onEnd);
+                    } else if (onEnd) onEnd();
                 });
                 
-                this.currentAudio.addEventListener('error', (e) => {
-                    console.error('Audio playback error:', e);
+                this.currentAudio.addEventListener('error', () => {
                     clearInterval(progressInterval);
                     if (onEnd) onEnd();
                 });
@@ -378,21 +349,20 @@
                 await this.currentAudio.play();
             },
 
-            splitText(text, maxLength) {
+            splitText(text, max) {
                 const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
                 const chunks = [];
-                let currentChunk = '';
+                let current = '';
                 
-                for (let sentence of sentences) {
-                    if ((currentChunk + sentence).length > maxLength) {
-                        if (currentChunk) chunks.push(currentChunk);
-                        currentChunk = sentence;
+                for (let s of sentences) {
+                    if ((current + s).length > max) {
+                        if (current) chunks.push(current);
+                        current = s;
                     } else {
-                        currentChunk += sentence;
+                        current += s;
                     }
                 }
-                
-                if (currentChunk) chunks.push(currentChunk);
+                if (current) chunks.push(current);
                 return chunks;
             },
 
@@ -405,132 +375,89 @@
             }
         };
 
-        // === FIXED APP LOGIC (Removes duplicates) ===
+        // APP LOGIC
         const app = {
             items: [],
             idx: 0,
             isPlaying: false,
-            currentSource: 'toi',
-            currentCategory: 'all',
+            currentCategory: '',
 
             init() {
-                const sourceSel = document.getElementById('source-select');
-                for (const [key, source] of Object.entries(NEWS_SOURCES)) {
+                const langSel = document.getElementById('lang-select');
+                for (const [code, info] of Object.entries(SOURCES)) {
                     const opt = document.createElement('option');
-                    opt.value = key;
-                    opt.innerText = source.name;
-                    sourceSel.appendChild(opt);
+                    opt.value = code;
+                    opt.innerText = info.name;
+                    if(code === 'en') opt.selected = true;
+                    langSel.appendChild(opt);
                 }
                 
-                this.updateCategories();
+                document.querySelectorAll('.cat-pill').forEach(pill => {
+                    pill.addEventListener('click', (e) => {
+                        document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.currentCategory = e.target.dataset.category;
+                        this.changeSource();
+                    });
+                });
+                
                 this.changeSource();
             },
 
-            updateCategories() {
-                const sourceKey = document.getElementById('source-select').value;
-                const source = NEWS_SOURCES[sourceKey];
-                const catBar = document.getElementById('category-bar');
-                
-                catBar.innerHTML = '';
-                
-                const categories = {
-                    'all': '🌍 All',
-                    'india': '🏛️ India',
-                    'world': '🗺️ World',
-                    'business': '💼 Business',
-                    'tech': '💻 Tech',
-                    'sports': '⚽ Sports',
-                    'entertainment': '🎬 Entertainment'
-                };
-                
-                for (const [cat, label] of Object.entries(categories)) {
-                    if (source.feeds[cat]) {
-                        const pill = document.createElement('button');
-                        pill.className = 'cat-pill' + (cat === 'all' ? ' active' : '');
-                        pill.dataset.category = cat;
-                        pill.innerText = label;
-                        pill.onclick = () => {
-                            document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
-                            pill.classList.add('active');
-                            this.currentCategory = cat;
-                            this.changeSource();
-                        };
-                        catBar.appendChild(pill);
-                    }
-                }
-            },
-
             async changeSource() {
-                const sourceKey = document.getElementById('source-select').value;
-                this.currentSource = sourceKey;
+                const langCode = document.getElementById('lang-select').value;
+                const source = SOURCES[langCode];
                 
-                const source = NEWS_SOURCES[sourceKey];
-                if (source.voice) {
-                    document.getElementById('voice-select').value = source.voice;
+                let url = source.feeds[0];
+                if (this.currentCategory) {
+                    url = url.replace('/rss', `/rss/headlines/section/topic/${this.currentCategory}`);
                 }
                 
-                this.updateCategories();
-                
-                const feedUrl = source.feeds[this.currentCategory] || source.feeds['all'];
-                await this.fetchFeed(feedUrl, source.name);
+                await this.fetchFeed(url);
             },
 
-            // FIXED: Remove duplicate content from description
-            cleanDescription(description, title) {
-                if (!description) return '';
+            cleanContent(desc, title) {
+                if (!desc) return '';
+                let clean = desc.replace(/<[^>]*>/g, ' ').trim();
                 
-                // Remove HTML tags
-                let clean = description.replace(/<[^>]*>/g, ' ').trim();
-                
-                // Remove the title if it appears at the start of description
-                const titleWords = title.toLowerCase().split(' ').slice(0, 5).join(' ');
-                const descStart = clean.toLowerCase().substring(0, 50);
-                
-                if (descStart.includes(titleWords)) {
-                    // Title found in description, remove it
-                    const titleLen = title.split(' ').length;
-                    const words = clean.split(' ');
-                    clean = words.slice(titleLen).join(' ').trim();
+                // Remove title if at start
+                const titleStart = title.substring(0, 30).toLowerCase();
+                if (clean.toLowerCase().startsWith(titleStart.substring(0, 20))) {
+                    clean = clean.substring(title.length).trim();
                 }
                 
-                // Remove duplicate sentences
+                // Remove duplicates
                 const sentences = clean.match(/[^.!?]+[.!?]+/g) || [clean];
-                const uniqueSentences = [];
+                const unique = [];
                 const seen = new Set();
                 
-                for (let sentence of sentences) {
-                    const normalized = sentence.toLowerCase().trim();
-                    if (!seen.has(normalized) && normalized.length > 10) {
-                        seen.add(normalized);
-                        uniqueSentences.push(sentence.trim());
+                for (let s of sentences) {
+                    const norm = s.toLowerCase().trim();
+                    if (!seen.has(norm) && norm.length > 10) {
+                        seen.add(norm);
+                        unique.push(s.trim());
                     }
                 }
                 
-                return uniqueSentences.join(' ');
+                return unique.slice(0, 3).join(' ');
             },
 
-            async fetchFeed(url, sourceName) {
+            async fetchFeed(url) {
                 const container = document.getElementById('feed');
-                container.innerHTML = '<div class="card-wrapper"><div class="news-card"><div class="loading-spinner"></div><h3 style="text-align:center; margin-top: 20px;">Loading News...</h3></div></div>';
+                container.innerHTML = '<div class="card-wrapper"><div class="news-card"><div class="loading-spinner"></div><h3 style="text-align:center; margin-top: 20px;">Loading...</h3></div></div>';
                 
                 try {
                     const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}&count=20`);
                     const data = await res.json();
                     
                     if (data.status === 'ok' && data.items && data.items.length > 0) {
-                        this.items = data.items.map(item => {
-                            // Clean description to remove duplicates
-                            const cleanDesc = this.cleanDescription(item.description || item.content || '', item.title);
-                            
-                            return {
-                                ...item, 
-                                source: sourceName,
-                                cleanDescription: cleanDesc
-                            };
-                        });
+                        this.items = data.items.map(item => ({
+                            ...item,
+                            cleanDesc: this.cleanContent(item.description || item.content || '', item.title)
+                        }));
                         this.render();
                     } else {
-                        throw new Error('No news items found');
+                        throw new Error('No news found');
                     }
                 } catch (e) {
                     container.innerHTML = `<div class="card-wrapper"><div class="news-card"><h3>❌ Error</h3><p>${e.message}</p></div></div>`;
@@ -542,22 +469,13 @@
                 container.innerHTML = '';
                 
                 this.items.forEach((item, i) => {
-                    const cleanText = item.cleanDescription || '';
-                    const sentences = cleanText.match(/[^.!?]+[.!?]+/g) || [cleanText];
-                    
-                    // Take only first 3 unique sentences for display
-                    const displaySentences = sentences.slice(0, 3);
-                    const spanHtml = displaySentences.map((s, si) => 
-                        `<span id="s-${i}-${si}" class="s">${s.trim()}</span>`
-                    ).join(' ');
+                    const sentences = item.cleanDesc.match(/[^.!?]+[.!?]+/g) || [item.cleanDesc];
+                    const spanHtml = sentences.map((s, si) => `<span id="s-${i}-${si}" class="s">${s.trim()}</span>`).join(' ');
 
                     container.innerHTML += `
                         <div class="card-wrapper" id="c-${i}">
                             <div class="news-card">
-                                <div>
-                                    <span class="badge">${this.currentCategory.toUpperCase()}</span>
-                                    <span class="source-badge">${item.source}</span>
-                                </div>
+                                <div class="badge">${this.currentCategory || 'TOP STORIES'}</div>
                                 <div class="headline" id="h-${i}">${item.title}</div>
                                 <div class="body-text" id="b-${i}">${spanHtml}</div>
                                 <a href="${item.link}" target="_blank" class="read-more">🔗 Read Full</a>
@@ -574,18 +492,14 @@
                 
                 if(name && url) {
                     const key = 'custom_' + Date.now();
-                    NEWS_SOURCES[key] = { 
-                        name: `📰 ${name}`, 
-                        feeds: { 'all': url },
-                        lang: 'en', voice: 'en-US'
-                    };
+                    SOURCES[key] = { name: `Custom: ${name}`, feeds: [url], voice: 'en-US' };
                     
-                    const sourceSel = document.getElementById('source-select');
+                    const langSel = document.getElementById('lang-select');
                     const opt = document.createElement('option');
                     opt.value = key;
                     opt.innerText = `📰 ${name}`;
                     opt.selected = true;
-                    sourceSel.appendChild(opt);
+                    langSel.appendChild(opt);
                     
                     document.getElementById('custom-name').value = '';
                     document.getElementById('custom-url').value = '';
@@ -607,7 +521,6 @@
                 }
             },
 
-            // FIXED: Clean speech text to avoid reading source name twice
             async playStory() {
                 if(this.idx >= this.items.length) {
                     this.isPlaying = false;
@@ -618,18 +531,16 @@
                 document.getElementById(`c-${this.idx}`).scrollIntoView({behavior:'smooth'});
                 
                 const title = this.items[this.idx].title;
-                const bodyText = document.getElementById(`b-${this.idx}`).innerText.trim();
-                
-                // FIXED: Only combine title and body, no source name
-                const fullText = bodyText ? `${title}. ${bodyText}` : title;
+                const body = document.getElementById(`b-${this.idx}`).innerText.trim();
+                const fullText = body ? `${title}. ${body}` : title;
 
                 const hEl = document.getElementById(`h-${this.idx}`);
                 const spans = document.querySelectorAll(`#c-${this.idx} .s`);
 
-                const sourceKey = document.getElementById('source-select').value;
-                const lang = NEWS_SOURCES[sourceKey].voice;
+                const langCode = document.getElementById('lang-select').value;
+                const voice = SOURCES[langCode].voice;
 
-                await tts.speak(fullText, lang,
+                await tts.speak(fullText, voice,
                     (e) => {
                         if (e.charIndex < title.length) {
                             hEl.classList.add('hl-title');
