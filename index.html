@@ -1,196 +1,479 @@
 <!DOCTYPE html>
-<html lang="ta">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tamil News - Voice Reader</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NewsDeck Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Noto+Sans+Tamil:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #f8f9fa; --text: #212529; --accent: #007bff; --card: #ffffff; }
-        [data-theme="dark"] { --bg: #121212; --text: #e9ecef; --accent: #375a7f; --card: #1e1e1e; }
+        :root {
+            --glass: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --bg-gradient: linear-gradient(135deg, #f6d365 0%, #fda085 100%); 
+            --text-main: #1f2937;
+            --text-sub: #4b5563;
+            --accent: #ef4444; /* News Red */
+            --card-surface: #ffffff;
+            --highlight: #fef3c7;
+        }
 
-        body { margin: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
+        [data-theme="dark"] {
+            --glass: rgba(30, 41, 59, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+            --text-main: #f1f5f9;
+            --text-sub: #94a3b8;
+            --accent: #f87171;
+            --card-surface: #1e293b;
+            --highlight: #b45309;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
+        body {
+            margin: 0;
+            font-family: 'Inter', 'Noto Sans Tamil', sans-serif;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            transition: color 0.3s;
+        }
+
+        /* --- Glass Header --- */
         .header {
-            position: fixed; top: 0; width: 100%; height: 60px;
-            background: var(--card); display: flex; align-items: center; 
-            justify-content: space-between; padding: 0 20px; z-index: 1000;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: fixed; top: 0; left: 0; right: 0; height: 70px;
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 20px; z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
         }
 
-        .settings-bar {
-            position: fixed; top: 60px; width: 100%; height: auto;
-            background: var(--card); padding: 10px 20px; box-sizing: border-box;
-            border-bottom: 1px solid rgba(0,0,0,0.1); z-index: 950;
-            display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
-        }
-
-        select { padding: 5px; border-radius: 5px; border: 1px solid #ccc; font-size: 0.9rem; max-width: 200px; }
-
-        .feed { height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; padding-top: 150px; }
-        .news-card { height: calc(100vh - 150px); scroll-snap-align: start; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
-        .box { background: var(--card); padding: 25px; border-radius: 12px; max-width: 500px; width: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .logo { font-weight: 900; font-size: 1.5rem; letter-spacing: -1px; background: linear-gradient(to right, var(--accent), #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        h3 { margin-top: 0; color: var(--accent); font-size: 1.25rem; }
-        .active-sentence { background: #fff59d; color: #000; border-radius: 3px; }
-        .active-title { color: #d32f2f; text-decoration: underline; }
-
-        .controls {
-            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
-            background: var(--accent); padding: 10px 20px; border-radius: 30px;
-            display: flex; gap: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 2000;
+        .header-btn {
+            background: rgba(0,0,0,0.05); border: none; width: 40px; height: 40px;
+            border-radius: 12px; cursor: pointer; color: var(--text-main);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; transition: all 0.2s;
         }
-        .controls button { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; }
+        .header-btn:active { transform: scale(0.9); }
+
+        /* --- Settings Drawer --- */
+        .drawer {
+            position: fixed; top: 70px; left: 0; right: 0;
+            background: var(--card-surface);
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transform: translateY(-150%);
+            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            z-index: 999;
+            border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;
+        }
+        .drawer.open { transform: translateY(0); }
+
+        .setting-row { margin-bottom: 20px; }
+        .setting-label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-sub); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        select, .action-btn {
+            width: 100%; padding: 12px; border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            background: var(--bg-gradient); color: var(--text-main);
+            font-size: 1rem; font-family: inherit; appearance: none;
+        }
+
+        /* --- Category Pills --- */
+        .cat-bar {
+            position: fixed; top: 70px; left: 0; right: 0; height: 60px;
+            display: flex; align-items: center; gap: 12px; overflow-x: auto;
+            padding: 0 20px; z-index: 900; scrollbar-width: none;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.02), transparent);
+        }
+        .pill {
+            padding: 8px 18px; border-radius: 20px; font-weight: 600; font-size: 0.9rem;
+            background: var(--glass); border: 1px solid var(--glass-border);
+            color: var(--text-sub); white-space: nowrap; cursor: pointer;
+            transition: all 0.3s; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .pill.active { background: var(--accent); color: white; border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3); }
+
+        /* --- News Feed Area --- */
+        .feed {
+            height: 100vh; padding-top: 140px; overflow-y: scroll; scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        .card-wrapper {
+            height: calc(100vh - 140px); width: 100%;
+            scroll-snap-align: start;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px; perspective: 1000px;
+        }
+
+        .news-card {
+            background: var(--card-surface);
+            width: 100%; max-width: 600px; max-height: 85vh;
+            border-radius: 24px; padding: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            overflow-y: auto; position: relative;
+            transform-style: preserve-3d;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .source-badge { display: inline-block; padding: 4px 10px; background: rgba(0,0,0,0.05); border-radius: 8px; font-size: 0.75rem; font-weight: 700; color: var(--accent); margin-bottom: 15px; }
+        
+        h1 { font-size: 1.6rem; line-height: 1.3; margin: 0 0 20px 0; letter-spacing: -0.5px; }
+        p { font-size: 1.15rem; line-height: 1.8; color: var(--text-sub); }
+
+        /* --- Highlight Logic --- */
+        .hl-title { color: var(--accent); text-decoration: underline; text-decoration-color: var(--accent); }
+        .hl-sentence { background: var(--highlight); color: var(--text-main); border-radius: 4px; box-shadow: 0 0 0 2px var(--highlight); }
+
+        /* --- Player Controls --- */
+        .player {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px);
+            padding: 10px 25px; border-radius: 50px;
+            display: flex; align-items: center; gap: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4); z-index: 2000;
+        }
+        .ctrl-btn { background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer; padding: 5px; transition: transform 0.2s; }
+        .ctrl-btn:active { transform: scale(0.8); }
+        .play-big { background: var(--accent); width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 10px 20px rgba(239, 68, 68, 0.4); margin-top: -25px; border: 4px solid var(--card-surface); }
+
+        /* --- Loading State --- */
+        .skeleton { animation: pulse 1.5s infinite ease-in-out; background: rgba(0,0,0,0.1); border-radius: 4px; }
+        .sk-title { height: 30px; width: 80%; margin-bottom: 20px; }
+        .sk-text { height: 15px; width: 100%; margin-bottom: 10px; }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 0.3; } 100% { opacity: 0.6; } }
+
     </style>
 </head>
 <body data-theme="light">
 
-    <div class="header">
-        <b>TAMIL NEWS READER</b>
-        <button onclick="toggleTheme()" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">🌓</button>
+    <header class="header">
+        <div class="logo">NewsDeck</div>
+        <div style="display:flex; gap:10px;">
+            <button class="header-btn" onclick="toggleSettings()">⚙️</button>
+            <button class="header-btn" onclick="toggleTheme()">🌓</button>
+        </div>
+    </header>
+
+    <div class="drawer" id="settings-drawer">
+        <div class="setting-row">
+            <label class="setting-label">News Language</label>
+            <select id="lang-select" onchange="app.changeLanguage()">
+                <option value="ta">Tamil (தமிழ்)</option>
+                <option value="en" selected>English (Global)</option>
+                <option value="hi">Hindi (हिंदी)</option>
+                <option value="ml">Malayalam (മലയാളം)</option>
+            </select>
+        </div>
+
+        <div class="setting-row">
+            <label class="setting-label">Narrator Voice</label>
+            <select id="voice-select" onchange="tts.setVoice(this.value)">
+                <option>Loading Voices...</option>
+            </select>
+            <small style="color:var(--text-sub); margin-top:5px; display:block;">
+                Tip: Select "Google Tamil" or "Microsoft Valluvar" for best results.
+            </small>
+        </div>
+
+        <button class="action-btn" style="background:var(--accent); color:white; font-weight:bold;" onclick="toggleSettings()">Done</button>
     </div>
 
-    <div class="settings-bar">
-        <span>Voice: </span>
-        <select id="voice-select"></select>
-        <button onclick="loadNews('https://www.dailythanthi.com/rss/News/TopNews')">🔄 Refresh</button>
-    </div>
+    <div class="cat-bar" id="cat-container"></div>
 
     <div class="feed" id="feed">
-        <div class="news-card"><div class="box">செய்திகள் ஏற்றப்படுகின்றன...</div></div>
-    </div>
+        </div>
 
-    <div class="controls">
-        <button onclick="move(-1)">⏮️</button>
-        <button id="play-btn" onclick="togglePlay()">▶️ Play</button>
-        <button onclick="move(1)">⏭️</button>
+    <div class="player">
+        <button class="ctrl-btn" onclick="app.prev()">⏮</button>
+        <button class="ctrl-btn play-big" id="play-btn" onclick="app.togglePlay()">▶</button>
+        <button class="ctrl-btn" onclick="app.next()">⏭</button>
     </div>
 
     <script>
-        const synth = window.speechSynthesis;
-        let articles = [];
-        let currentIdx = 0;
-        let isPlaying = false;
-        let voiceSelect = document.getElementById('voice-select');
+        // --- 1. DATA SOURCE (Inshorts-style fast feeds) ---
+        const FEEDS = {
+            'ta': {
+                'Top': 'https://www.dailythanthi.com/rss/News/TopNews',
+                'Tamil Nadu': 'https://www.dailythanthi.com/rss/News/State/TamilNadu',
+                'Cinema': 'https://www.dailythanthi.com/rss/Cinema/CinemaNews',
+                'Spirituality': 'https://www.dailythanthi.com/rss/Spiritual/General'
+            },
+            'en': {
+                'World': 'http://feeds.bbci.co.uk/news/world/rss.xml',
+                'Tech': 'http://feeds.bbci.co.uk/news/technology/rss.xml',
+                'India': 'https://timesofindia.indiatimes.com/rssfeeds/296589292.cms',
+                'Science': 'http://feeds.bbci.co.uk/news/science_and_environment/rss.xml'
+            },
+            'hi': {
+                'Breaking': 'https://www.jagran.com/rss/news-hindi.xml',
+                'Cricket': 'https://www.jagran.com/rss/cricket-hindi.xml'
+            },
+            'ml': {
+                'Latest': 'https://www.mathrubhumi.com/api/rss/latest/rss.xml',
+                'Kerala': 'https://www.mathrubhumi.com/api/rss/kerala/rss.xml'
+            }
+        };
 
-        // 1. Voice Management
-        function populateVoices() {
-            const voices = synth.getVoices();
-            voiceSelect.innerHTML = '';
-            
-            // Only show Tamil and English voices to keep it clean
-            const filtered = voices.filter(v => v.lang.startsWith('ta') || v.lang.startsWith('en'));
-            
-            filtered.forEach(voice => {
-                const option = document.createElement('option');
-                option.textContent = `${voice.name} (${voice.lang})`;
-                option.value = voice.name;
-                // Auto-select Valluvar (Edge) or Google Tamil if available
-                if (voice.name.includes('Valluvar') || voice.name === 'Google தமிழ்') option.selected = true;
-                voiceSelect.appendChild(option);
-            });
-        }
+        // --- 2. TTS ENGINE (The Professional Voice Manager) ---
+        const tts = {
+            synth: window.speechSynthesis,
+            voices: [],
+            currentVoice: null,
+            utterance: null,
 
-        // 2. Fetch News
-        async function loadNews(rssUrl) {
-            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
-            try {
-                const res = await fetch(apiUrl);
-                const data = await res.json();
-                articles = data.items;
-                render();
-            } catch (e) { console.error("Error", e); }
-        }
-
-        function render() {
-            const feed = document.getElementById('feed');
-            feed.innerHTML = '';
-            articles.forEach((item, i) => {
-                const cleanDesc = item.description.replace(/<[^>]*>?/gm, '');
-                const sentences = cleanDesc.split(/(?<=[.!?])\s+/);
-                const bodyHtml = sentences.map((s, si) => `<span class="s" id="s-${i}-${si}">${s}</span>`).join(' ');
-
-                feed.innerHTML += `
-                    <div class="news-card" id="card-${i}">
-                        <div class="box">
-                            <h3 id="t-${i}">${item.title}</h3>
-                            <p id="b-${i}">${bodyHtml}</p>
-                        </div>
-                    </div>
-                `;
-            });
-            currentIdx = 0;
-        }
-
-        // 3. Narration Logic
-        function speak() {
-            if (currentIdx >= articles.length) { isPlaying = false; updateBtn(); return; }
-
-            document.getElementById(`card-${currentIdx}`).scrollIntoView({ behavior: 'smooth' });
-            
-            // Combine Title and Body
-            const titleText = articles[currentIdx].title;
-            const bodyText = document.getElementById(`b-${currentIdx}`).innerText;
-            const fullText = `${titleText}. . . ${bodyText}`; // Pause slightly between title and body
-
-            const utt = new SpeechSynthesisUtterance(fullText);
-            const selectedVoiceName = voiceSelect.value;
-            utt.voice = synth.getVoices().find(v => v.name === selectedVoiceName);
-            utt.lang = utt.voice ? utt.voice.lang : 'ta-IN';
-            utt.rate = 0.9;
-
-            // Highlight Title during start
-            const titleElem = document.getElementById(`t-${currentIdx}`);
-            const bodySpans = document.querySelectorAll(`#card-${currentIdx} .s`);
-
-            utt.onstart = () => { titleElem.classList.add('active-title'); };
-
-            utt.onboundary = (event) => {
-                // Remove title highlight once we move to body (rough estimate)
-                if (event.charIndex > titleText.length) {
-                    titleElem.classList.remove('active-title');
+            init() {
+                // Wait for voices to load (Chrome issue fix)
+                if (this.synth.onvoiceschanged !== undefined) {
+                    this.synth.onvoiceschanged = () => this.loadVoices();
                 }
+                this.loadVoices();
+            },
 
-                let cumulative = titleText.length + 3; // +3 for the dots/pause
-                bodySpans.forEach(span => {
-                    const len = span.innerText.length + 1;
-                    if (event.charIndex >= cumulative && event.charIndex < cumulative + len) {
-                        document.querySelectorAll('.s').forEach(s => s.classList.remove('active-sentence'));
-                        span.classList.add('active-sentence');
-                    }
-                    cumulative += len;
+            loadVoices() {
+                this.voices = this.synth.getVoices();
+                this.populateDropdown();
+            },
+
+            populateDropdown() {
+                const select = document.getElementById('voice-select');
+                const currentLang = document.getElementById('lang-select').value;
+                select.innerHTML = '';
+
+                // Filter voices based on selected language OR English (as fallback)
+                // We aggressively look for "Google" or "Microsoft" voices
+                const available = this.voices.filter(v => 
+                    v.lang.startsWith(currentLang) || v.lang.startsWith('en')
+                ).sort((a, b) => {
+                    // Sort: Native language first, then Google/Microsoft preferred
+                    if(a.lang.startsWith(currentLang) && !b.lang.startsWith(currentLang)) return -1;
+                    if(a.name.includes('Google') || a.name.includes('Microsoft')) return -1;
+                    return 1;
                 });
-            };
 
-            utt.onend = () => {
-                titleElem.classList.remove('active-title');
-                if (isPlaying) { currentIdx++; setTimeout(speak, 1200); }
-            };
+                available.forEach(v => {
+                    const opt = document.createElement('option');
+                    opt.value = v.name;
+                    opt.innerText = `${v.name} (${v.lang})`;
+                    select.appendChild(opt);
+                });
 
-            synth.speak(utt);
+                // Auto-select best voice
+                const best = available.find(v => v.lang.startsWith(currentLang) && (v.name.includes('Valluvar') || v.name.includes('Google')));
+                if (best) select.value = best.name;
+            },
+
+            setVoice(name) {
+                this.currentVoice = this.voices.find(v => v.name === name);
+            },
+
+            speak(text, onBoundary, onEnd) {
+                this.cancel();
+                const u = new SpeechSynthesisUtterance(text);
+                
+                // If user selected a voice, use it. Otherwise auto-detect.
+                if (document.getElementById('voice-select').value) {
+                    u.voice = this.voices.find(v => v.name === document.getElementById('voice-select').value);
+                }
+                
+                u.rate = 1.0; 
+                u.pitch = 1.0;
+                u.onboundary = onBoundary;
+                u.onend = onEnd;
+                this.utterance = u;
+                this.synth.speak(u);
+            },
+
+            cancel() {
+                if (this.synth.speaking) this.synth.cancel();
+            }
+        };
+
+        // --- 3. APP LOGIC ---
+        const app = {
+            articles: [],
+            idx: 0,
+            isPlaying: false,
+
+            init() {
+                tts.init();
+                this.changeLanguage();
+                this.setupGestures();
+            },
+
+            changeLanguage() {
+                const lang = document.getElementById('lang-select').value;
+                const cats = FEEDS[lang];
+                const catContainer = document.getElementById('cat-container');
+                
+                catContainer.innerHTML = '';
+                Object.keys(cats).forEach((name, i) => {
+                    const pill = document.createElement('button');
+                    pill.className = `pill ${i===0?'active':''}`;
+                    pill.innerText = name;
+                    pill.onclick = () => {
+                        document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+                        pill.classList.add('active');
+                        this.fetchFeed(cats[name]);
+                    };
+                    catContainer.appendChild(pill);
+                });
+                
+                // Load first category
+                tts.populateDropdown(); // Refresh voices for new language
+                this.fetchFeed(Object.values(cats)[0]);
+            },
+
+            async fetchFeed(url) {
+                const feedEl = document.getElementById('feed');
+                // Skeleton Loader
+                feedEl.innerHTML = `
+                    <div class="card-wrapper">
+                        <div class="news-card">
+                            <div class="skeleton sk-title"></div>
+                            <div class="skeleton sk-text"></div>
+                            <div class="skeleton sk-text"></div>
+                            <div class="skeleton sk-text"></div>
+                        </div>
+                    </div>`;
+
+                try {
+                    const api = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`;
+                    const res = await fetch(api);
+                    const data = await res.json();
+                    this.articles = data.items;
+                    this.render();
+                } catch(e) {
+                    feedEl.innerHTML = `<div class="card-wrapper"><h2>Error loading news. Check connection.</h2></div>`;
+                }
+            },
+
+            render() {
+                const feedEl = document.getElementById('feed');
+                feedEl.innerHTML = '';
+                
+                this.articles.forEach((item, i) => {
+                    const clean = (item.description || item.content || "").replace(/<[^>]*>?/gm, '');
+                    // Advanced sentence splitter
+                    const sentences = clean.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [clean];
+                    
+                    const spanHTML = sentences.map((s, si) => `<span id="s-${i}-${si}" class="s">${s}</span>`).join(' ');
+
+                    feedEl.innerHTML += `
+                        <div class="card-wrapper" id="card-${i}">
+                            <div class="news-card">
+                                <div class="source-badge">NEWS FLASH</div>
+                                <h1 id="h-${i}">${item.title}</h1>
+                                <p id="b-${i}">${spanHTML}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                this.idx = 0;
+            },
+
+            togglePlay() {
+                if (this.isPlaying) {
+                    tts.cancel();
+                    this.isPlaying = false;
+                    document.getElementById('play-btn').innerText = "▶";
+                } else {
+                    this.isPlaying = true;
+                    document.getElementById('play-btn').innerText = "⏸";
+                    this.readStory();
+                }
+            },
+
+            readStory() {
+                if(this.idx >= this.articles.length) return;
+
+                // 1. Scroll
+                document.getElementById(`card-${this.idx}`).scrollIntoView({behavior: 'smooth'});
+
+                // 2. Prepare Text
+                const title = this.articles[this.idx].title;
+                const bodyText = document.getElementById(`b-${this.idx}`).innerText;
+                const fullText = `${title}. . . ${bodyText}`;
+
+                // 3. Elements for highlighting
+                const titleEl = document.getElementById(`h-${this.idx}`);
+                const spans = document.querySelectorAll(`#card-${this.idx} .s`);
+
+                tts.speak(fullText, 
+                    (e) => { // On Boundary
+                        // Rough Title Highlighting
+                        if (e.charIndex < title.length + 2) {
+                            titleEl.classList.add('hl-title');
+                        } else {
+                            titleEl.classList.remove('hl-title');
+                            // Sentence Highlighting
+                            let charCount = title.length + 5; // offset
+                            spans.forEach(span => {
+                                const len = span.innerText.length;
+                                if(e.charIndex >= charCount && e.charIndex < charCount + len + 5) {
+                                    document.querySelectorAll('.s').forEach(s=>s.classList.remove('hl-sentence'));
+                                    span.classList.add('hl-sentence');
+                                }
+                                charCount += len;
+                            });
+                        }
+                    },
+                    () => { // On End
+                        titleEl.classList.remove('hl-title');
+                        document.querySelectorAll('.s').forEach(s=>s.classList.remove('hl-sentence'));
+                        if(this.isPlaying) {
+                            this.idx++;
+                            if(this.idx < this.articles.length) setTimeout(()=>this.readStory(), 1000);
+                        }
+                    }
+                );
+            },
+
+            next() {
+                tts.cancel();
+                if(this.idx < this.articles.length - 1) this.idx++;
+                if(this.isPlaying) this.readStory();
+                else document.getElementById(`card-${this.idx}`).scrollIntoView({behavior:'smooth'});
+            },
+
+            prev() {
+                tts.cancel();
+                if(this.idx > 0) this.idx--;
+                if(this.isPlaying) this.readStory();
+                else document.getElementById(`card-${this.idx}`).scrollIntoView({behavior:'smooth'});
+            },
+            
+            setupGestures() {
+                // Simple Swipe Logic
+                let touchStartX = 0;
+                let touchEndX = 0;
+                document.getElementById('feed').addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX);
+                document.getElementById('feed').addEventListener('touchend', e => {
+                    touchEndX = e.changedTouches[0].screenX;
+                    if (touchStartX - touchEndX > 50) this.next(); // Swipe Left
+                    if (touchEndX - touchStartX > 50) this.prev(); // Swipe Right
+                });
+            }
+        };
+
+        // Helpers
+        function toggleSettings() { document.getElementById('settings-drawer').classList.toggle('open'); }
+        function toggleTheme() { 
+            const b = document.body;
+            b.setAttribute('data-theme', b.getAttribute('data-theme')==='light'?'dark':'light');
         }
 
-        function togglePlay() {
-            if (isPlaying) { synth.cancel(); isPlaying = false; } 
-            else { isPlaying = true; speak(); }
-            updateBtn();
-        }
+        // Start App
+        window.onload = () => app.init();
 
-        function move(dir) {
-            synth.cancel();
-            currentIdx = Math.max(0, Math.min(articles.length - 1, currentIdx + dir));
-            if (isPlaying) speak();
-            else document.getElementById(`card-${currentIdx}`).scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function updateBtn() { document.getElementById('play-btn').innerText = isPlaying ? "⏸️ Pause" : "▶️ Play"; }
-        function toggleTheme() { document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light'); }
-
-        // Setup voices
-        if (speechSynthesis.onvoiceschanged !== undefined) {
-            speechSynthesis.onvoiceschanged = populateVoices;
-        }
-        populateVoices();
-        loadNews('https://www.dailythanthi.com/rss/News/TopNews');
     </script>
 </body>
 </html>
