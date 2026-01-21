@@ -3,18 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>News Flow Pro</title>
+    <title>News Flow (Demo Pro)</title>
     <style>
         :root {
             --primary: #2563eb;
-            --bg: #f8fafc;
+            --bg: #f1f5f9;
             --surface: #ffffff;
             --text: #0f172a;
             --text-sub: #64748b;
             --border: #e2e8f0;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --highlight: #fde047;
             --active-title: #dc2626;
+            --highlight: #fde047;
         }
 
         [data-theme="dark"] {
@@ -24,309 +23,262 @@
             --text: #f8fafc;
             --text-sub: #94a3b8;
             --border: #334155;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-            --highlight: #854d0e;
             --active-title: #f87171;
+            --highlight: #854d0e;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; transition: background 0.3s ease, color 0.3s ease; }
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
 
-        /* --- HEADER --- */
+        /* HEADER */
         .header {
-            position: fixed; top: 0; left: 0; right: 0; height: 60px;
-            background: rgba(255, 255, 255, 0.85); 
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 20px; z-index: 1000;
+            position: fixed; top: 0; width: 100%; height: 60px;
+            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border); z-index: 1000;
+            display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
         }
-        [data-theme="dark"] .header { background: rgba(30, 41, 59, 0.85); }
+        [data-theme="dark"] .header { background: rgba(30, 41, 59, 0.9); }
+        .logo { font-weight: 900; font-size: 1.4rem; color: var(--primary); letter-spacing: -0.5px; }
+        .btn-icon { background: none; border: 1px solid var(--border); border-radius: 8px; width: 36px; height: 36px; cursor: pointer; color: var(--text); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
 
-        .logo { font-weight: 800; font-size: 1.25rem; color: var(--primary); letter-spacing: -0.5px; }
-        
-        .header-actions { display: flex; gap: 12px; }
-        
-        .icon-btn {
-            background: transparent; border: 1px solid var(--border); 
-            color: var(--text); border-radius: 8px;
-            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-            font-size: 1.2rem; cursor: pointer; transition: all 0.2s;
-        }
-        .icon-btn:active { transform: scale(0.95); background: var(--border); }
-
-        /* --- FEED --- */
+        /* FEED AREA */
         .feed-container {
             height: 100vh; padding-top: 70px; padding-bottom: 120px;
-            overflow-y: scroll; scroll-snap-type: y mandatory;
-            scroll-behavior: smooth;
+            overflow-y: scroll; scroll-snap-type: y mandatory; scroll-behavior: smooth;
         }
 
         .card-wrapper {
             min-height: calc(100vh - 190px); width: 100%;
             scroll-snap-align: center;
             display: flex; align-items: center; justify-content: center;
-            padding: 20px;
+            padding: 15px;
         }
 
         .card {
-            background: var(--surface); 
-            width: 100%; max-width: 600px; 
-            padding: 30px; border-radius: 24px;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            display: flex; flex-direction: column;
-            max-height: 75vh; overflow-y: auto;
-            position: relative;
+            background: var(--surface); width: 100%; max-width: 500px;
+            border-radius: 20px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            border: 1px solid var(--border); overflow: hidden;
+            display: flex; flex-direction: column; max-height: 80vh;
         }
+
+        /* IMAGE AREA */
+        .card-img {
+            width: 100%; height: 200px; object-fit: cover;
+            background: #cbd5e1; display: block;
+        }
+        .card-body { padding: 25px; overflow-y: auto; }
 
         .badge { 
-            align-self: flex-start; background: rgba(37, 99, 235, 0.1); 
-            color: var(--primary); padding: 6px 12px; border-radius: 20px; 
-            font-size: 0.75rem; font-weight: 700; margin-bottom: 16px; letter-spacing: 0.5px;
+            background: rgba(37,99,235,0.1); color: var(--primary); 
+            padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; 
+            font-weight: 700; display: inline-block; margin-bottom: 10px;
         }
 
-        .headline { 
-            font-size: 1.5rem; font-weight: 800; line-height: 1.3; 
-            margin-bottom: 16px; color: var(--text);
-        }
+        .headline { font-size: 1.35rem; font-weight: 800; line-height: 1.3; margin-bottom: 12px; color: var(--text); }
+        .text-content { font-size: 1.05rem; line-height: 1.6; color: var(--text-sub); }
 
-        .body-text { 
-            font-size: 1.1rem; line-height: 1.7; 
-            color: var(--text-sub); 
-        }
+        /* HIGHLIGHTS */
+        .hl-active { background-color: var(--highlight); color: var(--text); border-radius: 3px; box-shadow: 0 0 0 2px var(--highlight); }
+        .hl-title { color: var(--active-title); text-decoration: underline; }
 
-        /* --- HIGHLIGHTS --- */
-        .hl-active { background-color: var(--highlight); color: var(--text); border-radius: 4px; box-shadow: 0 0 0 2px var(--highlight); }
-        .hl-title { color: var(--active-title); text-decoration: underline; text-decoration-thickness: 3px; }
-
-        /* --- CONTROLS --- */
-        .controls-bar {
+        /* CONTROLS */
+        .controls {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            background: var(--surface); padding: 12px 30px; border-radius: 50px;
-            display: flex; align-items: center; gap: 30px;
-            box-shadow: 0 20px 40px -5px rgba(0,0,0,0.3); z-index: 1000;
-            border: 1px solid var(--border);
+            background: var(--surface); padding: 10px 30px; border-radius: 50px;
+            display: flex; gap: 30px; align-items: center;
+            box-shadow: 0 20px 40px -5px rgba(0,0,0,0.2); border: 1px solid var(--border); z-index: 1000;
         }
-        
-        .ctrl-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--text-sub); transition: 0.2s; }
-        .ctrl-btn:active { transform: scale(0.85); color: var(--primary); }
-        .play-btn { color: var(--primary); font-size: 2.2rem; display: flex; align-items: center; justify-content: center; }
+        .ctrl-btn { background: none; border: none; font-size: 1.8rem; cursor: pointer; color: var(--text-sub); transition: 0.2s; }
+        .ctrl-btn:active { transform: scale(0.9); color: var(--primary); }
+        .play-btn { font-size: 2.2rem; color: var(--primary); }
 
-        /* --- MODAL --- */
+        /* SETTINGS MODAL */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
-            z-index: 2000; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 2000;
+            align-items: center; justify-content: center;
         }
-        .modal.open { display: flex; opacity: 1; }
-
-        .modal-box {
-            background: var(--surface); width: 90%; max-width: 400px;
-            padding: 30px; border-radius: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            border: 1px solid var(--border);
-            transform: scale(0.9); transition: transform 0.3s;
-        }
-        .modal.open .modal-box { transform: scale(1); }
-
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-title { font-size: 1.25rem; font-weight: 800; margin: 0; }
-        .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-sub); }
-
-        label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-sub); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-        select { 
-            width: 100%; padding: 14px; margin-bottom: 24px; border-radius: 12px; 
-            border: 1px solid var(--border); background: var(--bg); color: var(--text);
-            font-size: 1rem; appearance: none; outline: none;
-        }
-        
-        .save-btn {
-            width: 100%; padding: 16px; background: var(--primary); 
-            color: white; border: none; border-radius: 14px; 
-            font-size: 1rem; font-weight: 700; cursor: pointer;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-            transition: transform 0.1s;
-        }
-        .save-btn:active { transform: scale(0.98); }
-
-        /* --- MEDIA QUERIES --- */
-        @media (min-width: 768px) {
-            .headline { font-size: 2rem; }
-            .card { padding: 40px; }
-        }
+        .modal.open { display: flex; }
+        .modal-box { background: var(--surface); padding: 25px; border-radius: 20px; width: 90%; max-width: 380px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+        select { width: 100%; padding: 12px; margin: 8px 0 20px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 1rem; }
+        .save-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body data-theme="light">
 
-    <header class="header">
+    <div class="header">
         <div class="logo">News Flow</div>
-        <div class="header-actions">
-            <button class="icon-btn" onclick="ui.toggleTheme()" title="Toggle Dark Mode">🌓</button>
-            <button class="icon-btn" onclick="ui.openSettings()" title="Settings">⚙️</button>
+        <div style="display:flex; gap:10px;">
+            <button class="btn-icon" onclick="ui.toggleTheme()">🌓</button>
+            <button class="btn-icon" onclick="ui.openSettings()">⚙️</button>
         </div>
-    </header>
+    </div>
 
-    <div class="modal" id="settings">
+    <div class="modal" id="settings-modal">
         <div class="modal-box">
-            <div class="modal-header">
-                <h2 class="modal-title">Preferences</h2>
-                <button class="close-btn" onclick="ui.closeSettings()">✕</button>
-            </div>
+            <h3>Configuration</h3>
+            <label style="font-size:0.85rem; font-weight:700; color:var(--text-sub);">REGION & LANGUAGE</label>
+            <select id="lang-select" onchange="app.reset()"></select>
             
-            <label>1. News Region / Language</label>
-            <select id="lang-select" onchange="app.resetNews()">
-                </select>
-            
-            <label>2. Narrator Voice (Manual)</label>
+            <label style="font-size:0.85rem; font-weight:700; color:var(--text-sub);">NARRATOR VOICE</label>
             <select id="voice-select"></select>
 
-            <button class="save-btn" onclick="ui.closeSettings()">Update News Feed</button>
+            <button class="save-btn" onclick="ui.closeSettings()">Update Feed</button>
         </div>
     </div>
 
     <div class="feed-container" id="feed"></div>
 
-    <div class="controls-bar">
+    <div class="controls">
         <button class="ctrl-btn" onclick="app.prev()">⏮</button>
         <button class="ctrl-btn play-btn" id="play-btn" onclick="app.togglePlay()">▶</button>
         <button class="ctrl-btn" onclick="app.next()">⏭</button>
     </div>
 
     <script>
-        // --- 1. DATA SOURCES ---
-        const FEEDS = {
-            'en': { name: 'English (World)', url: 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en' },
-            'ta': { name: 'Tamil (தமிழ்)', url: 'https://news.google.com/rss?hl=ta&gl=IN&ceid=IN:ta' },
-            'hi': { name: 'Hindi (हिंदी)', url: 'https://news.google.com/rss?hl=hi&gl=IN&ceid=IN:hi' },
-            'ml': { name: 'Malayalam (മലയാളം)', url: 'https://news.google.com/rss?hl=ml&gl=IN&ceid=IN:ml' },
-            'te': { name: 'Telugu (తెలుగు)', url: 'https://news.google.com/rss?hl=te&gl=IN&ceid=IN:te' },
-            'kn': { name: 'Kannada (ಕನ್ನಡ)', url: 'https://news.google.com/rss?hl=kn&gl=IN&ceid=IN:kn' },
-            'mr': { name: 'Marathi (मराठी)', url: 'https://news.google.com/rss?hl=mr&gl=IN&ceid=IN:mr' },
-            'bn': { name: 'Bengali (বাংলা)', url: 'https://news.google.com/rss?hl=bn&gl=IN&ceid=IN:bn' },
-            'or': { name: 'Odia (ଓଡ଼ିଆ)', url: 'https://news.google.com/rss?hl=or&gl=IN&ceid=IN:or' },
-            'es': { name: 'Spanish (Español)', url: 'https://news.google.com/rss?hl=es-419&gl=US&ceid=US:es-419' },
-            'fr': { name: 'French (Français)', url: 'https://news.google.com/rss?hl=fr&gl=FR&ceid=FR:fr' },
-            'de': { name: 'German (Deutsch)', url: 'https://news.google.com/rss?hl=de&gl=DE&ceid=DE:de' },
-            'ru': { name: 'Russian (Русский)', url: 'https://news.google.com/rss?hl=ru&gl=RU&ceid=RU:ru' },
-            'ja': { name: 'Japanese (日本語)', url: 'https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja' },
-            'ar': { name: 'Arabic (العربية)', url: 'https://news.google.com/rss?hl=ar&gl=EG&ceid=EG:ar' }
+        // --- 1. ROBUST SOURCE MAP (Google + YouTube Fallbacks) ---
+        const SOURCES = {
+            'en': { name: 'English (Global)', rss: 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en', yt_channel: 'UCq19-38pLXJYcN2e_E4p14A' }, // BBC
+            'ta': { name: 'Tamil (தமிழ்)', rss: 'https://news.google.com/rss?hl=ta&gl=IN&ceid=IN:ta', yt_channel: 'UC5Jc5625X9L15Z6x7y22q0g' }, // Polimer
+            'hi': { name: 'Hindi (हिंदी)', rss: 'https://news.google.com/rss?hl=hi&gl=IN&ceid=IN:hi', yt_channel: 'UCeY0bbntWzzVIaj2z3QigXg' }, // Aaj Tak
+            'ml': { name: 'Malayalam (മലയാളം)', rss: 'https://news.google.com/rss?hl=ml&gl=IN&ceid=IN:ml', yt_channel: 'UC1uvF2r664593y-4TzM6I1w' }, // Asianet
+            'te': { name: 'Telugu (తెలుగు)', rss: 'https://news.google.com/rss?hl=te&gl=IN&ceid=IN:te', yt_channel: 'UC30j1eit7Mh6333N0tO301g' }, // TV9
+            'kn': { name: 'Kannada (ಕನ್ನಡ)', rss: 'https://news.google.com/rss?hl=kn&gl=IN&ceid=IN:kn', yt_channel: 'UCc7p4h2A4lF3c6r8q0O4m7g' }, // Public TV
+            'mr': { name: 'Marathi (मराठी)', rss: 'https://news.google.com/rss?hl=mr&gl=IN&ceid=IN:mr', yt_channel: 'UC5m8305F80053914170725' }, // ABP Majha
+            'bn': { name: 'Bengali (বাংলা)', rss: 'https://news.google.com/rss?hl=bn&gl=IN&ceid=IN:bn', yt_channel: 'UC1m8ed7m939462867089100' }, // ABP Ananda
+            'or': { name: 'Odia (ଓଡ଼ିଆ)', rss: 'https://news.google.com/rss?hl=or&gl=IN&ceid=IN:or', yt_channel: 'UC6157582490800310' }, // OTV (Mock ID)
         };
 
-        // --- 2. TTS ENGINE ---
+        // --- 2. EMERGENCY DEMO DATA (Layer 3) ---
+        const DEMO_DATA = [
+            { title: "Demo: AI Technology Revolutionizes News Reading", desc: "This is a demonstration of the offline capability. Artificial Intelligence is now powering text to speech engines on mobile devices.", img: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600" },
+            { title: "Demo: Global Markets Reach All-Time Highs", desc: "Stock markets across Asia and Europe surged today as technology stocks continued their rally.", img: "https://images.unsplash.com/photo-1611974765270-ca1258634369?w=600" },
+            { title: "Demo: New Sustainable Energy Breakthrough", desc: "Scientists have discovered a new method to store solar energy more efficiently using salt-based batteries.", img: "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=600" }
+        ];
+
+        // --- 3. TTS ENGINE ---
         const tts = {
             synth: window.speechSynthesis,
             voices: [],
-
             init() {
-                if (this.synth.onvoiceschanged !== undefined) {
-                    this.synth.onvoiceschanged = () => this.loadVoices();
-                }
+                if (this.synth.onvoiceschanged !== undefined) this.synth.onvoiceschanged = () => this.loadVoices();
                 this.loadVoices();
             },
-
             loadVoices() {
-                this.voices = this.synth.getVoices();
-                const select = document.getElementById('voice-select');
-                select.innerHTML = '';
-                
-                // Sort by Priority (Google/Microsoft first)
-                this.voices.sort((a,b) => {
-                    const nA = a.name.toLowerCase(), nB = b.name.toLowerCase();
-                    if(nA.includes('google') || nA.includes('microsoft')) return -1;
-                    if(nB.includes('google') || nB.includes('microsoft')) return 1;
-                    return 0;
-                });
-
+                this.voices = this.synth.getVoices().sort((a,b) => (a.name.includes('Google') || a.name.includes('Microsoft')) ? -1 : 1);
+                const sel = document.getElementById('voice-select');
+                sel.innerHTML = '';
                 this.voices.forEach(v => {
                     const opt = document.createElement('option');
-                    opt.value = v.name;
-                    opt.innerText = `${v.name} (${v.lang})`;
-                    select.appendChild(opt);
+                    opt.value = v.name; opt.innerText = `${v.name} (${v.lang})`;
+                    sel.appendChild(opt);
                 });
             },
-
             speak(text, onBound, onEnd) {
                 this.cancel();
                 const u = new SpeechSynthesisUtterance(text);
-                const vName = document.getElementById('voice-select').value;
-                const voice = this.voices.find(v => v.name === vName);
-                if(voice) { u.voice = voice; u.lang = voice.lang; }
-                u.onboundary = onBound;
-                u.onend = onEnd;
+                const v = this.voices.find(v => v.name === document.getElementById('voice-select').value);
+                if(v) { u.voice = v; u.lang = v.lang; }
+                u.onboundary = onBound; u.onend = onEnd;
                 this.synth.speak(u);
             },
             cancel() { if(this.synth.speaking) this.synth.cancel(); }
         };
 
-        // --- 3. APP LOGIC ---
+        // --- 4. APP LOGIC (The Waterfall Fetcher) ---
         const app = {
-            items: [],
-            idx: 0,
-            isPlaying: false,
+            items: [], idx: 0, isPlaying: false,
 
             init() {
                 const sel = document.getElementById('lang-select');
-                for(let [k,v] of Object.entries(FEEDS)) {
+                for(let [k,v] of Object.entries(SOURCES)) {
                     let opt = document.createElement('option');
                     opt.value = k; opt.innerText = v.name;
                     if(k==='en') opt.selected=true;
                     sel.appendChild(opt);
                 }
                 tts.init();
-                // Load Default Feed
-                this.fetchNews(FEEDS['en'].url);
+                this.startWaterfallFetch('en');
             },
 
-            resetNews() {
-                // Just a helper to re-trigger fetch when language changes
-            },
+            reset() { /* Helper to re-init if needed */ },
 
-            async fetchNews(rssUrl) {
+            // THE WATERFALL: Try Google -> Try YouTube -> Use Demo Data
+            async startWaterfallFetch(langCode) {
                 const feedEl = document.getElementById('feed');
-                feedEl.innerHTML = '<div class="card-wrapper"><div class="card" style="text-align:center;"><h3>Loading News...</h3><p>Connecting to global feed...</p></div></div>';
+                feedEl.innerHTML = '<div class="card-wrapper"><div class="card" style="padding:40px; text-align:center;"><h3>Loading News...</h3></div></div>';
                 
-                // RELIABLE FETCH STRATEGY
+                const source = SOURCES[langCode];
+                
+                // 1. Try Google RSS
                 try {
-                    const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`;
-                    const res = await fetch(proxy);
-                    const json = await res.json();
-                    
-                    if (!json.contents) throw new Error("Empty Feed Data");
+                    console.log("Attempting Layer 1: Google RSS");
+                    await this.fetchRSS(source.rss);
+                    return; 
+                } catch(e) { console.warn("Layer 1 Failed:", e); }
 
-                    // Manual XML Parsing
-                    const parser = new DOMParser();
-                    const xml = parser.parseFromString(json.contents, "text/xml");
-                    const items = xml.querySelectorAll("item");
-                    
-                    this.items = [];
-                    items.forEach(item => {
-                        const title = item.querySelector("title")?.textContent || "";
-                        let desc = item.querySelector("description")?.textContent || "";
-                        // Strip HTML
-                        const div = document.createElement("div");
-                        div.innerHTML = desc;
-                        desc = div.textContent || div.innerText || "";
-                        
-                        if(title) this.items.push({ title, desc });
-                    });
+                // 2. Try YouTube RSS (More reliable + Images)
+                try {
+                    console.log("Attempting Layer 2: YouTube RSS");
+                    // YouTube RSS URL format
+                    const ytUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${source.yt_channel}`;
+                    await this.fetchRSS(ytUrl, true);
+                    return;
+                } catch(e) { console.warn("Layer 2 Failed:", e); }
 
-                    if(this.items.length === 0) throw new Error("No readable news found.");
-                    this.render();
-
-                } catch(e) {
-                    feedEl.innerHTML = `<div class="card-wrapper"><div class="card" style="border-color:var(--active-title);">
-                        <h3 style="color:var(--active-title);">Feed Error</h3>
-                        <p>Could not load this news source right now.</p>
-                        <p style="font-size:0.9rem; opacity:0.7;">Tech Detail: ${e.message}</p>
-                    </div></div>`;
-                }
+                // 3. Fallback to Demo Data
+                console.warn("All Layers Failed. Loading Demo Data.");
+                this.items = DEMO_DATA;
+                this.render("Offline Mode (Demo Data)");
             },
 
-            render() {
+            async fetchRSS(url, isYoutube = false) {
+                const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+                const res = await fetch(proxy);
+                const json = await res.json();
+                if (!json.contents) throw new Error("Empty Proxy Response");
+
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(json.contents, "text/xml");
+                
+                // YouTube uses 'entry', Standard RSS uses 'item'
+                const nodes = isYoutube ? xml.querySelectorAll("entry") : xml.querySelectorAll("item");
+                if (nodes.length === 0) throw new Error("No items in XML");
+
+                this.items = [];
+                nodes.forEach(node => {
+                    const title = node.querySelector("title")?.textContent || "";
+                    let desc = "";
+                    let img = "";
+
+                    if (isYoutube) {
+                        // YouTube Logic
+                        const group = node.querySelector("group"); // media:group
+                        desc = group?.querySelector("description")?.textContent || "";
+                        img = group?.querySelector("thumbnail")?.getAttribute("url") || "";
+                    } else {
+                        // Standard RSS Logic
+                        let rawDesc = node.querySelector("description")?.textContent || "";
+                        const div = document.createElement("div");
+                        div.innerHTML = rawDesc;
+                        desc = div.textContent || div.innerText || "";
+                        // Try to extract image from content or description
+                        const imgTag = div.querySelector("img");
+                        if(imgTag) img = imgTag.src;
+                    }
+
+                    // Cleanup
+                    if(desc.length > 200) desc = desc.substring(0, 200) + "...";
+                    if(!img) img = `https://source.unsplash.com/random/600x400/?news,${Math.random()}`; // Fallback img
+
+                    if(title) this.items.push({ title, desc, img });
+                });
+
+                this.render(isYoutube ? "Video Feed" : "News Feed");
+            },
+
+            render(sourceLabel) {
                 const feedEl = document.getElementById('feed');
                 feedEl.innerHTML = '';
-                
                 this.items.forEach((item, i) => {
                     const sentences = item.desc.split('. ');
                     const spanHtml = sentences.map((s, si) => `<span id="s-${i}-${si}" class="s">${s}</span>`).join('. ');
@@ -334,9 +286,12 @@
                     feedEl.innerHTML += `
                         <div class="card-wrapper" id="c-${i}">
                             <div class="card">
-                                <div class="badge">FLASH NEWS</div>
-                                <div class="headline" id="h-${i}">${item.title}</div>
-                                <div class="body-text">${spanHtml}</div>
+                                <img src="${item.img}" class="card-img" onerror="this.style.display='none'">
+                                <div class="card-body">
+                                    <div class="badge">${sourceLabel}</div>
+                                    <div class="headline" id="h-${i}">${item.title}</div>
+                                    <div class="text-content">${spanHtml}</div>
+                                </div>
                             </div>
                         </div>
                     `;
@@ -345,20 +300,12 @@
             },
 
             togglePlay() {
-                if(this.isPlaying) {
-                    this.isPlaying = false;
-                    tts.cancel();
-                    document.getElementById('play-btn').innerText = "▶";
-                } else {
-                    this.isPlaying = true;
-                    document.getElementById('play-btn').innerText = "⏸";
-                    this.play();
-                }
+                if(this.isPlaying) { this.isPlaying = false; tts.cancel(); document.getElementById('play-btn').innerText = "▶"; }
+                else { this.isPlaying = true; document.getElementById('play-btn').innerText = "⏸"; this.play(); }
             },
 
             play() {
                 if(this.idx >= this.items.length) return;
-                
                 document.getElementById(`c-${this.idx}`).scrollIntoView({behavior:'smooth'});
                 
                 const item = this.items[this.idx];
@@ -386,30 +333,24 @@
                     () => {
                         hEl.classList.remove('hl-title');
                         document.querySelectorAll('.hl-active').forEach(x=>x.classList.remove('hl-active'));
-                        if(this.isPlaying) {
-                            this.idx++;
-                            if(this.idx < this.items.length) setTimeout(()=>this.play(), 800);
-                        }
+                        if(this.isPlaying) { this.idx++; if(this.idx < this.items.length) setTimeout(()=>this.play(), 800); }
                     }
                 );
             },
-
             next() { tts.cancel(); if(this.idx < this.items.length-1) this.idx++; if(this.isPlaying) this.play(); else document.getElementById(`c-${this.idx}`).scrollIntoView({behavior:'smooth'}); },
             prev() { tts.cancel(); if(this.idx > 0) this.idx--; if(this.isPlaying) this.play(); else document.getElementById(`c-${this.idx}`).scrollIntoView({behavior:'smooth'}); }
         };
 
-        // --- 4. UI CONTROLLER ---
         const ui = {
-            openSettings: () => document.getElementById('settings').classList.add('open'),
+            openSettings: () => document.getElementById('settings-modal').classList.add('open'),
             closeSettings: () => {
-                document.getElementById('settings').classList.remove('open');
+                document.getElementById('settings-modal').classList.remove('open');
                 const lang = document.getElementById('lang-select').value;
-                app.fetchNews(FEEDS[lang].url);
+                app.startWaterfallFetch(lang);
             },
             toggleTheme: () => {
                 const b = document.body;
-                const current = b.getAttribute('data-theme');
-                b.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
+                b.setAttribute('data-theme', b.getAttribute('data-theme')==='light'?'dark':'light');
             }
         };
 
