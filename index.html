@@ -18,6 +18,7 @@
             --active-title: #dc2626;
             --success: #10b981;
             --warning: #f59e0b;
+            --local-ai: #8b5cf6;
         }
 
         [data-theme="dark"] {
@@ -31,6 +32,7 @@
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
             --highlight: #854d0e;
             --active-title: #f87171;
+            --local-ai: #a78bfa;
         }
 
         * { 
@@ -107,6 +109,14 @@
             border-radius: 50%;
             background: var(--success);
             animation: pulse 2s infinite;
+        }
+
+        .status-dot.local-ai {
+            background: var(--local-ai);
+        }
+
+        .status-dot.cloud {
+            background: var(--primary);
         }
 
         @keyframes pulse {
@@ -212,6 +222,11 @@
             border-left: 3px solid var(--primary);
         }
 
+        .local-ai-section {
+            background: rgba(139, 92, 246, 0.05);
+            border-left: 3px solid var(--local-ai);
+        }
+
         .basic-section {
             background: rgba(245, 158, 11, 0.05);
             border-left: 3px solid var(--warning);
@@ -227,6 +242,10 @@
             display: flex;
             align-items: center;
             gap: 6px;
+        }
+
+        .summary-label.local-ai {
+            color: var(--local-ai);
         }
 
         .body-text { 
@@ -455,6 +474,33 @@
             border-left: 3px solid var(--primary);
         }
 
+        .info-box.local {
+            background: rgba(139, 92, 246, 0.05);
+            border-left: 3px solid var(--local-ai);
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: var(--bg);
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 0.85rem;
+        }
+
+        .connection-status .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ef4444;
+        }
+
+        .connection-status.connected .dot {
+            background: var(--success);
+        }
+
         /* --- LOADING --- */
         .loading-spinner {
             display: inline-block;
@@ -505,7 +551,7 @@
         </div>
         <div class="header-actions">
             <div class="status-indicator" id="status">
-                <span class="status-dot"></span>
+                <span class="status-dot" id="status-dot"></span>
                 <span id="status-text">Ready</span>
             </div>
             <button class="icon-btn" onclick="ui.toggleTheme()" title="Toggle Dark Mode">🌓</button>
@@ -519,6 +565,19 @@
             <div class="modal-header">
                 <h2 class="modal-title">Preferences</h2>
                 <button class="close-btn" onclick="ui.closeSettings()">✕</button>
+            </div>
+
+            <div class="info-box local">
+                <strong>💜 Local AI Priority</strong><br>
+                Connect your Mac Mini M4 LM Studio for private, fast summaries. Falls back to cloud when offline.
+            </div>
+
+            <label>LM Studio Server URL (Local AI)</label>
+            <input type="text" id="lm-studio-url" placeholder="http://192.168.1.x:1234" value="http://localhost:1234">
+
+            <div class="connection-status" id="lm-status">
+                <span class="dot"></span>
+                <span id="lm-status-text">Not connected</span>
             </div>
 
             <label>News Language</label>
@@ -543,12 +602,12 @@
             <label>Narrator Voice</label>
             <select id="voice-select"></select>
 
-            <label>Hugging Face API Token (Optional)</label>
+            <label>Hugging Face API Token (Cloud Fallback)</label>
             <input type="password" id="hf-token" placeholder="hf_xxxxxxxxxxxxx">
             <div class="info-box">
-                <strong>🤖 Enable AI Summaries</strong><br>
-                Add your free HF token for intelligent summaries. Without it, you'll get basic text extraction. 
-                <a href="https://huggingface.co/settings/tokens" target="_blank" style="color: var(--primary); font-weight: 600;">Get token →</a>
+                <strong>☁️ Cloud Fallback</strong><br>
+                Used when LM Studio is offline. 
+                <a href="https://huggingface.co/settings/tokens" target="_blank" style="color: var(--primary); font-weight: 600;">Get free token →</a>
             </div>
 
             <button class="save-btn" onclick="ui.saveAndRefresh()">
@@ -591,7 +650,8 @@
             CACHE_DURATION: 6 * 60 * 60 * 1000,
             MAX_SUMMARY_LENGTH: 150,
             MIN_SUMMARY_LENGTH: 50,
-            MIN_NEWS_THRESHOLD: 10
+            MIN_NEWS_THRESHOLD: 10,
+            LM_STUDIO_TIMEOUT: 5000
         };
 
         // --- MULTI-SOURCE RSS FEEDS PER LANGUAGE ---
@@ -803,30 +863,163 @@
             }
         };
 
-        // --- AI SUMMARIZER ---
+        // --- LM STUDIO CLIENT ---
+        const lmStudio = {
+            url: 'http://localhost:1234',
+            isConnected: false,
+
+            async checkConnection() {
+                try {
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => controller.abort(), CONFIG.LM_STUDIO_TIMEOUT);
+
+                    const response = await fetch(`${this.url}/v1/models`, {
+                        signal: controller.signal
+                    });
+
+                    clearTimeout(timeout);
+                    this.isConnected = response.ok;
+
+                    console.log(`LM Studio: ${this.isConnected ? '✅ Connected' : '❌ Not reachable'}`);
+                    this.updateUI();
+
+                    return this.isConnected;
+                } catch (error) {
+                    this.isConnected = false;
+                    console.log('LM Studio: ❌ Offline');
+                    this.updateUI();
+                    return false;
+                }
+            },
+
+            async summarize(text) {
+                if (!this.isConnected) return null;
+
+                try {
+                    const prompt = `Summarize this news article in 2-3 clear sentences. Keep it factual and concise:
+
+${text}`;
+
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => controller.abort(), 30000);
+
+                    const response = await fetch(`${this.url}/v1/chat/completions`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            model: "local-model",
+                            messages: [
+                                { role: "system", content: "You are a news summarizer. Provide concise, factual 2-3 sentence summaries." },
+                                { role: "user", content: prompt }
+                            ],
+                            temperature: 0.3,
+                            max_tokens: 200,
+                            stream: false
+                        }),
+                        signal: controller.signal
+                    });
+
+                    clearTimeout(timeout);
+
+                    if (!response.ok) throw new Error('LM Studio API error');
+
+                    const data = await response.json();
+                    const summary = data.choices?.[0]?.message?.content?.trim();
+
+                    if (summary && summary.length > 30) {
+                        console.log('✅ Summary from LM Studio');
+                        return summary;
+                    }
+
+                    return null;
+                } catch (error) {
+                    console.warn('LM Studio summarization failed:', error.message);
+                    this.isConnected = false;
+                    this.updateUI();
+                    return null;
+                }
+            },
+
+            updateUI() {
+                const statusEl = document.getElementById('lm-status');
+                const textEl = document.getElementById('lm-status-text');
+                const dotEl = document.getElementById('status-dot');
+
+                if (statusEl && textEl) {
+                    if (this.isConnected) {
+                        statusEl.classList.add('connected');
+                        textEl.textContent = '✓ Connected to LM Studio';
+                        if (dotEl) dotEl.classList.add('local-ai');
+                    } else {
+                        statusEl.classList.remove('connected');
+                        textEl.textContent = '✗ LM Studio offline (using fallback)';
+                        if (dotEl) dotEl.classList.remove('local-ai');
+                    }
+                }
+            }
+        };
+
+        // --- AI SUMMARIZER (WITH LM STUDIO PRIORITY) ---
         const aiSummarizer = {
             cache: new Map(),
-            hasToken: false,
+            hasHFToken: false,
+            mode: 'basic', // 'lm-studio', 'huggingface', or 'basic'
 
-            init() {
-                this.hasToken = !!localStorage.getItem('hfToken');
-                console.log(`AI Mode: ${this.hasToken ? 'Enabled (HF Token)' : 'Disabled (Basic Extraction)'}`);
+            async init() {
+                this.hasHFToken = !!localStorage.getItem('hfToken');
+
+                // Check LM Studio first
+                const lmConnected = await lmStudio.checkConnection();
+
+                if (lmConnected) {
+                    this.mode = 'lm-studio';
+                    console.log('📡 Mode: LM Studio (Local AI)');
+                } else if (this.hasHFToken) {
+                    this.mode = 'huggingface';
+                    console.log('☁️ Mode: Hugging Face (Cloud)');
+                } else {
+                    this.mode = 'basic';
+                    console.log('📝 Mode: Basic Extraction');
+                }
             },
 
             async summarize(title, description, source) {
                 const cacheKey = `${title}-${source}`;
                 const cached = this.getFromCache(cacheKey);
-                if (cached) return cached;
+                if (cached) return { summary: cached, mode: this.mode };
 
-                if (!this.hasToken) {
-                    const summary = this.fallbackSummary(description);
-                    this.saveToCache(cacheKey, summary);
-                    return summary;
+                const text = `${title}. ${description}`.substring(0, 1000);
+
+                // Priority 1: Try LM Studio
+                if (lmStudio.isConnected) {
+                    const summary = await lmStudio.summarize(text);
+                    if (summary) {
+                        this.saveToCache(cacheKey, summary);
+                        this.mode = 'lm-studio';
+                        return { summary, mode: 'lm-studio' };
+                    }
                 }
 
+                // Priority 2: Try Hugging Face
+                if (this.hasHFToken) {
+                    const summary = await this.huggingFaceSummarize(text);
+                    if (summary) {
+                        this.saveToCache(cacheKey, summary);
+                        this.mode = 'huggingface';
+                        return { summary, mode: 'huggingface' };
+                    }
+                }
+
+                // Priority 3: Basic extraction
+                const summary = this.fallbackSummary(description);
+                this.saveToCache(cacheKey, summary);
+                this.mode = 'basic';
+                return { summary, mode: 'basic' };
+            },
+
+            async huggingFaceSummarize(text) {
                 try {
                     const token = localStorage.getItem('hfToken');
-                    const text = `${title}. ${description}`.substring(0, 1000);
 
                     const response = await fetch(CONFIG.HF_API_URL, {
                         method: 'POST',
@@ -847,26 +1040,23 @@
                     if (!response.ok) {
                         if (response.status === 503) {
                             await new Promise(resolve => setTimeout(resolve, 2000));
-                            return this.summarize(title, description, source);
+                            return this.huggingFaceSummarize(text);
                         }
                         if (response.status === 401 || response.status === 403) {
-                            console.warn('Invalid HF token - switching to basic mode');
+                            console.warn('Invalid HF token');
                             localStorage.removeItem('hfToken');
-                            this.hasToken = false;
-                            return this.fallbackSummary(description);
+                            this.hasHFToken = false;
+                            return null;
                         }
                         throw new Error(`API Error: ${response.status}`);
                     }
 
                     const data = await response.json();
-                    let summary = data[0]?.summary_text || this.fallbackSummary(description);
-
-                    this.saveToCache(cacheKey, summary);
-                    return summary;
+                    return data[0]?.summary_text || null;
 
                 } catch (error) {
-                    console.warn('Summarization failed, using fallback:', error);
-                    return this.fallbackSummary(description);
+                    console.warn('HF summarization failed:', error);
+                    return null;
                 }
             },
 
@@ -935,9 +1125,16 @@
                 this.currentLang = localStorage.getItem('selectedLang') || 'en';
                 document.getElementById('lang-select').value = this.currentLang;
 
+                // Load LM Studio URL
+                const savedUrl = localStorage.getItem('lmStudioUrl');
+                if (savedUrl) {
+                    document.getElementById('lm-studio-url').value = savedUrl;
+                    lmStudio.url = savedUrl;
+                }
+
                 this.loadSettings();
                 tts.init();
-                aiSummarizer.init();
+                await aiSummarizer.init();
 
                 await this.fetchNews();
             },
@@ -954,10 +1151,16 @@
                 const token = document.getElementById('hf-token').value.trim();
                 if (token) {
                     localStorage.setItem('hfToken', token);
-                    aiSummarizer.hasToken = true;
+                    aiSummarizer.hasHFToken = true;
                 } else {
                     localStorage.removeItem('hfToken');
-                    aiSummarizer.hasToken = false;
+                    aiSummarizer.hasHFToken = false;
+                }
+
+                const lmUrl = document.getElementById('lm-studio-url').value.trim();
+                if (lmUrl) {
+                    localStorage.setItem('lmStudioUrl', lmUrl);
+                    lmStudio.url = lmUrl;
                 }
 
                 const voice = document.getElementById('voice-select').value;
@@ -1067,7 +1270,8 @@
                                 link,
                                 source: source,
                                 lang: langName,
-                                summary: null 
+                                summary: null,
+                                mode: null
                             });
                         }
                     }
@@ -1077,15 +1281,16 @@
             },
 
             async processSummaries() {
-                const mode = aiSummarizer.hasToken ? 'AI summaries' : 'quick summaries';
-                this.setStatus(`Generating ${mode}...`);
+                this.setStatus('Generating summaries...');
 
                 const promises = this.items.map(async (item) => {
-                    item.summary = await aiSummarizer.summarize(
+                    const result = await aiSummarizer.summarize(
                         item.title, 
                         item.desc, 
                         item.source
                     );
+                    item.summary = result.summary;
+                    item.mode = result.mode;
                 });
 
                 await Promise.all(promises);
@@ -1102,10 +1307,21 @@
                 const feedEl = document.getElementById('feed');
                 feedEl.innerHTML = '';
 
-                const summaryMode = aiSummarizer.hasToken ? '🤖 AI Summary' : '📝 Quick Summary';
-                const sectionClass = aiSummarizer.hasToken ? 'summary-section' : 'summary-section basic-section';
-
                 this.items.forEach((item, i) => {
+                    let summaryMode = '📝 Quick Summary';
+                    let sectionClass = 'summary-section basic-section';
+                    let labelClass = 'summary-label';
+
+                    if (item.mode === 'lm-studio') {
+                        summaryMode = '💜 Local AI Summary';
+                        sectionClass = 'summary-section local-ai-section';
+                        labelClass = 'summary-label local-ai';
+                    } else if (item.mode === 'huggingface') {
+                        summaryMode = '☁️ Cloud AI Summary';
+                        sectionClass = 'summary-section';
+                        labelClass = 'summary-label';
+                    }
+
                     const sentences = (item.summary || item.desc).split(/[.!?]+/).filter(s => s.trim().length > 10);
                     const spanHtml = sentences.map((s, si) => 
                         `<span id="s-${i}-${si}" class="s">${s.trim()}</span>`
@@ -1120,7 +1336,7 @@
                                 </div>
                                 <div class="headline" id="h-${i}">${item.title}</div>
                                 <div class="${sectionClass}">
-                                    <div class="summary-label">${summaryMode}</div>
+                                    <div class="${labelClass}">${summaryMode}</div>
                                     <div class="body-text">${spanHtml}</div>
                                 </div>
                                 <div class="attribution">
@@ -1187,7 +1403,7 @@
                 const item = this.items[this.idx];
                 const summary = item.summary || item.desc;
 
-                // NEW FORMAT: "[Headline]. [Summary]. Source: [source name]"
+                // Format: "[Headline]. [Summary]. Source: [source name]"
                 const sourcePart = `. Source: ${item.source}`;
                 const fullText = item.title + ". " + summary + sourcePart;
 
@@ -1275,9 +1491,10 @@
 
         // --- UI CONTROLLER ---
         const ui = {
-            openSettings: () => {
+            openSettings: async () => {
                 document.getElementById('settings').classList.add('open');
                 tts.populateVoiceSelect();
+                await lmStudio.checkConnection();
             },
 
             closeSettings: () => {
@@ -1292,6 +1509,7 @@
                 btnText.innerHTML = '<div class="loading-spinner"></div>';
 
                 app.saveSettings();
+                await aiSummarizer.init();
                 this.closeSettings();
 
                 tts.populateVoiceSelect();
