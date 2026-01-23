@@ -118,14 +118,14 @@
         .feed-container {
             height: 100vh; 
             padding-top: 70px; 
-            padding-bottom: 140px;
+            padding-bottom: 170px;
             overflow-y: scroll; 
             scroll-snap-type: y mandatory;
             scroll-behavior: smooth;
         }
 
         .card-wrapper {
-            min-height: calc(100vh - 210px); 
+            min-height: calc(100vh - 240px); 
             width: 100%;
             scroll-snap-align: center;
             display: flex; 
@@ -270,7 +270,7 @@
         /* --- CONTROLS --- */
         .controls-bar {
             position: fixed; 
-            bottom: 30px; 
+            bottom: 40px; 
             left: 50%; 
             transform: translateX(-50%);
             background: var(--surface); 
@@ -312,6 +312,39 @@
             display: flex; 
             align-items: center; 
             justify-content: center; 
+        }
+
+        /* --- FOOTER --- */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.85);
+            border-top: 1px solid var(--border);
+            padding: 8px 20px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            z-index: 999;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        [data-theme="dark"] .footer {
+            background: rgba(30, 41, 59, 0.85);
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+
+        .footer a:hover {
+            opacity: 0.7;
+            text-decoration: underline;
         }
 
         /* --- MODAL --- */
@@ -545,6 +578,10 @@
         <button class="ctrl-btn" onclick="app.next()" id="next-btn">⏭</button>
     </div>
 
+    <footer class="footer">
+        Copyright © 2026 | Designed by <a href="https://thosho.github.io/" target="_blank" rel="noopener noreferrer">Thosho Tech</a>
+    </footer>
+
     <script>
         // --- CONFIG ---
         const CONFIG = {
@@ -554,26 +591,128 @@
             CACHE_DURATION: 6 * 60 * 60 * 1000,
             MAX_SUMMARY_LENGTH: 150,
             MIN_SUMMARY_LENGTH: 50,
-            MIN_NEWS_THRESHOLD: 8 // Translate English news if less than this
+            MIN_NEWS_THRESHOLD: 10
         };
 
-        // --- LANGUAGE RSS FEEDS ---
+        // --- MULTI-SOURCE RSS FEEDS PER LANGUAGE ---
         const FEEDS = {
-            'en': { name: 'English', url: 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en', voiceLang: 'en-US' },
-            'hi': { name: 'Hindi', url: 'https://news.google.com/rss?hl=hi&gl=IN&ceid=IN:hi', voiceLang: 'hi-IN' },
-            'ta': { name: 'Tamil', url: 'https://news.google.com/rss?hl=ta&gl=IN&ceid=IN:ta', voiceLang: 'ta-IN' },
-            'te': { name: 'Telugu', url: 'https://news.google.com/rss?hl=te&gl=IN&ceid=IN:te', voiceLang: 'te-IN' },
-            'kn': { name: 'Kannada', url: 'https://news.google.com/rss?hl=kn&gl=IN&ceid=IN:kn', voiceLang: 'kn-IN' },
-            'mr': { name: 'Marathi', url: 'https://news.google.com/rss?hl=mr&gl=IN&ceid=IN:mr', voiceLang: 'mr-IN' },
-            'bn': { name: 'Bengali', url: 'https://news.google.com/rss?hl=bn&gl=IN&ceid=IN:bn', voiceLang: 'bn-IN' },
-            'ml': { name: 'Malayalam', url: 'https://news.google.com/rss?hl=ml&gl=IN&ceid=IN:ml', voiceLang: 'ml-IN' },
-            'or': { name: 'Odia', url: 'https://news.google.com/rss?hl=or&gl=IN&ceid=IN:or', voiceLang: 'or-IN' },
-            'es': { name: 'Spanish', url: 'https://news.google.com/rss?hl=es-419&gl=US&ceid=US:es-419', voiceLang: 'es-ES' },
-            'fr': { name: 'French', url: 'https://news.google.com/rss?hl=fr&gl=FR&ceid=FR:fr', voiceLang: 'fr-FR' },
-            'de': { name: 'German', url: 'https://news.google.com/rss?hl=de&gl=DE&ceid=DE:de', voiceLang: 'de-DE' },
-            'ru': { name: 'Russian', url: 'https://news.google.com/rss?hl=ru&gl=RU&ceid=RU:ru', voiceLang: 'ru-RU' },
-            'ja': { name: 'Japanese', url: 'https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja', voiceLang: 'ja-JP' },
-            'ar': { name: 'Arabic', url: 'https://news.google.com/rss?hl=ar&gl=EG&ceid=EG:ar', voiceLang: 'ar-SA' }
+            'en': { 
+                name: 'English', 
+                voiceLang: 'en-US',
+                sources: [
+                    { name: 'Google News', url: 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en' },
+                    { name: 'Times of India', url: 'https://timesofindia.indiatimes.com/rssfeedstopstories.cms' },
+                    { name: 'Indian Express', url: 'https://indianexpress.com/feed/' }
+                ]
+            },
+            'hi': { 
+                name: 'Hindi', 
+                voiceLang: 'hi-IN',
+                sources: [
+                    { name: 'Google News Hindi', url: 'https://news.google.com/rss?hl=hi&gl=IN&ceid=IN:hi' },
+                    { name: 'Amar Ujala', url: 'https://www.amarujala.com/rss/breaking-news.xml' },
+                    { name: 'News18 Hindi', url: 'https://hindi.news18.com/rss/khabar/india.xml' }
+                ]
+            },
+            'ta': { 
+                name: 'Tamil', 
+                voiceLang: 'ta-IN',
+                sources: [
+                    { name: 'Google News Tamil', url: 'https://news.google.com/rss?hl=ta&gl=IN&ceid=IN:ta' },
+                    { name: 'Tamil Oneindia', url: 'https://tamil.oneindia.com/rss/news-fb.xml' },
+                    { name: 'News18 Tamil', url: 'https://tamil.news18.com/rss/' }
+                ]
+            },
+            'te': { 
+                name: 'Telugu', 
+                voiceLang: 'te-IN',
+                sources: [
+                    { name: 'Google News Telugu', url: 'https://news.google.com/rss?hl=te&gl=IN&ceid=IN:te' },
+                    { name: 'Telugu Oneindia', url: 'https://telugu.oneindia.com/rss/news-fb.xml' },
+                    { name: 'Mana Telangana', url: 'https://manatelangana.news/feed' }
+                ]
+            },
+            'kn': { 
+                name: 'Kannada', 
+                voiceLang: 'kn-IN',
+                sources: [
+                    { name: 'Google News Kannada', url: 'https://news.google.com/rss?hl=kn&gl=IN&ceid=IN:kn' },
+                    { name: 'Kannada Oneindia', url: 'https://kannada.oneindia.com/rss/news-fb.xml' }
+                ]
+            },
+            'mr': { 
+                name: 'Marathi', 
+                voiceLang: 'mr-IN',
+                sources: [
+                    { name: 'Google News Marathi', url: 'https://news.google.com/rss?hl=mr&gl=IN&ceid=IN:mr' },
+                    { name: 'ABP Majha', url: 'https://abpmajha.abplive.com/feed' }
+                ]
+            },
+            'bn': { 
+                name: 'Bengali', 
+                voiceLang: 'bn-IN',
+                sources: [
+                    { name: 'Google News Bengali', url: 'https://news.google.com/rss?hl=bn&gl=IN&ceid=IN:bn' },
+                    { name: 'Bengali Oneindia', url: 'https://bengali.oneindia.com/rss/news-fb.xml' }
+                ]
+            },
+            'ml': { 
+                name: 'Malayalam', 
+                voiceLang: 'ml-IN',
+                sources: [
+                    { name: 'Google News Malayalam', url: 'https://news.google.com/rss?hl=ml&gl=IN&ceid=IN:ml' },
+                    { name: 'Malayalam Oneindia', url: 'https://malayalam.oneindia.com/rss/news-fb.xml' }
+                ]
+            },
+            'or': { 
+                name: 'Odia', 
+                voiceLang: 'or-IN',
+                sources: [
+                    { name: 'Google News Odia', url: 'https://news.google.com/rss?hl=or&gl=IN&ceid=IN:or' }
+                ]
+            },
+            'es': { 
+                name: 'Spanish', 
+                voiceLang: 'es-ES',
+                sources: [
+                    { name: 'Google News Spanish', url: 'https://news.google.com/rss?hl=es-419&gl=US&ceid=US:es-419' }
+                ]
+            },
+            'fr': { 
+                name: 'French', 
+                voiceLang: 'fr-FR',
+                sources: [
+                    { name: 'Google News French', url: 'https://news.google.com/rss?hl=fr&gl=FR&ceid=FR:fr' }
+                ]
+            },
+            'de': { 
+                name: 'German', 
+                voiceLang: 'de-DE',
+                sources: [
+                    { name: 'Google News German', url: 'https://news.google.com/rss?hl=de&gl=DE&ceid=DE:de' }
+                ]
+            },
+            'ru': { 
+                name: 'Russian', 
+                voiceLang: 'ru-RU',
+                sources: [
+                    { name: 'Google News Russian', url: 'https://news.google.com/rss?hl=ru&gl=RU&ceid=RU:ru' }
+                ]
+            },
+            'ja': { 
+                name: 'Japanese', 
+                voiceLang: 'ja-JP',
+                sources: [
+                    { name: 'Google News Japanese', url: 'https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja' }
+                ]
+            },
+            'ar': { 
+                name: 'Arabic', 
+                voiceLang: 'ar-SA',
+                sources: [
+                    { name: 'Google News Arabic', url: 'https://news.google.com/rss?hl=ar&gl=EG&ceid=EG:ar' }
+                ]
+            }
         };
 
         // --- TTS ENGINE ---
@@ -846,15 +985,27 @@
 
                 const feedInfo = FEEDS[this.currentLang];
 
-                // Fetch primary language feed
-                await this.fetchFromFeed(feedInfo);
+                // Fetch from all sources for the selected language
+                for (const source of feedInfo.sources) {
+                    await this.fetchFromSource(source, feedInfo.name, false);
+                }
 
                 console.log(`Fetched ${this.items.length} items in ${feedInfo.name}`);
 
-                // If less than threshold, supplement with translated English news
+                // If not enough content, add Google News as fallback
+                if (this.items.length < CONFIG.MIN_NEWS_THRESHOLD) {
+                    console.log(`Adding Google News fallback for ${feedInfo.name}`);
+                    const googleSource = feedInfo.sources.find(s => s.name.includes('Google'));
+                    if (googleSource) {
+                        await this.fetchFromSource(googleSource, feedInfo.name, false);
+                    }
+                }
+
+                // If still not enough, translate English news
                 if (this.items.length < CONFIG.MIN_NEWS_THRESHOLD && this.currentLang !== 'en') {
                     console.log(`Supplementing with translated English news (< ${CONFIG.MIN_NEWS_THRESHOLD} items)`);
-                    await this.fetchFromFeed(FEEDS['en'], true);
+                    const enSource = FEEDS['en'].sources[0];
+                    await this.fetchFromSource(enSource, 'English', true);
                 }
 
                 if (this.items.length === 0) {
@@ -870,9 +1021,9 @@
                 this.isLoading = false;
             },
 
-            async fetchFromFeed(feedInfo, translate = false) {
+            async fetchFromSource(sourceInfo, langName, translate = false) {
                 try {
-                    const proxyUrl = `${CONFIG.PROXY_URL}${encodeURIComponent(feedInfo.url)}`;
+                    const proxyUrl = `${CONFIG.PROXY_URL}${encodeURIComponent(sourceInfo.url)}`;
                     const res = await fetch(proxyUrl);
                     const json = await res.json();
 
@@ -882,7 +1033,7 @@
                     const xml = parser.parseFromString(json.contents, "text/xml");
                     const items = xml.querySelectorAll("item");
 
-                    const maxItems = translate ? 10 : 20; // Get more from primary feed
+                    const maxItems = translate ? 5 : 10;
 
                     for (let i = 0; i < Math.min(items.length, maxItems); i++) {
                         const item = items[i];
@@ -890,8 +1041,8 @@
                         let desc = item.querySelector("description")?.textContent || "";
                         const link = item.querySelector("link")?.textContent || "";
 
-                        // Extract source from title (Google News format: "Title - Source")
-                        let source = feedInfo.name;
+                        // Extract source from title (Google News format)
+                        let source = sourceInfo.name;
                         const titleParts = title.split(' - ');
                         if (titleParts.length > 1) {
                             source = titleParts[titleParts.length - 1].trim();
@@ -915,13 +1066,13 @@
                                 desc, 
                                 link,
                                 source: source,
-                                lang: feedInfo.name,
+                                lang: langName,
                                 summary: null 
                             });
                         }
                     }
                 } catch (error) {
-                    console.warn(`Feed ${feedInfo.name} failed:`, error);
+                    console.warn(`Source ${sourceInfo.name} failed:`, error);
                 }
             },
 
@@ -1036,9 +1187,9 @@
                 const item = this.items[this.idx];
                 const summary = item.summary || item.desc;
 
-                // Format: "Source: [source name]. [Headline]. [Summary]"
-                const sourcePart = `Source: ${item.source}. `;
-                const fullText = sourcePart + item.title + ". " + summary;
+                // NEW FORMAT: "[Headline]. [Summary]. Source: [source name]"
+                const sourcePart = `. Source: ${item.source}`;
+                const fullText = item.title + ". " + summary + sourcePart;
 
                 const hEl = document.getElementById(`h-${this.idx}`);
                 const sourceEl = document.getElementById(`source-${this.idx}`);
@@ -1046,26 +1197,19 @@
 
                 tts.speak(fullText, 
                     (e) => {
-                        const sourceLen = sourcePart.length;
                         const titleLen = item.title.length;
+                        const summaryLen = summary.length;
 
-                        // Highlight source
-                        if(e.charIndex < sourceLen) {
-                            sourceEl?.classList.add('hl-source');
-                            hEl?.classList.remove('hl-title');
-                            document.querySelectorAll('.hl-active').forEach(x => x.classList.remove('hl-active'));
-                        }
                         // Highlight headline
-                        else if(e.charIndex < sourceLen + titleLen + 2) {
-                            sourceEl?.classList.remove('hl-source');
+                        if(e.charIndex < titleLen + 2) {
                             hEl?.classList.add('hl-title');
                             document.querySelectorAll('.hl-active').forEach(x => x.classList.remove('hl-active'));
+                            sourceEl?.classList.remove('hl-source');
                         }
                         // Highlight summary sentences
-                        else {
-                            sourceEl?.classList.remove('hl-source');
+                        else if(e.charIndex < titleLen + summaryLen + 4) {
                             hEl?.classList.remove('hl-title');
-                            let count = sourceLen + titleLen + 2;
+                            let count = titleLen + 2;
                             spans.forEach(s => {
                                 let len = s.innerText.length + 2;
                                 if(e.charIndex >= count && e.charIndex < count + len) {
@@ -1074,6 +1218,13 @@
                                 }
                                 count += len;
                             });
+                            sourceEl?.classList.remove('hl-source');
+                        }
+                        // Highlight source at the end
+                        else {
+                            hEl?.classList.remove('hl-title');
+                            document.querySelectorAll('.hl-active').forEach(x => x.classList.remove('hl-active'));
+                            sourceEl?.classList.add('hl-source');
                         }
                     },
                     () => {
