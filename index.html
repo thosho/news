@@ -161,6 +161,7 @@
             align-items: flex-start;
             margin-bottom: 16px;
             gap: 12px;
+            flex-wrap: wrap;
         }
 
         .badge { 
@@ -186,6 +187,15 @@
             gap: 4px;
         }
 
+        .lang-badge {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
         .headline { 
             font-size: 1.5rem; 
             font-weight: 800; 
@@ -200,6 +210,11 @@
             border-radius: 12px;
             margin-bottom: 16px;
             border-left: 3px solid var(--primary);
+        }
+
+        .basic-section {
+            background: rgba(245, 158, 11, 0.05);
+            border-left: 3px solid var(--warning);
         }
 
         .summary-label {
@@ -227,21 +242,6 @@
             font-size: 0.85rem;
             color: var(--text-sub);
             font-style: italic;
-        }
-
-        .read-more {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
-            margin-top: 8px;
-            font-size: 0.9rem;
-        }
-
-        .read-more:hover {
-            text-decoration: underline;
         }
 
         /* --- HIGHLIGHTS --- */
@@ -384,30 +384,6 @@
             outline: none;
         }
 
-        .checkbox-group {
-            margin-bottom: 24px;
-        }
-
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .checkbox-item:hover {
-            background: var(--bg);
-        }
-
-        .checkbox-item input[type="checkbox"] {
-            width: auto;
-            margin: 0;
-            cursor: pointer;
-        }
-
         .save-btn {
             width: 100%; 
             padding: 16px; 
@@ -430,6 +406,15 @@
             cursor: not-allowed;
         }
 
+        .info-box {
+            background: rgba(37, 99, 235, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            border-left: 3px solid var(--primary);
+        }
+
         /* --- LOADING --- */
         .loading-spinner {
             display: inline-block;
@@ -443,16 +428,6 @@
 
         @keyframes spin {
             to { transform: rotate(360deg); }
-        }
-
-        .error-message {
-            background: rgba(220, 38, 38, 0.1);
-            color: var(--active-title);
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            margin-bottom: 16px;
-            border-left: 3px solid var(--active-title);
         }
 
         /* --- DESKTOP RESPONSIVE --- */
@@ -506,19 +481,23 @@
                 <button class="close-btn" onclick="ui.closeSettings()">✕</button>
             </div>
 
-            <label>News Sources (Select Multiple)</label>
-            <div class="checkbox-group" id="source-checkboxes">
-                <!-- Dynamically populated -->
-            </div>
-
             <label>News Language</label>
             <select id="lang-select">
-                <option value="en">English</option>
+                <option value="en">English (World)</option>
                 <option value="hi">हिंदी (Hindi)</option>
                 <option value="ta">தமிழ் (Tamil)</option>
                 <option value="te">తెలుగు (Telugu)</option>
+                <option value="kn">ಕನ್ನಡ (Kannada)</option>
                 <option value="mr">मराठी (Marathi)</option>
                 <option value="bn">বাংলা (Bengali)</option>
+                <option value="ml">മലയാളം (Malayalam)</option>
+                <option value="or">ଓଡ଼ିଆ (Odia)</option>
+                <option value="es">Español (Spanish)</option>
+                <option value="fr">Français (French)</option>
+                <option value="de">Deutsch (German)</option>
+                <option value="ru">Русский (Russian)</option>
+                <option value="ja">日本語 (Japanese)</option>
+                <option value="ar">العربية (Arabic)</option>
             </select>
 
             <label>Narrator Voice</label>
@@ -526,17 +505,33 @@
 
             <label>Hugging Face API Token (Optional)</label>
             <input type="password" id="hf-token" placeholder="hf_xxxxxxxxxxxxx">
-            <small style="color: var(--text-sub); font-size: 0.8rem; display: block; margin-top: -16px; margin-bottom: 16px;">
-                Get free token from <a href="https://huggingface.co/settings/tokens" target="_blank" style="color: var(--primary);">huggingface.co</a>
-            </small>
+            <div class="info-box">
+                <strong>🤖 Enable AI Summaries</strong><br>
+                Add your free HF token for intelligent summaries. Without it, you'll get basic text extraction. 
+                <a href="https://huggingface.co/settings/tokens" target="_blank" style="color: var(--primary); font-weight: 600;">Get token →</a>
+            </div>
 
             <button class="save-btn" onclick="ui.saveAndRefresh()">
-                <span id="save-btn-text">Update Feed</span>
+                <span id="save-btn-text">Save & Update Feed</span>
             </button>
         </div>
     </div>
 
-    <div class="feed-container" id="feed"></div>
+    <div class="feed-container" id="feed">
+        <!-- Initial content loaded immediately -->
+        <div class="card-wrapper">
+            <div class="card">
+                <div class="card-header">
+                    <div class="badge">⚡ WELCOME</div>
+                </div>
+                <div class="headline">News Flow Pro is Loading...</div>
+                <div class="body-text">
+                    <p>Fetching the latest news from around the world. This will take just a moment.</p>
+                    <p>You can customize your language and voice preferences anytime using the settings button.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="controls-bar">
         <button class="ctrl-btn" onclick="app.prev()" id="prev-btn">⏮</button>
@@ -548,54 +543,30 @@
         // --- CONFIG ---
         const CONFIG = {
             HF_API_URL: 'https://api-inference.huggingface.co/models/facebook/bart-large-cnn',
+            TRANSLATE_API_URL: 'https://libretranslate.com/translate',
             PROXY_URL: 'https://api.allorigins.win/get?url=',
-            CACHE_DURATION: 6 * 60 * 60 * 1000, // 6 hours
+            CACHE_DURATION: 6 * 60 * 60 * 1000,
             MAX_SUMMARY_LENGTH: 150,
             MIN_SUMMARY_LENGTH: 50
         };
 
-        // --- INDIAN NEWS SOURCES ---
-        const NEWS_SOURCES = {
-            'toi': {
-                name: 'Times of India',
-                url: 'https://timesofindia.indiatimes.com/rssfeedstopstories.cms',
-                enabled: true
-            },
-            'ndtv': {
-                name: 'NDTV',
-                url: 'https://feeds.feedburner.com/NDTV-LatestNews',
-                enabled: true
-            },
-            'hindu': {
-                name: 'The Hindu',
-                url: 'https://www.thehindu.com/news/national/feeder/default.rss',
-                enabled: true
-            },
-            'indianexpress': {
-                name: 'Indian Express',
-                url: 'https://indianexpress.com/feed/',
-                enabled: true
-            },
-            'firstpost': {
-                name: 'Firstpost',
-                url: 'https://www.firstpost.com/commonfeeds/v1/rss',
-                enabled: false
-            },
-            'quint': {
-                name: 'The Quint',
-                url: 'https://prod-qt-images.s3.amazonaws.com/production/the-quint/feed.xml',
-                enabled: false
-            },
-            'scroll': {
-                name: 'Scroll.in',
-                url: 'https://feeds.feedburner.com/Scrollin',
-                enabled: false
-            },
-            'wire': {
-                name: 'The Wire',
-                url: 'https://thewire.in/feed',
-                enabled: false
-            }
+        // --- LANGUAGE RSS FEEDS ---
+        const FEEDS = {
+            'en': { name: 'English', url: 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en', voiceLang: 'en-US' },
+            'hi': { name: 'Hindi', url: 'https://news.google.com/rss?hl=hi&gl=IN&ceid=IN:hi', voiceLang: 'hi-IN' },
+            'ta': { name: 'Tamil', url: 'https://news.google.com/rss?hl=ta&gl=IN&ceid=IN:ta', voiceLang: 'ta-IN' },
+            'te': { name: 'Telugu', url: 'https://news.google.com/rss?hl=te&gl=IN&ceid=IN:te', voiceLang: 'te-IN' },
+            'kn': { name: 'Kannada', url: 'https://news.google.com/rss?hl=kn&gl=IN&ceid=IN:kn', voiceLang: 'kn-IN' },
+            'mr': { name: 'Marathi', url: 'https://news.google.com/rss?hl=mr&gl=IN&ceid=IN:mr', voiceLang: 'mr-IN' },
+            'bn': { name: 'Bengali', url: 'https://news.google.com/rss?hl=bn&gl=IN&ceid=IN:bn', voiceLang: 'bn-IN' },
+            'ml': { name: 'Malayalam', url: 'https://news.google.com/rss?hl=ml&gl=IN&ceid=IN:ml', voiceLang: 'ml-IN' },
+            'or': { name: 'Odia', url: 'https://news.google.com/rss?hl=or&gl=IN&ceid=IN:or', voiceLang: 'or-IN' },
+            'es': { name: 'Spanish', url: 'https://news.google.com/rss?hl=es-419&gl=US&ceid=US:es-419', voiceLang: 'es-ES' },
+            'fr': { name: 'French', url: 'https://news.google.com/rss?hl=fr&gl=FR&ceid=FR:fr', voiceLang: 'fr-FR' },
+            'de': { name: 'German', url: 'https://news.google.com/rss?hl=de&gl=DE&ceid=DE:de', voiceLang: 'de-DE' },
+            'ru': { name: 'Russian', url: 'https://news.google.com/rss?hl=ru&gl=RU&ceid=RU:ru', voiceLang: 'ru-RU' },
+            'ja': { name: 'Japanese', url: 'https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja', voiceLang: 'ja-JP' },
+            'ar': { name: 'Arabic', url: 'https://news.google.com/rss?hl=ar&gl=EG&ceid=EG:ar', voiceLang: 'ar-SA' }
         };
 
         // --- TTS ENGINE ---
@@ -613,24 +584,58 @@
 
             loadVoices() {
                 this.voices = this.synth.getVoices();
+                this.populateVoiceSelect();
+            },
+
+            populateVoiceSelect() {
                 const select = document.getElementById('voice-select');
+                if (!select) return;
+
                 select.innerHTML = '';
 
-                this.voices.sort((a,b) => {
-                    const nA = a.name.toLowerCase(), nB = b.name.toLowerCase();
-                    if(nA.includes('google') || nA.includes('microsoft')) return -1;
-                    if(nB.includes('google') || nB.includes('microsoft')) return 1;
+                // Sort: preferred language first, then Google/Microsoft
+                const currentLang = localStorage.getItem('selectedLang') || 'en';
+                const preferredLang = FEEDS[currentLang].voiceLang;
+
+                this.voices.sort((a, b) => {
+                    const aMatch = a.lang.startsWith(preferredLang.split('-')[0]);
+                    const bMatch = b.lang.startsWith(preferredLang.split('-')[0]);
+                    if (aMatch && !bMatch) return -1;
+                    if (!aMatch && bMatch) return 1;
+
+                    const nA = a.name.toLowerCase();
+                    const nB = b.name.toLowerCase();
+                    if ((nA.includes('google') || nA.includes('microsoft')) && 
+                        !(nB.includes('google') || nB.includes('microsoft'))) return -1;
+                    if (!(nA.includes('google') || nA.includes('microsoft')) && 
+                        (nB.includes('google') || nB.includes('microsoft'))) return 1;
                     return 0;
                 });
 
                 const savedVoice = localStorage.getItem('selectedVoice');
+                let foundSaved = false;
+
                 this.voices.forEach(v => {
                     const opt = document.createElement('option');
                     opt.value = v.name;
                     opt.innerText = `${v.name} (${v.lang})`;
-                    if (v.name === savedVoice) opt.selected = true;
+                    if (v.name === savedVoice) {
+                        opt.selected = true;
+                        foundSaved = true;
+                    }
                     select.appendChild(opt);
                 });
+
+                // Auto-select matching language voice
+                if (!foundSaved) {
+                    const matchingVoice = this.voices.find(v => 
+                        v.lang.startsWith(preferredLang.split('-')[0])
+                    );
+                    if (matchingVoice) {
+                        select.value = matchingVoice.name;
+                        localStorage.setItem('selectedVoice', matchingVoice.name);
+                    }
+                }
             },
 
             speak(text, onBound, onEnd) {
@@ -657,21 +662,33 @@
         // --- AI SUMMARIZER ---
         const aiSummarizer = {
             cache: new Map(),
+            hasToken: false,
+
+            init() {
+                this.hasToken = !!localStorage.getItem('hfToken');
+                console.log(`AI Mode: ${this.hasToken ? 'Enabled (HF Token)' : 'Disabled (Basic Extraction)'}`);
+            },
 
             async summarize(title, description, source) {
                 const cacheKey = `${title}-${source}`;
                 const cached = this.getFromCache(cacheKey);
                 if (cached) return cached;
 
+                if (!this.hasToken) {
+                    const summary = this.fallbackSummary(description);
+                    this.saveToCache(cacheKey, summary);
+                    return summary;
+                }
+
                 try {
-                    const token = localStorage.getItem('hfToken') || '';
+                    const token = localStorage.getItem('hfToken');
                     const text = `${title}. ${description}`.substring(0, 1000);
 
                     const response = await fetch(CONFIG.HF_API_URL, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            ...(token && { 'Authorization': `Bearer ${token}` })
+                            'Authorization': `Bearer ${token}`
                         },
                         body: JSON.stringify({
                             inputs: text,
@@ -687,6 +704,12 @@
                         if (response.status === 503) {
                             await new Promise(resolve => setTimeout(resolve, 2000));
                             return this.summarize(title, description, source);
+                        }
+                        if (response.status === 401 || response.status === 403) {
+                            console.warn('Invalid HF token - switching to basic mode');
+                            localStorage.removeItem('hfToken');
+                            this.hasToken = false;
+                            return this.fallbackSummary(description);
                         }
                         throw new Error(`API Error: ${response.status}`);
                     }
@@ -704,8 +727,9 @@
             },
 
             fallbackSummary(text) {
-                const sentences = text.split('. ').filter(s => s.length > 20);
-                return sentences.slice(0, 2).join('. ') + '.';
+                const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 20);
+                const summary = sentences.slice(0, 2).join('. ').trim();
+                return summary + (summary.endsWith('.') ? '' : '.');
             },
 
             getFromCache(key) {
@@ -727,37 +751,53 @@
             }
         };
 
+        // --- TRANSLATOR (Fallback) ---
+        const translator = {
+            async translate(text, targetLang) {
+                // Only translate if target is not English
+                if (targetLang === 'en') return text;
+
+                try {
+                    const response = await fetch(CONFIG.TRANSLATE_API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            q: text.substring(0, 500),
+                            source: 'en',
+                            target: targetLang,
+                            format: 'text'
+                        })
+                    });
+
+                    if (!response.ok) throw new Error('Translation failed');
+
+                    const data = await response.json();
+                    return data.translatedText || text;
+                } catch (error) {
+                    console.warn('Translation failed:', error);
+                    return text;
+                }
+            }
+        };
+
         // --- APP CORE ---
         const app = {
             items: [],
             idx: 0,
             isPlaying: false,
             isLoading: false,
+            currentLang: 'en',
 
             async init() {
-                this.populateSourceCheckboxes();
+                this.currentLang = localStorage.getItem('selectedLang') || 'en';
+                document.getElementById('lang-select').value = this.currentLang;
+
                 this.loadSettings();
                 tts.init();
-                await this.fetchAllNews();
-            },
+                aiSummarizer.init();
 
-            populateSourceCheckboxes() {
-                const container = document.getElementById('source-checkboxes');
-                container.innerHTML = '';
-
-                Object.entries(NEWS_SOURCES).forEach(([key, source]) => {
-                    const div = document.createElement('div');
-                    div.className = 'checkbox-item';
-                    div.innerHTML = `
-                        <input type="checkbox" id="src-${key}" ${source.enabled ? 'checked' : ''}>
-                        <label for="src-${key}" style="margin: 0; cursor: pointer; text-transform: none;">${source.name}</label>
-                    `;
-                    container.appendChild(div);
-
-                    div.querySelector('input').addEventListener('change', (e) => {
-                        NEWS_SOURCES[key].enabled = e.target.checked;
-                    });
-                });
+                // Immediate fetch on init
+                await this.fetchNews();
             },
 
             loadSettings() {
@@ -770,59 +810,53 @@
 
             saveSettings() {
                 const token = document.getElementById('hf-token').value.trim();
-                if (token) localStorage.setItem('hfToken', token);
+                if (token) {
+                    localStorage.setItem('hfToken', token);
+                    aiSummarizer.hasToken = true;
+                } else {
+                    localStorage.removeItem('hfToken');
+                    aiSummarizer.hasToken = false;
+                }
 
                 const voice = document.getElementById('voice-select').value;
                 localStorage.setItem('selectedVoice', voice);
+
+                const lang = document.getElementById('lang-select').value;
+                localStorage.setItem('selectedLang', lang);
+                this.currentLang = lang;
             },
 
             setStatus(text, isError = false) {
                 const statusEl = document.getElementById('status-text');
-                statusEl.textContent = text;
-                statusEl.style.color = isError ? 'var(--active-title)' : 'var(--text-sub)';
+                if (statusEl) {
+                    statusEl.textContent = text;
+                    statusEl.style.color = isError ? 'var(--active-title)' : 'var(--text-sub)';
+                }
             },
 
-            async fetchAllNews() {
+            async fetchNews() {
                 if (this.isLoading) return;
                 this.isLoading = true;
-
-                const feedEl = document.getElementById('feed');
-                feedEl.innerHTML = `
-                    <div class="card-wrapper">
-                        <div class="card" style="text-align:center;">
-                            <div class="loading-spinner" style="margin: 0 auto 16px;"></div>
-                            <h3>Loading AI Flash News...</h3>
-                            <p>Aggregating from multiple sources and generating summaries</p>
-                        </div>
-                    </div>
-                `;
 
                 this.setStatus('Loading...');
                 this.items = [];
 
-                const enabledSources = Object.entries(NEWS_SOURCES)
-                    .filter(([_, source]) => source.enabled);
+                const feedInfo = FEEDS[this.currentLang];
 
-                for (const [key, source] of enabledSources) {
-                    try {
-                        await this.fetchFromSource(source);
-                    } catch (error) {
-                        console.error(`Failed to fetch ${source.name}:`, error);
+                try {
+                    await this.fetchFromFeed(feedInfo);
+
+                    // If less than 5 items, supplement with translated English news
+                    if (this.items.length < 5 && this.currentLang !== 'en') {
+                        console.log('Supplementing with translated English news...');
+                        await this.fetchFromFeed(FEEDS['en'], true);
                     }
+                } catch (error) {
+                    console.error('Failed to fetch news:', error);
                 }
 
                 if (this.items.length === 0) {
-                    feedEl.innerHTML = `
-                        <div class="card-wrapper">
-                            <div class="card">
-                                <div class="error-message">
-                                    <strong>Unable to load news</strong><br>
-                                    Please check your internet connection or try different sources.
-                                </div>
-                                <button class="save-btn" onclick="app.fetchAllNews()">Retry</button>
-                            </div>
-                        </div>
-                    `;
+                    this.showError();
                     this.setStatus('Error', true);
                 } else {
                     this.shuffleArray(this.items);
@@ -834,9 +868,9 @@
                 this.isLoading = false;
             },
 
-            async fetchFromSource(source) {
+            async fetchFromFeed(feedInfo, translate = false) {
                 try {
-                    const proxyUrl = `${CONFIG.PROXY_URL}${encodeURIComponent(source.url)}`;
+                    const proxyUrl = `${CONFIG.PROXY_URL}${encodeURIComponent(feedInfo.url)}`;
                     const res = await fetch(proxyUrl);
                     const json = await res.json();
 
@@ -846,10 +880,9 @@
                     const xml = parser.parseFromString(json.contents, "text/xml");
                     const items = xml.querySelectorAll("item");
 
-                    items.forEach((item, index) => {
-                        if (index >= 5) return; // Limit to 5 per source
-
-                        const title = item.querySelector("title")?.textContent || "";
+                    for (let i = 0; i < Math.min(items.length, 10); i++) {
+                        const item = items[i];
+                        let title = item.querySelector("title")?.textContent || "";
                         let desc = item.querySelector("description")?.textContent || "";
                         const link = item.querySelector("link")?.textContent || "";
 
@@ -857,23 +890,31 @@
                         div.innerHTML = desc;
                         desc = (div.textContent || div.innerText || "").substring(0, 500);
 
+                        // Translate if needed
+                        if (translate && this.currentLang !== 'en') {
+                            title = await translator.translate(title, this.currentLang);
+                            desc = await translator.translate(desc, this.currentLang);
+                        }
+
                         if(title && desc.length > 50) {
                             this.items.push({ 
                                 title, 
                                 desc, 
                                 link,
-                                source: source.name,
+                                source: feedInfo.name + (translate ? ' (Translated)' : ''),
+                                lang: feedInfo.name,
                                 summary: null 
                             });
                         }
-                    });
+                    }
                 } catch (error) {
-                    console.warn(`Source ${source.name} failed:`, error);
+                    console.warn(`Feed ${feedInfo.name} failed:`, error);
                 }
             },
 
             async processSummaries() {
-                this.setStatus('Generating AI summaries...');
+                const mode = aiSummarizer.hasToken ? 'AI summaries' : 'quick summaries';
+                this.setStatus(`Generating ${mode}...`);
 
                 const promises = this.items.map(async (item) => {
                     item.summary = await aiSummarizer.summarize(
@@ -897,11 +938,14 @@
                 const feedEl = document.getElementById('feed');
                 feedEl.innerHTML = '';
 
+                const summaryMode = aiSummarizer.hasToken ? '🤖 AI Summary' : '📝 Quick Summary';
+                const sectionClass = aiSummarizer.hasToken ? 'summary-section' : 'summary-section basic-section';
+
                 this.items.forEach((item, i) => {
-                    const sentences = (item.summary || item.desc).split('. ');
+                    const sentences = (item.summary || item.desc).split(/[.!?]+/).filter(s => s.trim().length > 10);
                     const spanHtml = sentences.map((s, si) => 
-                        `<span id="s-${i}-${si}" class="s">${s}</span>`
-                    ).join('. ');
+                        `<span id="s-${i}-${si}" class="s">${s.trim()}</span>`
+                    ).join('. ') + '.';
 
                     feedEl.innerHTML += `
                         <div class="card-wrapper" id="c-${i}">
@@ -909,13 +953,13 @@
                                 <div class="card-header">
                                     <div class="badge">⚡ FLASH NEWS</div>
                                     <div class="source-badge">📰 ${item.source}</div>
+                                    <div class="lang-badge">🌐 ${item.lang}</div>
                                 </div>
                                 <div class="headline" id="h-${i}">${item.title}</div>
-                                <div class="summary-section">
-                                    <div class="summary-label">🤖 AI Summary</div>
+                                <div class="${sectionClass}">
+                                    <div class="summary-label">${summaryMode}</div>
                                     <div class="body-text">${spanHtml}</div>
                                 </div>
-                                ${item.link ? `<a href="${item.link}" target="_blank" class="read-more">Read full article →</a>` : ''}
                                 <div class="attribution">Source: ${item.source}</div>
                             </div>
                         </div>
@@ -926,9 +970,29 @@
                 this.updateNavButtons();
             },
 
+            showError() {
+                const feedEl = document.getElementById('feed');
+                feedEl.innerHTML = `
+                    <div class="card-wrapper">
+                        <div class="card">
+                            <div class="badge" style="background: rgba(220, 38, 38, 0.1); color: var(--active-title);">⚠️ ERROR</div>
+                            <div class="headline">Unable to Load News</div>
+                            <div class="body-text">
+                                <p>We couldn't fetch news at this moment. Please check your internet connection and try again.</p>
+                            </div>
+                            <button class="save-btn" onclick="app.fetchNews()" style="margin-top: 16px;">
+                                Retry Loading
+                            </button>
+                        </div>
+                    </div>
+                `;
+            },
+
             updateNavButtons() {
-                document.getElementById('prev-btn').disabled = this.idx === 0;
-                document.getElementById('next-btn').disabled = this.idx >= this.items.length - 1;
+                const prevBtn = document.getElementById('prev-btn');
+                const nextBtn = document.getElementById('next-btn');
+                if (prevBtn) prevBtn.disabled = this.idx === 0;
+                if (nextBtn) nextBtn.disabled = this.idx >= this.items.length - 1;
             },
 
             togglePlay() {
@@ -962,7 +1026,6 @@
 
                 const hEl = document.getElementById(`h-${this.idx}`);
                 const spans = document.querySelectorAll(`#c-${this.idx} .s`);
-                let charCount = 0;
 
                 tts.speak(fullText, 
                     (e) => {
@@ -1034,6 +1097,7 @@
         const ui = {
             openSettings: () => {
                 document.getElementById('settings').classList.add('open');
+                tts.populateVoiceSelect(); // Refresh voice list
             },
 
             closeSettings: () => {
@@ -1050,10 +1114,11 @@
                 app.saveSettings();
                 this.closeSettings();
 
-                await app.fetchAllNews();
+                tts.populateVoiceSelect(); // Update voice to match language
+                await app.fetchNews();
 
                 btn.disabled = false;
-                btnText.textContent = 'Update Feed';
+                btnText.textContent = 'Save & Update Feed';
             },
 
             toggleTheme: () => {
@@ -1069,7 +1134,7 @@
         window.onload = () => app.init();
 
         // Close modal on outside click
-        document.getElementById('settings').addEventListener('click', (e) => {
+        document.getElementById('settings')?.addEventListener('click', (e) => {
             if (e.target.id === 'settings') ui.closeSettings();
         });
     </script>
