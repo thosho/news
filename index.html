@@ -19,6 +19,7 @@
             --success: #10b981;
             --warning: #f59e0b;
             --local-ai: #8b5cf6;
+            --groq: #f97316;
         }
 
         [data-theme="dark"] {
@@ -33,6 +34,7 @@
             --highlight: #854d0e;
             --active-title: #f87171;
             --local-ai: #a78bfa;
+            --groq: #fb923c;
         }
 
         * { 
@@ -111,12 +113,8 @@
             animation: pulse 2s infinite;
         }
 
-        .status-dot.local-ai {
-            background: var(--local-ai);
-        }
-
-        .status-dot.cloud {
-            background: var(--primary);
+        .status-dot.groq-mode {
+            background: var(--groq);
         }
 
         @keyframes pulse {
@@ -197,15 +195,6 @@
             gap: 4px;
         }
 
-        .lang-badge {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
-
         .headline { 
             font-size: 1.5rem; 
             font-weight: 800; 
@@ -222,9 +211,9 @@
             border-left: 3px solid var(--primary);
         }
 
-        .local-ai-section {
-            background: rgba(139, 92, 246, 0.05);
-            border-left: 3px solid var(--local-ai);
+        .groq-section {
+            background: rgba(249, 115, 22, 0.05);
+            border-left: 3px solid var(--groq);
         }
 
         .basic-section {
@@ -244,8 +233,8 @@
             gap: 6px;
         }
 
-        .summary-label.local-ai {
-            color: var(--local-ai);
+        .summary-label.groq {
+            color: var(--groq);
         }
 
         .body-text { 
@@ -261,29 +250,6 @@
             font-size: 0.85rem;
             color: var(--text-sub);
             font-style: italic;
-        }
-
-        /* --- HIGHLIGHTS --- */
-        .hl-active { 
-            background-color: var(--highlight); 
-            color: var(--text); 
-            border-radius: 4px; 
-            box-shadow: 0 0 0 2px var(--highlight); 
-            padding: 2px 4px;
-            transition: all 0.2s;
-        }
-
-        .hl-title { 
-            color: var(--active-title); 
-            text-decoration: underline; 
-            text-decoration-thickness: 3px; 
-        }
-
-        .hl-source {
-            background-color: var(--success);
-            color: white;
-            border-radius: 4px;
-            padding: 2px 4px;
         }
 
         /* --- CONTROLS --- */
@@ -328,9 +294,6 @@
         .play-btn { 
             color: var(--primary); 
             font-size: 2.2rem; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
         }
 
         /* --- FOOTER --- */
@@ -347,7 +310,6 @@
             color: var(--text-sub);
             z-index: 999;
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
         }
 
         [data-theme="dark"] .footer {
@@ -358,12 +320,6 @@
             color: var(--primary);
             text-decoration: none;
             font-weight: 600;
-            transition: opacity 0.2s;
-        }
-
-        .footer a:hover {
-            opacity: 0.7;
-            text-decoration: underline;
         }
 
         /* --- MODAL --- */
@@ -439,8 +395,11 @@
             background: var(--bg); 
             color: var(--text);
             font-size: 1rem; 
-            appearance: none; 
             outline: none;
+        }
+
+        input[type="password"] {
+            font-family: monospace;
         }
 
         .save-btn {
@@ -460,11 +419,6 @@
         .save-btn:active { transform: scale(0.98); }
         .save-btn:hover { background: var(--primary-dark); }
 
-        .save-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
         .info-box {
             background: rgba(37, 99, 235, 0.05);
             padding: 12px;
@@ -474,9 +428,86 @@
             border-left: 3px solid var(--primary);
         }
 
-        .info-box.local {
-            background: rgba(139, 92, 246, 0.05);
-            border-left: 3px solid var(--local-ai);
+        .info-box.groq {
+            background: rgba(249, 115, 22, 0.05);
+            border-left: 3px solid var(--groq);
+        }
+
+        .toggle-section {
+            background: var(--bg);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .toggle-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .toggle-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            margin: 0;
+            padding: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border);
+            transition: 0.3s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        .optional-fields {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .optional-fields.show {
+            max-height: 1000px;
         }
 
         .connection-status {
@@ -501,44 +532,11 @@
             background: var(--success);
         }
 
-        /* --- LOADING --- */
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* --- DESKTOP RESPONSIVE --- */
         @media (min-width: 768px) {
             .headline { font-size: 2rem; }
             .card { padding: 40px; max-width: 800px; }
             .body-text { font-size: 1.1rem; }
             .controls-bar { padding: 16px 40px; gap: 40px; }
-            .ctrl-btn { font-size: 1.8rem; }
-            .play-btn { font-size: 2.5rem; }
-        }
-
-        @media (min-width: 1024px) {
-            .feed-container { padding-left: 10%; padding-right: 10%; }
-            .header { padding: 0 40px; }
-        }
-
-        /* --- ANIMATIONS --- */
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .card-wrapper {
-            animation: slideIn 0.4s ease-out;
         }
     </style>
 </head>
@@ -567,19 +565,6 @@
                 <button class="close-btn" onclick="ui.closeSettings()">✕</button>
             </div>
 
-            <div class="info-box local">
-                <strong>💜 Local AI Priority</strong><br>
-                Connect your Mac Mini M4 LM Studio for private, fast summaries. Falls back to cloud when offline.
-            </div>
-
-            <label>LM Studio Server URL (Local AI)</label>
-            <input type="text" id="lm-studio-url" placeholder="http://192.168.1.x:1234" value="http://localhost:1234">
-
-            <div class="connection-status" id="lm-status">
-                <span class="dot"></span>
-                <span id="lm-status-text">Not connected</span>
-            </div>
-
             <label>News Language</label>
             <select id="lang-select">
                 <option value="en">English (World)</option>
@@ -602,12 +587,30 @@
             <label>Narrator Voice</label>
             <select id="voice-select"></select>
 
-            <label>Hugging Face API Token (Cloud Fallback)</label>
-            <input type="password" id="hf-token" placeholder="hf_xxxxxxxxxxxxx">
-            <div class="info-box">
-                <strong>☁️ Cloud Fallback</strong><br>
-                Used when LM Studio is offline. 
-                <a href="https://huggingface.co/settings/tokens" target="_blank" style="color: var(--primary); font-weight: 600;">Get free token →</a>
+            <!-- Advanced AI Options Toggle -->
+            <div class="toggle-section">
+                <div class="toggle-header">
+                    <span class="toggle-title">🔧 Advanced AI Options</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="advanced-toggle" onchange="ui.toggleAdvanced()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="optional-fields" id="advanced-fields">
+                    <div class="info-box groq" style="margin-top: 12px;">
+                        <strong>Optional AI Services</strong><br>
+                        Enable these only if you want to use custom AI providers for summarization.
+                    </div>
+
+                    <label>LM Studio Server URL (Optional)</label>
+                    <input type="text" id="lm-studio-url" placeholder="http://localhost:1234">
+
+                    <label>Hugging Face API Token (Optional)</label>
+                    <input type="password" id="hf-token" placeholder="hf_xxxxxxxxxxxxx">
+
+                    <label>Google Gemini API Key (Optional)</label>
+                    <input type="password" id="gemini-key" placeholder="AIzaSy...">
+                </div>
             </div>
 
             <button class="save-btn" onclick="ui.saveAndRefresh()">
@@ -625,7 +628,6 @@
                 <div class="headline">News Flow Pro is Loading...</div>
                 <div class="body-text">
                     <p>Fetching the latest news from around the world. This will take just a moment.</p>
-                    <p>You can customize your language and voice preferences anytime using the settings button.</p>
                 </div>
             </div>
         </div>
@@ -642,19 +644,21 @@
     </footer>
 
     <script>
+        // --- HIDDEN GROQ API KEY (Embedded) ---
+        const GROQ_API_KEY = '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'; // Replace with actual key before deploying
+
         // --- CONFIG ---
         const CONFIG = {
-            HF_API_URL: 'https://api-inference.huggingface.co/models/facebook/bart-large-cnn',
+            GROQ_API_URL: 'https://api.groq.com/openai/v1/chat/completions',
             TRANSLATE_API_URL: 'https://libretranslate.com/translate',
             PROXY_URL: 'https://api.allorigins.win/get?url=',
             CACHE_DURATION: 6 * 60 * 60 * 1000,
-            MAX_SUMMARY_LENGTH: 150,
-            MIN_SUMMARY_LENGTH: 50,
             MIN_NEWS_THRESHOLD: 10,
+            GROQ_TIMEOUT: 10000,
             LM_STUDIO_TIMEOUT: 5000
         };
 
-        // --- MULTI-SOURCE RSS FEEDS PER LANGUAGE ---
+        // --- MULTI-SOURCE RSS FEEDS ---
         const FEEDS = {
             'en': { 
                 name: 'English', 
@@ -669,113 +673,26 @@
                 name: 'Hindi', 
                 voiceLang: 'hi-IN',
                 sources: [
-                    { name: 'Google News Hindi', url: 'https://news.google.com/rss?hl=hi&gl=IN&ceid=IN:hi' },
-                    { name: 'Amar Ujala', url: 'https://www.amarujala.com/rss/breaking-news.xml' },
-                    { name: 'News18 Hindi', url: 'https://hindi.news18.com/rss/khabar/india.xml' }
+                    { name: 'Google News', url: 'https://news.google.com/rss?hl=hi&gl=IN&ceid=IN:hi' },
+                    { name: 'Amar Ujala', url: 'https://www.amarujala.com/rss/breaking-news.xml' }
                 ]
             },
-            'ta': { 
-                name: 'Tamil', 
-                voiceLang: 'ta-IN',
-                sources: [
-                    { name: 'Google News Tamil', url: 'https://news.google.com/rss?hl=ta&gl=IN&ceid=IN:ta' },
-                    { name: 'Tamil Oneindia', url: 'https://tamil.oneindia.com/rss/news-fb.xml' },
-                    { name: 'News18 Tamil', url: 'https://tamil.news18.com/rss/' }
-                ]
-            },
-            'te': { 
-                name: 'Telugu', 
-                voiceLang: 'te-IN',
-                sources: [
-                    { name: 'Google News Telugu', url: 'https://news.google.com/rss?hl=te&gl=IN&ceid=IN:te' },
-                    { name: 'Telugu Oneindia', url: 'https://telugu.oneindia.com/rss/news-fb.xml' },
-                    { name: 'Mana Telangana', url: 'https://manatelangana.news/feed' }
-                ]
-            },
-            'kn': { 
-                name: 'Kannada', 
-                voiceLang: 'kn-IN',
-                sources: [
-                    { name: 'Google News Kannada', url: 'https://news.google.com/rss?hl=kn&gl=IN&ceid=IN:kn' },
-                    { name: 'Kannada Oneindia', url: 'https://kannada.oneindia.com/rss/news-fb.xml' }
-                ]
-            },
-            'mr': { 
-                name: 'Marathi', 
-                voiceLang: 'mr-IN',
-                sources: [
-                    { name: 'Google News Marathi', url: 'https://news.google.com/rss?hl=mr&gl=IN&ceid=IN:mr' },
-                    { name: 'ABP Majha', url: 'https://abpmajha.abplive.com/feed' }
-                ]
-            },
-            'bn': { 
-                name: 'Bengali', 
-                voiceLang: 'bn-IN',
-                sources: [
-                    { name: 'Google News Bengali', url: 'https://news.google.com/rss?hl=bn&gl=IN&ceid=IN:bn' },
-                    { name: 'Bengali Oneindia', url: 'https://bengali.oneindia.com/rss/news-fb.xml' }
-                ]
-            },
-            'ml': { 
-                name: 'Malayalam', 
-                voiceLang: 'ml-IN',
-                sources: [
-                    { name: 'Google News Malayalam', url: 'https://news.google.com/rss?hl=ml&gl=IN&ceid=IN:ml' },
-                    { name: 'Malayalam Oneindia', url: 'https://malayalam.oneindia.com/rss/news-fb.xml' }
-                ]
-            },
-            'or': { 
-                name: 'Odia', 
-                voiceLang: 'or-IN',
-                sources: [
-                    { name: 'Google News Odia', url: 'https://news.google.com/rss?hl=or&gl=IN&ceid=IN:or' }
-                ]
-            },
-            'es': { 
-                name: 'Spanish', 
-                voiceLang: 'es-ES',
-                sources: [
-                    { name: 'Google News Spanish', url: 'https://news.google.com/rss?hl=es-419&gl=US&ceid=US:es-419' }
-                ]
-            },
-            'fr': { 
-                name: 'French', 
-                voiceLang: 'fr-FR',
-                sources: [
-                    { name: 'Google News French', url: 'https://news.google.com/rss?hl=fr&gl=FR&ceid=FR:fr' }
-                ]
-            },
-            'de': { 
-                name: 'German', 
-                voiceLang: 'de-DE',
-                sources: [
-                    { name: 'Google News German', url: 'https://news.google.com/rss?hl=de&gl=DE&ceid=DE:de' }
-                ]
-            },
-            'ru': { 
-                name: 'Russian', 
-                voiceLang: 'ru-RU',
-                sources: [
-                    { name: 'Google News Russian', url: 'https://news.google.com/rss?hl=ru&gl=RU&ceid=RU:ru' }
-                ]
-            },
-            'ja': { 
-                name: 'Japanese', 
-                voiceLang: 'ja-JP',
-                sources: [
-                    { name: 'Google News Japanese', url: 'https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja' }
-                ]
-            },
-            'ar': { 
-                name: 'Arabic', 
-                voiceLang: 'ar-SA',
-                sources: [
-                    { name: 'Google News Arabic', url: 'https://news.google.com/rss?hl=ar&gl=EG&ceid=EG:ar' }
-                ]
-            }
+            'ta': { name: 'Tamil', voiceLang: 'ta-IN', sources: [{ name: 'Google News', url: 'https://news.google.com/rss?hl=ta&gl=IN&ceid=IN:ta' }]},
+            'te': { name: 'Telugu', voiceLang: 'te-IN', sources: [{ name: 'Google News', url: 'https://news.google.com/rss?hl=te&gl=IN&ceid=IN:te' }]},
+            'kn': { name: 'Kannada', voiceLang: 'kn-IN', sources: [{ name: 'Google News', url: 'https://news.google.com/rss?hl=kn&gl=IN&ceid=IN:kn' }]},
+            'mr': { name: 'Marathi', voiceLang: 'mr-IN', sources: [{ name: 'Google News', url: 'https://news.google.com/rss?hl=mr&gl=IN&ceid=IN:mr' }]},
+            'bn': { name: 'Bengali', voiceLang: 'bn-IN', sources: [{ name: 'Google News', url: 'https://news.google.com/rss?hl=bn&gl=IN&ceid=IN:bn' }]},
+            'ml': { name: 'Malayalam', voiceLang: 'ml-IN', sources: [{ name: 'Google News', url: 'https://news.google.com/rss?hl=ml&gl=IN&ceid=IN:ml' }]},
+            'or': { name: 'Odia', voiceLang: 'or-IN', sources: [{ name: 'Google News', url: 'https://news.google.com/rss?hl=or&gl=IN&ceid=IN:or' }]},
+            'es': { name: 'Spanish', voiceLang: 'es-ES', sources: [{ name: 'Google News', url: 'https://news.google.com/rss?hl=es&gl=ES&ceid=ES:es' }]},
+            'fr': { name: 'French', voiceLang: 'fr-FR', sources: [{ name: 'Google News', url: 'https://news.google.com/rss?hl=fr&gl=FR&ceid=FR:fr' }]},
+            'de': { name: 'German', voiceLang: 'de-DE', sources: [{ name: 'Google News', url: 'https://news.google.com/rss?hl=de&gl=DE&ceid=DE:de' }]},
+            'ru': { name: 'Russian', voiceLang: 'ru-RU', sources: [{ name: 'Google News', url: 'https://news.google.com/rss?hl=ru&gl=RU&ceid=RU:ru' }]},
+            'ja': { name: 'Japanese', voiceLang: 'ja-JP', sources: [{ name: 'Google News', url: 'https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja' }]},
+            'ar': { name: 'Arabic', voiceLang: 'ar-SA', sources: [{ name: 'Google News', url: 'https://news.google.com/rss?hl=ar&gl=EG&ceid=EG:ar' }]}
         };
 
-        // --- TTS ENGINE ---
+        // --- TTS ENGINE WITH NATURAL PAUSES ---
         const tts = {
             synth: window.speechSynthesis,
             voices: [],
@@ -798,7 +715,6 @@
                 if (!select) return;
 
                 select.innerHTML = '';
-
                 const currentLang = localStorage.getItem('selectedLang') || 'en';
                 const preferredLang = FEEDS[currentLang].voiceLang;
 
@@ -807,54 +723,39 @@
                     const bMatch = b.lang.startsWith(preferredLang.split('-')[0]);
                     if (aMatch && !bMatch) return -1;
                     if (!aMatch && bMatch) return 1;
-
-                    const nA = a.name.toLowerCase();
-                    const nB = b.name.toLowerCase();
-                    if ((nA.includes('google') || nA.includes('microsoft')) && 
-                        !(nB.includes('google') || nB.includes('microsoft'))) return -1;
-                    if (!(nA.includes('google') || nA.includes('microsoft')) && 
-                        (nB.includes('google') || nB.includes('microsoft'))) return 1;
                     return 0;
                 });
 
                 const savedVoice = localStorage.getItem('selectedVoice');
-                let foundSaved = false;
-
                 this.voices.forEach(v => {
                     const opt = document.createElement('option');
                     opt.value = v.name;
                     opt.innerText = `${v.name} (${v.lang})`;
-                    if (v.name === savedVoice) {
-                        opt.selected = true;
-                        foundSaved = true;
-                    }
+                    if (v.name === savedVoice) opt.selected = true;
                     select.appendChild(opt);
                 });
-
-                if (!foundSaved) {
-                    const matchingVoice = this.voices.find(v => 
-                        v.lang.startsWith(preferredLang.split('-')[0])
-                    );
-                    if (matchingVoice) {
-                        select.value = matchingVoice.name;
-                        localStorage.setItem('selectedVoice', matchingVoice.name);
-                    }
-                }
             },
 
-            speak(text, onBound, onEnd) {
+            async speak(text, onEnd) {
                 this.cancel();
-                this.currentUtterance = new SpeechSynthesisUtterance(text);
+
+                // Add natural pauses using AI
+                const enhancedText = await pauseEnhancer.addPauses(text);
+
+                this.currentUtterance = new SpeechSynthesisUtterance(enhancedText);
                 const vName = document.getElementById('voice-select')?.value;
                 const voice = this.voices.find(v => v.name === vName);
                 if(voice) { 
                     this.currentUtterance.voice = voice; 
                     this.currentUtterance.lang = voice.lang; 
                 }
-                this.currentUtterance.rate = 0.95;
+                this.currentUtterance.rate = 0.9;
                 this.currentUtterance.pitch = 1.0;
-                this.currentUtterance.onboundary = onBound;
-                this.currentUtterance.onend = onEnd;
+                this.currentUtterance.onend = () => {
+                    if (onEnd) onEnd();
+                    // Auto-advance to next news
+                    setTimeout(() => app.next(), 1000);
+                };
                 this.synth.speak(this.currentUtterance);
             },
 
@@ -863,65 +764,132 @@
             }
         };
 
-        // --- LM STUDIO CLIENT ---
-        const lmStudio = {
-            url: 'http://localhost:1234',
-            isConnected: false,
+        // --- PAUSE ENHANCER (AI-based) ---
+        const pauseEnhancer = {
+            async addPauses(text) {
+                // Try Groq first for intelligent pause insertion
+                if (GROQ_API_KEY && GROQ_API_KEY !== 'YOUR_GROQ_API_KEY_HERE') {
+                    try {
+                        const response = await fetch(CONFIG.GROQ_API_URL, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${GROQ_API_KEY}`
+                            },
+                            body: JSON.stringify({
+                                model: 'llama-3.3-70b-versatile',
+                                messages: [{
+                                    role: 'user',
+                                    content: `Add invisible commas (,) in this text for natural TTS pauses. Only add commas where a human would naturally pause while speaking. Return ONLY the text with added commas, nothing else:
 
-            async checkConnection() {
+${text}`
+                                }],
+                                temperature: 0.3,
+                                max_tokens: 500
+                            }),
+                            signal: AbortSignal.timeout(CONFIG.GROQ_TIMEOUT)
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            const enhanced = data.choices?.[0]?.message?.content?.trim();
+                            if (enhanced) return enhanced;
+                        }
+                    } catch (error) {
+                        console.warn('Groq pause enhancement failed:', error.message);
+                    }
+                }
+
+                // Fallback: Rule-based pause insertion
+                return text
+                    .replace(/\. /g, '., ')
+                    .replace(/: /g, ':, ')
+                    .replace(/; /g, ';, ')
+                    .replace(/ - /g, ', - ')
+                    .replace(/\? /g, '?, ')
+                    .replace(/! /g, '!, ');
+            }
+        };
+
+        // --- GROQ AI SUMMARIZER ---
+        const groqAI = {
+            async summarize(text) {
+                if (!GROQ_API_KEY || GROQ_API_KEY === 'YOUR_GROQ_API_KEY_HERE') {
+                    return null;
+                }
+
                 try {
-                    const controller = new AbortController();
-                    const timeout = setTimeout(() => controller.abort(), CONFIG.LM_STUDIO_TIMEOUT);
+                    const response = await fetch(CONFIG.GROQ_API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${GROQ_API_KEY}`
+                        },
+                        body: JSON.stringify({
+                            model: 'llama-3.3-70b-versatile',
+                            messages: [{
+                                role: 'system',
+                                content: 'You are a news summarizer. Provide concise, factual 2-3 sentence summaries.'
+                            }, {
+                                role: 'user',
+                                content: `Summarize this news in 2-3 clear sentences:
 
-                    const response = await fetch(`${this.url}/v1/models`, {
-                        signal: controller.signal
+${text}`
+                            }],
+                            temperature: 0.3,
+                            max_tokens: 200
+                        }),
+                        signal: AbortSignal.timeout(CONFIG.GROQ_TIMEOUT)
                     });
 
-                    clearTimeout(timeout);
-                    this.isConnected = response.ok;
+                    if (!response.ok) throw new Error('Groq API error');
 
-                    console.log(`LM Studio: ${this.isConnected ? '✅ Connected' : '❌ Not reachable'}`);
-                    this.updateUI();
+                    const data = await response.json();
+                    const summary = data.choices?.[0]?.message?.content?.trim();
 
-                    return this.isConnected;
+                    if (summary && summary.length > 30) {
+                        console.log('✅ Summary from Groq');
+                        return summary;
+                    }
+                    return null;
+
                 } catch (error) {
-                    this.isConnected = false;
-                    console.log('LM Studio: ❌ Offline');
-                    this.updateUI();
-                    return false;
+                    console.warn('Groq summarization failed:', error.message);
+                    return null;
                 }
-            },
+            }
+        };
+
+        // --- LM STUDIO CLIENT (Optional) ---
+        const lmStudio = {
+            url: 'http://localhost:1234',
+            isEnabled: false,
 
             async summarize(text) {
-                if (!this.isConnected) return null;
+                if (!this.isEnabled || !this.url) return null;
 
                 try {
-                    const prompt = `Summarize this news article in 2-3 clear sentences. Keep it factual and concise:
-
-${text}`;
-
-                    const controller = new AbortController();
-                    const timeout = setTimeout(() => controller.abort(), 30000);
-
                     const response = await fetch(`${this.url}/v1/chat/completions`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             model: "local-model",
-                            messages: [
-                                { role: "system", content: "You are a news summarizer. Provide concise, factual 2-3 sentence summaries." },
-                                { role: "user", content: prompt }
-                            ],
+                            messages: [{
+                                role: "system",
+                                content: "You are a news summarizer. Provide concise 2-3 sentence summaries."
+                            }, {
+                                role: "user",
+                                content: `Summarize this news:
+
+${text}`
+                            }],
                             temperature: 0.3,
-                            max_tokens: 200,
-                            stream: false
+                            max_tokens: 200
                         }),
-                        signal: controller.signal
+                        signal: AbortSignal.timeout(CONFIG.LM_STUDIO_TIMEOUT)
                     });
 
-                    clearTimeout(timeout);
-
-                    if (!response.ok) throw new Error('LM Studio API error');
+                    if (!response.ok) throw new Error('LM Studio error');
 
                     const data = await response.json();
                     const summary = data.choices?.[0]?.message?.content?.trim();
@@ -930,58 +898,97 @@ ${text}`;
                         console.log('✅ Summary from LM Studio');
                         return summary;
                     }
-
                     return null;
+
                 } catch (error) {
-                    console.warn('LM Studio summarization failed:', error.message);
-                    this.isConnected = false;
-                    this.updateUI();
+                    console.warn('LM Studio failed:', error.message);
                     return null;
-                }
-            },
-
-            updateUI() {
-                const statusEl = document.getElementById('lm-status');
-                const textEl = document.getElementById('lm-status-text');
-                const dotEl = document.getElementById('status-dot');
-
-                if (statusEl && textEl) {
-                    if (this.isConnected) {
-                        statusEl.classList.add('connected');
-                        textEl.textContent = '✓ Connected to LM Studio';
-                        if (dotEl) dotEl.classList.add('local-ai');
-                    } else {
-                        statusEl.classList.remove('connected');
-                        textEl.textContent = '✗ LM Studio offline (using fallback)';
-                        if (dotEl) dotEl.classList.remove('local-ai');
-                    }
                 }
             }
         };
 
-        // --- AI SUMMARIZER (WITH LM STUDIO PRIORITY) ---
+        // --- HUGGING FACE CLIENT (Optional) ---
+        const huggingFace = {
+            token: null,
+
+            async summarize(text) {
+                if (!this.token) return null;
+
+                try {
+                    const response = await fetch('https://api-inference.huggingface.co/models/facebook/bart-large-cnn', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${this.token}`
+                        },
+                        body: JSON.stringify({
+                            inputs: text,
+                            parameters: { max_length: 150, min_length: 50 }
+                        })
+                    });
+
+                    if (!response.ok) return null;
+
+                    const data = await response.json();
+                    const summary = data[0]?.summary_text;
+
+                    if (summary) {
+                        console.log('✅ Summary from Hugging Face');
+                        return summary;
+                    }
+                    return null;
+
+                } catch (error) {
+                    console.warn('HF summarization failed:', error);
+                    return null;
+                }
+            }
+        };
+
+        // --- GEMINI CLIENT (Optional) ---
+        const geminiAI = {
+            key: null,
+
+            async summarize(text) {
+                if (!this.key) return null;
+
+                try {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${this.key}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{
+                                    text: `Summarize this news in 2-3 sentences:
+
+${text}`
+                                }]
+                            }]
+                        })
+                    });
+
+                    if (!response.ok) return null;
+
+                    const data = await response.json();
+                    const summary = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
+                    if (summary && summary.length > 30) {
+                        console.log('✅ Summary from Gemini');
+                        return summary;
+                    }
+                    return null;
+
+                } catch (error) {
+                    console.warn('Gemini summarization failed:', error);
+                    return null;
+                }
+            }
+        };
+
+        // --- UNIFIED AI SUMMARIZER ---
         const aiSummarizer = {
             cache: new Map(),
-            hasHFToken: false,
-            mode: 'basic', // 'lm-studio', 'huggingface', or 'basic'
-
-            async init() {
-                this.hasHFToken = !!localStorage.getItem('hfToken');
-
-                // Check LM Studio first
-                const lmConnected = await lmStudio.checkConnection();
-
-                if (lmConnected) {
-                    this.mode = 'lm-studio';
-                    console.log('📡 Mode: LM Studio (Local AI)');
-                } else if (this.hasHFToken) {
-                    this.mode = 'huggingface';
-                    console.log('☁️ Mode: Hugging Face (Cloud)');
-                } else {
-                    this.mode = 'basic';
-                    console.log('📝 Mode: Basic Extraction');
-                }
-            },
+            mode: 'groq',
 
             async summarize(title, description, source) {
                 const cacheKey = `${title}-${source}`;
@@ -990,73 +997,48 @@ ${text}`;
 
                 const text = `${title}. ${description}`.substring(0, 1000);
 
-                // Priority 1: Try LM Studio
-                if (lmStudio.isConnected) {
+                // Priority 1: Groq (Hidden, always tries first)
+                const groqSummary = await groqAI.summarize(text);
+                if (groqSummary) {
+                    this.saveToCache(cacheKey, groqSummary);
+                    this.mode = 'groq';
+                    return { summary: groqSummary, mode: 'groq' };
+                }
+
+                // Priority 2: Basic extraction (immediate fallback)
+                const basicSummary = this.fallbackSummary(description);
+                this.saveToCache(cacheKey, basicSummary);
+                this.mode = 'basic';
+
+                // Priority 3-5: Optional AI (LM Studio, HF, Gemini) - async background enhancement
+                this.tryOptionalAI(text, cacheKey);
+
+                return { summary: basicSummary, mode: 'basic' };
+            },
+
+            async tryOptionalAI(text, cacheKey) {
+                // Try LM Studio
+                if (lmStudio.isEnabled) {
                     const summary = await lmStudio.summarize(text);
                     if (summary) {
                         this.saveToCache(cacheKey, summary);
-                        this.mode = 'lm-studio';
-                        return { summary, mode: 'lm-studio' };
+                        return;
                     }
                 }
 
-                // Priority 2: Try Hugging Face
-                if (this.hasHFToken) {
-                    const summary = await this.huggingFaceSummarize(text);
+                // Try Hugging Face
+                if (huggingFace.token) {
+                    const summary = await huggingFace.summarize(text);
                     if (summary) {
                         this.saveToCache(cacheKey, summary);
-                        this.mode = 'huggingface';
-                        return { summary, mode: 'huggingface' };
+                        return;
                     }
                 }
 
-                // Priority 3: Basic extraction
-                const summary = this.fallbackSummary(description);
-                this.saveToCache(cacheKey, summary);
-                this.mode = 'basic';
-                return { summary, mode: 'basic' };
-            },
-
-            async huggingFaceSummarize(text) {
-                try {
-                    const token = localStorage.getItem('hfToken');
-
-                    const response = await fetch(CONFIG.HF_API_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({
-                            inputs: text,
-                            parameters: {
-                                max_length: CONFIG.MAX_SUMMARY_LENGTH,
-                                min_length: CONFIG.MIN_SUMMARY_LENGTH,
-                                do_sample: false
-                            }
-                        })
-                    });
-
-                    if (!response.ok) {
-                        if (response.status === 503) {
-                            await new Promise(resolve => setTimeout(resolve, 2000));
-                            return this.huggingFaceSummarize(text);
-                        }
-                        if (response.status === 401 || response.status === 403) {
-                            console.warn('Invalid HF token');
-                            localStorage.removeItem('hfToken');
-                            this.hasHFToken = false;
-                            return null;
-                        }
-                        throw new Error(`API Error: ${response.status}`);
-                    }
-
-                    const data = await response.json();
-                    return data[0]?.summary_text || null;
-
-                } catch (error) {
-                    console.warn('HF summarization failed:', error);
-                    return null;
+                // Try Gemini
+                if (geminiAI.key) {
+                    const summary = await geminiAI.summarize(text);
+                    if (summary) this.saveToCache(cacheKey, summary);
                 }
             },
 
@@ -1078,38 +1060,6 @@ ${text}`;
 
             saveToCache(key, data) {
                 this.cache.set(key, { data, timestamp: Date.now() });
-                if (this.cache.size > 50) {
-                    const firstKey = this.cache.keys().next().value;
-                    this.cache.delete(firstKey);
-                }
-            }
-        };
-
-        // --- TRANSLATOR (Fallback) ---
-        const translator = {
-            async translate(text, targetLang) {
-                if (targetLang === 'en') return text;
-
-                try {
-                    const response = await fetch(CONFIG.TRANSLATE_API_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            q: text.substring(0, 500),
-                            source: 'en',
-                            target: targetLang,
-                            format: 'text'
-                        })
-                    });
-
-                    if (!response.ok) throw new Error('Translation failed');
-
-                    const data = await response.json();
-                    return data.translatedText || text;
-                } catch (error) {
-                    console.warn('Translation failed:', error);
-                    return text;
-                }
             }
         };
 
@@ -1118,421 +1068,270 @@ ${text}`;
             items: [],
             idx: 0,
             isPlaying: false,
-            isLoading: false,
             currentLang: 'en',
 
             async init() {
                 this.currentLang = localStorage.getItem('selectedLang') || 'en';
                 document.getElementById('lang-select').value = this.currentLang;
 
-                // Load LM Studio URL
-                const savedUrl = localStorage.getItem('lmStudioUrl');
-                if (savedUrl) {
-                    document.getElementById('lm-studio-url').value = savedUrl;
-                    lmStudio.url = savedUrl;
+                // Load optional AI settings
+                const lmUrl = localStorage.getItem('lmStudioUrl');
+                if (lmUrl) {
+                    lmStudio.url = lmUrl;
+                    lmStudio.isEnabled = true;
+                    document.getElementById('lm-studio-url').value = lmUrl;
                 }
 
-                this.loadSettings();
-                tts.init();
-                await aiSummarizer.init();
+                const hfToken = localStorage.getItem('hfToken');
+                if (hfToken) {
+                    huggingFace.token = hfToken;
+                    document.getElementById('hf-token').value = hfToken;
+                }
 
+                const geminiKey = localStorage.getItem('geminiKey');
+                if (geminiKey) {
+                    geminiAI.key = geminiKey;
+                    document.getElementById('gemini-key').value = geminiKey;
+                }
+
+                tts.init();
                 await this.fetchNews();
             },
 
-            loadSettings() {
-                const theme = localStorage.getItem('theme') || 'light';
-                document.body.setAttribute('data-theme', theme);
-
-                const hfToken = localStorage.getItem('hfToken');
-                if (hfToken) document.getElementById('hf-token').value = hfToken;
-            },
-
-            saveSettings() {
-                const token = document.getElementById('hf-token').value.trim();
-                if (token) {
-                    localStorage.setItem('hfToken', token);
-                    aiSummarizer.hasHFToken = true;
-                } else {
-                    localStorage.removeItem('hfToken');
-                    aiSummarizer.hasHFToken = false;
-                }
-
-                const lmUrl = document.getElementById('lm-studio-url').value.trim();
-                if (lmUrl) {
-                    localStorage.setItem('lmStudioUrl', lmUrl);
-                    lmStudio.url = lmUrl;
-                }
-
-                const voice = document.getElementById('voice-select').value;
-                localStorage.setItem('selectedVoice', voice);
-
-                const lang = document.getElementById('lang-select').value;
-                localStorage.setItem('selectedLang', lang);
-                this.currentLang = lang;
-            },
-
-            setStatus(text, isError = false) {
-                const statusEl = document.getElementById('status-text');
-                if (statusEl) {
-                    statusEl.textContent = text;
-                    statusEl.style.color = isError ? 'var(--active-title)' : 'var(--text-sub)';
-                }
-            },
-
             async fetchNews() {
-                if (this.isLoading) return;
-                this.isLoading = true;
-
-                this.setStatus('Loading...');
-                this.items = [];
-
-                const feedInfo = FEEDS[this.currentLang];
-
-                // Fetch from all sources for the selected language
-                for (const source of feedInfo.sources) {
-                    await this.fetchFromSource(source, feedInfo.name, false);
-                }
-
-                console.log(`Fetched ${this.items.length} items in ${feedInfo.name}`);
-
-                // If not enough content, add Google News as fallback
-                if (this.items.length < CONFIG.MIN_NEWS_THRESHOLD) {
-                    console.log(`Adding Google News fallback for ${feedInfo.name}`);
-                    const googleSource = feedInfo.sources.find(s => s.name.includes('Google'));
-                    if (googleSource) {
-                        await this.fetchFromSource(googleSource, feedInfo.name, false);
-                    }
-                }
-
-                // If still not enough, translate English news
-                if (this.items.length < CONFIG.MIN_NEWS_THRESHOLD && this.currentLang !== 'en') {
-                    console.log(`Supplementing with translated English news (< ${CONFIG.MIN_NEWS_THRESHOLD} items)`);
-                    const enSource = FEEDS['en'].sources[0];
-                    await this.fetchFromSource(enSource, 'English', true);
-                }
-
-                if (this.items.length === 0) {
-                    this.showError();
-                    this.setStatus('Error', true);
-                } else {
-                    this.shuffleArray(this.items);
-                    await this.processSummaries();
-                    this.render();
-                    this.setStatus(`${this.items.length} stories`);
-                }
-
-                this.isLoading = false;
-            },
-
-            async fetchFromSource(sourceInfo, langName, translate = false) {
                 try {
-                    const proxyUrl = `${CONFIG.PROXY_URL}${encodeURIComponent(sourceInfo.url)}`;
-                    const res = await fetch(proxyUrl);
-                    const json = await res.json();
+                    const feed = FEEDS[this.currentLang];
+                    let allItems = [];
 
-                    if (!json.contents) throw new Error("Empty feed");
+                    for (const source of feed.sources) {
+                        try {
+                            const proxyUrl = CONFIG.PROXY_URL + encodeURIComponent(source.url);
+                            const response = await fetch(proxyUrl);
+                            const data = await response.json();
+                            const parser = new DOMParser();
+                            const xml = parser.parseFromString(data.contents, 'text/xml');
+                            const items = xml.querySelectorAll('item');
 
-                    const parser = new DOMParser();
-                    const xml = parser.parseFromString(json.contents, "text/xml");
-                    const items = xml.querySelectorAll("item");
-
-                    const maxItems = translate ? 5 : 10;
-
-                    for (let i = 0; i < Math.min(items.length, maxItems); i++) {
-                        const item = items[i];
-                        let title = item.querySelector("title")?.textContent || "";
-                        let desc = item.querySelector("description")?.textContent || "";
-                        const link = item.querySelector("link")?.textContent || "";
-
-                        // Extract source from title (Google News format)
-                        let source = sourceInfo.name;
-                        const titleParts = title.split(' - ');
-                        if (titleParts.length > 1) {
-                            source = titleParts[titleParts.length - 1].trim();
-                            title = titleParts.slice(0, -1).join(' - ').trim();
-                        }
-
-                        const div = document.createElement("div");
-                        div.innerHTML = desc;
-                        desc = (div.textContent || div.innerText || "").substring(0, 500);
-
-                        // Translate if needed
-                        if (translate && this.currentLang !== 'en') {
-                            title = await translator.translate(title, this.currentLang);
-                            desc = await translator.translate(desc, this.currentLang);
-                            source = source + " (Translated)";
-                        }
-
-                        if(title && desc.length > 50) {
-                            this.items.push({ 
-                                title, 
-                                desc, 
-                                link,
-                                source: source,
-                                lang: langName,
-                                summary: null,
-                                mode: null
+                            items.forEach((item, i) => {
+                                if (i < 10) {
+                                    allItems.push({
+                                        title: item.querySelector('title')?.textContent || '',
+                                        description: item.querySelector('description')?.textContent?.replace(/<[^>]*>/g, '') || '',
+                                        link: item.querySelector('link')?.textContent || '',
+                                        source: source.name,
+                                        pubDate: item.querySelector('pubDate')?.textContent || ''
+                                    });
+                                }
                             });
+                        } catch (error) {
+                            console.warn(`Failed to fetch from ${source.name}:`, error);
                         }
                     }
+
+                    allItems = allItems.sort(() => Math.random() - 0.5);
+                    this.items = allItems.slice(0, 20);
+
+                    await this.processNews();
+                    this.render();
+
                 } catch (error) {
-                    console.warn(`Source ${sourceInfo.name} failed:`, error);
+                    console.error('News fetch failed:', error);
+                    this.showError();
                 }
             },
 
-            async processSummaries() {
-                this.setStatus('Generating summaries...');
-
-                const promises = this.items.map(async (item) => {
-                    const result = await aiSummarizer.summarize(
-                        item.title, 
-                        item.desc, 
-                        item.source
-                    );
+            async processNews() {
+                for (let item of this.items) {
+                    const result = await aiSummarizer.summarize(item.title, item.description, item.source);
                     item.summary = result.summary;
-                    item.mode = result.mode;
-                });
-
-                await Promise.all(promises);
-            },
-
-            shuffleArray(array) {
-                for (let i = array.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [array[i], array[j]] = [array[j], array[i]];
+                    item.summaryMode = result.mode;
                 }
             },
 
             render() {
-                const feedEl = document.getElementById('feed');
-                feedEl.innerHTML = '';
+                const feed = document.getElementById('feed');
+                feed.innerHTML = '';
 
                 this.items.forEach((item, i) => {
-                    let summaryMode = '📝 Quick Summary';
-                    let sectionClass = 'summary-section basic-section';
-                    let labelClass = 'summary-label';
-
-                    if (item.mode === 'lm-studio') {
-                        summaryMode = '💜 Local AI Summary';
-                        sectionClass = 'summary-section local-ai-section';
-                        labelClass = 'summary-label local-ai';
-                    } else if (item.mode === 'huggingface') {
-                        summaryMode = '☁️ Cloud AI Summary';
-                        sectionClass = 'summary-section';
-                        labelClass = 'summary-label';
-                    }
-
-                    const sentences = (item.summary || item.desc).split(/[.!?]+/).filter(s => s.trim().length > 10);
-                    const spanHtml = sentences.map((s, si) => 
-                        `<span id="s-${i}-${si}" class="s">${s.trim()}</span>`
-                    ).join('. ') + '.';
-
-                    feedEl.innerHTML += `
-                        <div class="card-wrapper" id="c-${i}">
-                            <div class="card">
-                                <div class="card-header">
-                                    <div class="badge">⚡ FLASH NEWS</div>
-                                    <div class="lang-badge">🌐 ${item.lang}</div>
-                                </div>
-                                <div class="headline" id="h-${i}">${item.title}</div>
-                                <div class="${sectionClass}">
-                                    <div class="${labelClass}">${summaryMode}</div>
-                                    <div class="body-text">${spanHtml}</div>
-                                </div>
-                                <div class="attribution">
-                                    Source: <span id="source-${i}" class="source-span">${item.source}</span>
-                                </div>
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'card-wrapper';
+                    wrapper.innerHTML = `
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="badge">${FEEDS[this.currentLang].name}</div>
+                                <div class="source-badge">${item.source}</div>
                             </div>
+                            <div class="headline">${item.title}</div>
+                            <div class="summary-section ${item.summaryMode === 'groq' ? 'groq-section' : item.summaryMode === 'basic' ? 'basic-section' : ''}">
+                                <div class="summary-label ${item.summaryMode === 'groq' ? 'groq' : ''}">
+                                    ${item.summaryMode === 'groq' ? '⚡ AI Summary' : item.summaryMode === 'basic' ? '📝 Quick Summary' : '🤖 AI Summary'}
+                                </div>
+                                <div class="body-text">${item.summary}</div>
+                            </div>
+                            <div class="attribution">Source: ${item.source}</div>
                         </div>
                     `;
+                    feed.appendChild(wrapper);
                 });
 
-                this.idx = 0;
-                this.updateNavButtons();
-            },
-
-            showError() {
-                const feedEl = document.getElementById('feed');
-                feedEl.innerHTML = `
-                    <div class="card-wrapper">
-                        <div class="card">
-                            <div class="badge" style="background: rgba(220, 38, 38, 0.1); color: var(--active-title);">⚠️ ERROR</div>
-                            <div class="headline">Unable to Load News</div>
-                            <div class="body-text">
-                                <p>We couldn't fetch news at this moment. Please check your internet connection and try again.</p>
-                            </div>
-                            <button class="save-btn" onclick="app.fetchNews()" style="margin-top: 16px;">
-                                Retry Loading
-                            </button>
-                        </div>
-                    </div>
-                `;
-            },
-
-            updateNavButtons() {
-                const prevBtn = document.getElementById('prev-btn');
-                const nextBtn = document.getElementById('next-btn');
-                if (prevBtn) prevBtn.disabled = this.idx === 0;
-                if (nextBtn) nextBtn.disabled = this.idx >= this.items.length - 1;
+                this.updateStatus();
             },
 
             togglePlay() {
-                if(this.isPlaying) {
-                    this.isPlaying = false;
-                    tts.cancel();
-                    document.getElementById('play-btn').innerText = "▶";
-                    this.setStatus('Paused');
+                if (this.isPlaying) {
+                    this.pause();
                 } else {
-                    this.isPlaying = true;
-                    document.getElementById('play-btn').innerText = "⏸";
                     this.play();
                 }
             },
 
             play() {
-                if(this.idx >= this.items.length) {
-                    this.isPlaying = false;
-                    document.getElementById('play-btn').innerText = "▶";
-                    this.setStatus('Completed');
-                    return;
-                }
-
-                this.setStatus(`Playing ${this.idx + 1}/${this.items.length}`);
-                document.getElementById(`c-${this.idx}`)?.scrollIntoView({behavior:'smooth'});
-
+                this.isPlaying = true;
+                document.getElementById('play-btn').textContent = '⏸';
                 const item = this.items[this.idx];
-                const summary = item.summary || item.desc;
-
-                // Format: "[Headline]. [Summary]. Source: [source name]"
-                const sourcePart = `. Source: ${item.source}`;
-                const fullText = item.title + ". " + summary + sourcePart;
-
-                const hEl = document.getElementById(`h-${this.idx}`);
-                const sourceEl = document.getElementById(`source-${this.idx}`);
-                const spans = document.querySelectorAll(`#c-${this.idx} .s`);
-
-                tts.speak(fullText, 
-                    (e) => {
-                        const titleLen = item.title.length;
-                        const summaryLen = summary.length;
-
-                        // Highlight headline
-                        if(e.charIndex < titleLen + 2) {
-                            hEl?.classList.add('hl-title');
-                            document.querySelectorAll('.hl-active').forEach(x => x.classList.remove('hl-active'));
-                            sourceEl?.classList.remove('hl-source');
-                        }
-                        // Highlight summary sentences
-                        else if(e.charIndex < titleLen + summaryLen + 4) {
-                            hEl?.classList.remove('hl-title');
-                            let count = titleLen + 2;
-                            spans.forEach(s => {
-                                let len = s.innerText.length + 2;
-                                if(e.charIndex >= count && e.charIndex < count + len) {
-                                    document.querySelectorAll('.hl-active').forEach(x => x.classList.remove('hl-active'));
-                                    s.classList.add('hl-active');
-                                }
-                                count += len;
-                            });
-                            sourceEl?.classList.remove('hl-source');
-                        }
-                        // Highlight source at the end
-                        else {
-                            hEl?.classList.remove('hl-title');
-                            document.querySelectorAll('.hl-active').forEach(x => x.classList.remove('hl-active'));
-                            sourceEl?.classList.add('hl-source');
-                        }
-                    },
-                    () => {
-                        sourceEl?.classList.remove('hl-source');
-                        hEl?.classList.remove('hl-title');
-                        document.querySelectorAll('.hl-active').forEach(x=>x.classList.remove('hl-active'));
-                        if(this.isPlaying) {
-                            this.idx++;
-                            this.updateNavButtons();
-                            if(this.idx < this.items.length) {
-                                setTimeout(()=>this.play(), 1000);
-                            } else {
-                                this.isPlaying = false;
-                                document.getElementById('play-btn').innerText = "▶";
-                                this.setStatus('Completed');
-                            }
-                        }
-                    }
-                );
+                const textToRead = `${item.title}. ${item.summary}`;
+                tts.speak(textToRead, () => {
+                    this.isPlaying = false;
+                    document.getElementById('play-btn').textContent = '▶';
+                });
             },
 
-            next() { 
-                tts.cancel(); 
-                if(this.idx < this.items.length-1) {
+            pause() {
+                this.isPlaying = false;
+                document.getElementById('play-btn').textContent = '▶';
+                tts.cancel();
+            },
+
+            next() {
+                this.pause();
+                if (this.idx < this.items.length - 1) {
                     this.idx++;
-                    this.updateNavButtons();
-                }
-                if(this.isPlaying) {
-                    this.play();
-                } else {
-                    document.getElementById(`c-${this.idx}`)?.scrollIntoView({behavior:'smooth'});
+                    this.scrollToCard();
                 }
             },
 
-            prev() { 
-                tts.cancel(); 
-                if(this.idx > 0) {
+            prev() {
+                this.pause();
+                if (this.idx > 0) {
                     this.idx--;
-                    this.updateNavButtons();
+                    this.scrollToCard();
                 }
-                if(this.isPlaying) {
-                    this.play();
+            },
+
+            scrollToCard() {
+                const cards = document.querySelectorAll('.card-wrapper');
+                cards[this.idx]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                this.updateStatus();
+            },
+
+            updateStatus() {
+                const statusText = document.getElementById('status-text');
+                const statusDot = document.getElementById('status-dot');
+
+                if (this.items[this.idx]?.summaryMode === 'groq') {
+                    statusDot.classList.add('groq-mode');
+                    statusText.textContent = `${this.idx + 1}/${this.items.length}`;
                 } else {
-                    document.getElementById(`c-${this.idx}`)?.scrollIntoView({behavior:'smooth'});
+                    statusDot.classList.remove('groq-mode');
+                    statusText.textContent = `${this.idx + 1}/${this.items.length}`;
                 }
+            },
+
+            showError() {
+                document.getElementById('feed').innerHTML = `
+                    <div class="card-wrapper">
+                        <div class="card">
+                            <div class="headline">Unable to load news</div>
+                            <div class="body-text">Please check your internet connection and try again.</div>
+                        </div>
+                    </div>
+                `;
             }
         };
 
-        // --- UI CONTROLLER ---
+        // --- UI CONTROLS ---
         const ui = {
-            openSettings: async () => {
-                document.getElementById('settings').classList.add('open');
-                tts.populateVoiceSelect();
-                await lmStudio.checkConnection();
+            toggleTheme() {
+                const current = document.body.getAttribute('data-theme');
+                const newTheme = current === 'dark' ? 'light' : 'dark';
+                document.body.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
             },
 
-            closeSettings: () => {
+            openSettings() {
+                document.getElementById('settings').classList.add('open');
+
+                // Check if advanced options are enabled
+                const hasAdvanced = localStorage.getItem('lmStudioUrl') || 
+                                  localStorage.getItem('hfToken') || 
+                                  localStorage.getItem('geminiKey');
+
+                if (hasAdvanced) {
+                    document.getElementById('advanced-toggle').checked = true;
+                    document.getElementById('advanced-fields').classList.add('show');
+                }
+            },
+
+            closeSettings() {
                 document.getElementById('settings').classList.remove('open');
             },
 
-            async saveAndRefresh() {
-                const btn = document.querySelector('.save-btn');
-                const btnText = document.getElementById('save-btn-text');
+            toggleAdvanced() {
+                const toggle = document.getElementById('advanced-toggle');
+                const fields = document.getElementById('advanced-fields');
 
-                btn.disabled = true;
-                btnText.innerHTML = '<div class="loading-spinner"></div>';
-
-                app.saveSettings();
-                await aiSummarizer.init();
-                this.closeSettings();
-
-                tts.populateVoiceSelect();
-                await app.fetchNews();
-
-                btn.disabled = false;
-                btnText.textContent = 'Save & Update Feed';
+                if (toggle.checked) {
+                    fields.classList.add('show');
+                } else {
+                    fields.classList.remove('show');
+                }
             },
 
-            toggleTheme: () => {
-                const b = document.body;
-                const current = b.getAttribute('data-theme');
-                const newTheme = current === 'light' ? 'dark' : 'light';
-                b.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
+            async saveAndRefresh() {
+                const lang = document.getElementById('lang-select').value;
+                const voice = document.getElementById('voice-select').value;
+                const lmUrl = document.getElementById('lm-studio-url').value;
+                const hfToken = document.getElementById('hf-token').value;
+                const geminiKey = document.getElementById('gemini-key').value;
+
+                localStorage.setItem('selectedLang', lang);
+                localStorage.setItem('selectedVoice', voice);
+
+                if (lmUrl) {
+                    localStorage.setItem('lmStudioUrl', lmUrl);
+                    lmStudio.url = lmUrl;
+                    lmStudio.isEnabled = true;
+                } else {
+                    localStorage.removeItem('lmStudioUrl');
+                    lmStudio.isEnabled = false;
+                }
+
+                if (hfToken) {
+                    localStorage.setItem('hfToken', hfToken);
+                    huggingFace.token = hfToken;
+                } else {
+                    localStorage.removeItem('hfToken');
+                    huggingFace.token = null;
+                }
+
+                if (geminiKey) {
+                    localStorage.setItem('geminiKey', geminiKey);
+                    geminiAI.key = geminiKey;
+                } else {
+                    localStorage.removeItem('geminiKey');
+                    geminiAI.key = null;
+                }
+
+                this.closeSettings();
+                location.reload();
             }
         };
 
-        // --- INITIALIZATION ---
-        window.onload = () => app.init();
-
-        document.getElementById('settings')?.addEventListener('click', (e) => {
-            if (e.target.id === 'settings') ui.closeSettings();
+        // --- INIT ---
+        window.addEventListener('DOMContentLoaded', () => {
+            const theme = localStorage.getItem('theme') || 'light';
+            document.body.setAttribute('data-theme', theme);
+            app.init();
         });
     </script>
 </body>
